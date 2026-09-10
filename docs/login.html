@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로그인 | 2027 대입 AI 면접코치</title>
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  max-width: 450px;
+  width: 100%;
+  padding: 50px 40px;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logo h1 {
+  font-size: 28px;
+  font-weight: 900;
+  color: #667eea;
+  margin-bottom: 8px;
+}
+
+.logo p {
+  font-size: 14px;
+  color: #666;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.3s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+}
+
+.btn-login {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 8px;
+}
+
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+}
+
+.btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.divider {
+  text-align: center;
+  margin: 30px 0;
+  position: relative;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider span {
+  position: relative;
+  background: white;
+  padding: 0 16px;
+  color: #999;
+  font-size: 13px;
+}
+
+.btn-back {
+  width: 100%;
+  padding: 14px;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-back:hover {
+  background: #f8f9fa;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  display: none;
+}
+
+.alert.error {
+  background: #fee;
+  color: #c00;
+  border: 1px solid #fcc;
+}
+
+.alert.success {
+  background: #efe;
+  color: #0a0;
+  border: 1px solid #cfc;
+}
+
+.alert.show {
+  display: block;
+}
+
+.info-box {
+  background: #f8f9fa;
+  border-left: 4px solid #667eea;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 24px;
+  font-size: 13px;
+  color: #666;
+}
+
+.info-box strong {
+  color: #667eea;
+}
+
+@media (max-width: 500px) {
+  .login-container {
+    padding: 40px 30px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="login-container">
+  <div class="logo">
+    <i data-lucide="graduation-cap" style="width:48px; height:48px; color:#667eea"></i>
+    <h1>AI 면접코치</h1>
+    <p>2027 학생부종합 전형 면접 대비</p>
+  </div>
+
+  <div id="alert" class="alert"></div>
+
+  <form id="loginForm">
+    <div class="form-group">
+      <label for="email">
+        <i data-lucide="mail" style="width:14px; height:14px; vertical-align:-1px; margin-right:4px"></i>
+        이메일
+      </label>
+      <input
+        type="email"
+        id="email"
+        placeholder="이메일을 입력하세요"
+        required
+        autocomplete="email"
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="password">
+        <i data-lucide="lock" style="width:14px; height:14px; vertical-align:-1px; margin-right:4px"></i>
+        비밀번호
+      </label>
+      <input
+        type="password"
+        id="password"
+        placeholder="비밀번호를 입력하세요"
+        required
+        autocomplete="current-password"
+      >
+    </div>
+
+    <button type="submit" class="btn-login" id="loginBtn">
+      <i data-lucide="log-in" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>
+      로그인
+    </button>
+  </form>
+
+  <div class="divider">
+    <span>또는</span>
+  </div>
+
+  <a href="index.html" class="btn-back">
+    <i data-lucide="arrow-left" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>
+    메인으로 돌아가기
+  </a>
+
+  <div class="info-box">
+    <strong>💡 첫 방문이신가요?</strong><br>
+    관리자에게 계정을 요청하세요.<br>
+    문의: support@jobizic.com
+  </div>
+</div>
+
+<script>
+  // Lucide 아이콘 초기화
+  lucide.createIcons();
+
+  // 관리자 계정 초기화
+  function initializeAdmin() {
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    if (!users['roche07m@gmail.com']) {
+      users['roche07m@gmail.com'] = {
+        email: 'roche07m@gmail.com',
+        password: 'ro0722',
+        role: 'admin',
+        createdAt: new Date().toISOString()
+      };
+      localStorage.setItem('users', JSON.stringify(users));
+      console.log('관리자 계정이 초기화되었습니다.');
+    }
+  }
+
+  // 페이지 로드 시 관리자 계정 초기화
+  initializeAdmin();
+
+  // 이미 로그인되어 있으면 리다이렉트
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  if (currentUser) {
+    if (currentUser.role === 'admin') {
+      window.location.href = 'admin.html';
+    } else {
+      window.location.href = 'app.html';
+    }
+  }
+
+  // 알림 표시 함수
+  function showAlert(type, message) {
+    const alert = document.getElementById('alert');
+    alert.className = `alert ${type} show`;
+    alert.textContent = message;
+    setTimeout(() => {
+      alert.classList.remove('show');
+    }, 5000);
+  }
+
+  // 로그인 폼 처리
+  document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const loginBtn = document.getElementById('loginBtn');
+
+    if (!email || !password) {
+      showAlert('error', '이메일과 비밀번호를 입력해주세요.');
+      return;
+    }
+
+    // 사용자 확인
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const user = users[email];
+
+    if (!user) {
+      showAlert('error', '등록되지 않은 이메일입니다.');
+      return;
+    }
+
+    if (user.password !== password) {
+      showAlert('error', '비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    // 로그인 성공
+    loginBtn.disabled = true;
+    loginBtn.textContent = '로그인 중...';
+
+    // 현재 사용자 정보 저장
+    localStorage.setItem('currentUser', JSON.stringify({
+      email: user.email,
+      role: user.role,
+      loginAt: new Date().toISOString()
+    }));
+
+    showAlert('success', '로그인 성공! 리다이렉트 중...');
+
+    setTimeout(() => {
+      if (user.role === 'admin') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'app.html';
+      }
+    }, 1000);
+  });
+</script>
+
+</body>
+</html>

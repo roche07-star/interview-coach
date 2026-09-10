@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2027 대입 AI 면접코치 | 학생부종합 전형 면접 대비</title>
+<title>2027 대입 AI 면접코치 | 학생부종합 전형 면접 완벽 대비</title>
 
 <!-- Lucide Icons -->
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -19,2362 +19,515 @@ body {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-  padding: 20px;
   line-height: 1.6;
-  position: relative;
+  color: #333;
 }
 
-@media (max-width: 768px) {
-  body {
-    padding: 10px;
-  }
-}
-
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  position: relative;
-}
-
-.settings-btn {
-  position: absolute;
-  top: 30px;
-  right: 30px;
-  background: #667eea;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
+/* Hero Section */
+.hero {
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(102,126,234,0.3);
+  text-align: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
 }
 
-.settings-btn:hover {
-  background: #764ba2;
-  transform: rotate(90deg);
-}
-
-.modal {
-  display: none;
-  position: fixed;
+.hero::before {
+  content: '';
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+  animation: float 20s linear infinite;
 }
 
-.modal.show {
-  display: flex;
+@keyframes float {
+  from { background-position: 0 0; }
+  to { background-position: 100px 100px; }
 }
 
-.modal-content {
-  background: white;
-  border-radius: 16px;
-  padding: 30px;
-  max-width: 500px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
+.hero-content {
   position: relative;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  z-index: 1;
+  max-width: 900px;
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #f0f0f0;
-}
-
-.modal-header h2 {
-  font-size: 20px;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #999;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s;
-}
-
-.modal-close:hover {
-  background: #f0f0f0;
-  color: #333;
-}
-
-.api-status {
-  background: #f0f4ff;
-  border-left: 4px solid #667eea;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin: 15px 0;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.api-status.configured {
-  background: #e8f5e9;
-  border-left-color: #4caf50;
-  color: #2e7d32;
-}
-
-.api-status.not-configured {
-  background: #fff3cd;
-  border-left-color: #ff9800;
-  color: #e65100;
-}
-
-#saveApiKey {
-  width: 100%;
-  margin-top: 15px;
-  padding: 12px;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-#saveApiKey:hover {
-  background: #764ba2;
-}
-
-h1 {
-  font-size: 32px;
+.hero h1 {
+  font-size: 56px;
   font-weight: 900;
-  text-align: center;
-  margin-bottom: 10px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.subtitle {
-  text-align: center;
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 30px;
-}
-
-.info-box {
-  background: #f0f4ff;
-  border-left: 4px solid #667eea;
-  padding: 20px;
-  margin: 20px 0;
-  border-radius: 8px;
-}
-
-.info-box h3 {
-  font-size: 16px;
-  margin-bottom: 10px;
-  color: #667eea;
-}
-
-.info-box ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-.info-box li {
-  padding: 5px 0;
-  padding-left: 20px;
-  position: relative;
-}
-
-.info-box li:before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  color: #667eea;
-  font-weight: bold;
-}
-
-.warning-box {
-  background: #fff3cd;
-  border-left: 4px solid #ff9800;
-  padding: 15px;
-  margin: 20px 0;
-  border-radius: 8px;
-}
-
-.warning-box strong {
-  color: #c0392b;
-}
-
-.select-container {
-  display: grid;
-  gap: 20px;
-  margin: 30px 0;
-}
-
-.select-box {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.select-box label {
-  font-weight: 700;
-  font-size: 14px;
-  color: #333;
-}
-
-.select-box select,
-.select-box input[type="text"] {
-  padding: 12px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: all 0.3s;
-}
-
-.select-box select:focus,
-.select-box input[type="text"]:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.textarea-box {
-  margin: 20px 0;
-}
-
-.textarea-box label {
-  display: block;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #333;
-}
-
-.textarea-box textarea {
-  width: 100%;
-  min-height: 300px;
-  padding: 15px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: inherit;
-  resize: vertical;
-  transition: all 0.3s;
-}
-
-.textarea-box textarea:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.btn {
-  padding: 15px 30px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
-  width: 100%;
-  margin: 10px 0;
+  margin-bottom: 20px;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  line-height: 1.2;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+.hero-subtitle {
+  font-size: 24px;
+  color: rgba(255,255,255,0.95);
+  margin-bottom: 40px;
+  font-weight: 300;
 }
 
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.result-container {
-  margin-top: 30px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-}
-
-.question-list {
-  list-style: none;
-  padding: 0;
-}
-
-.question-item {
-  background: white;
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 8px;
-  border-left: 4px solid #667eea;
-}
-
-.question-item strong {
-  display: block;
-  color: #667eea;
-  margin-bottom: 5px;
-  font-size: 12px;
-  text-transform: uppercase;
-}
-
-.question-item p {
-  font-size: 15px;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.question-item small {
-  color: #666;
-  font-size: 13px;
-}
-
-.filter-tabs {
+.hero-buttons {
   display: flex;
-  gap: 10px;
-  margin: 20px 0;
+  gap: 20px;
+  justify-content: center;
   flex-wrap: wrap;
 }
 
-.filter-tab {
-  padding: 10px 20px;
-  background: #f0f0f0;
+.btn {
+  padding: 16px 40px;
   border: none;
-  border-radius: 8px;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 700;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
   transition: all 0.3s;
-}
-
-.filter-tab.active {
-  background: #667eea;
-  color: white;
-}
-
-.filter-tab:hover {
-  background: #764ba2;
-  color: white;
-}
-
-.search-box {
-  margin: 15px 0;
-  position: relative;
-}
-
-.search-box input {
-  width: 100%;
-  padding: 12px 40px 12px 15px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.search-box input:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.question-detail {
-  margin-top: 15px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  display: none;
-}
-
-.question-detail.show {
-  display: block;
-}
-
-.question-detail h4 {
-  font-size: 14px;
-  color: #667eea;
-  margin-bottom: 10px;
-}
-
-.question-detail p {
-  font-size: 14px;
-  line-height: 1.6;
-  margin-bottom: 10px;
-}
-
-.question-detail ul {
-  list-style: disc;
-  padding-left: 20px;
-  margin: 10px 0;
-}
-
-.question-detail li {
-  font-size: 13px;
-  line-height: 1.6;
-  margin: 5px 0;
-}
-
-.toggle-detail-btn {
-  background: none;
-  border: none;
-  color: #667eea;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 5px 0;
-  margin-top: 10px;
-  transition: color 0.2s;
-}
-
-.toggle-detail-btn:hover {
-  color: #764ba2;
-}
-
-.download-btn {
-  padding: 12px 24px;
-  background: #27ae60;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.3s;
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-}
-
-.download-btn:hover {
-  background: #229954;
-}
-
-/* 프로그레스 바 */
-.progress-container {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  margin: 20px 0;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 8px;
-  background: #e0e0e0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin: 15px 0;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-  width: 0%;
-  transition: width 0.3s ease;
-  animation: progressShine 1.5s infinite;
-}
-
-@keyframes progressShine {
-  0% { opacity: 0.8; }
-  50% { opacity: 1; }
-  100% { opacity: 0.8; }
-}
-
-.progress-text {
-  text-align: center;
-  color: #667eea;
-  font-size: 14px;
-  margin-top: 10px;
-}
-
-/* 맨 위로 가기 버튼 */
-.scroll-to-top {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 50px;
-  height: 50px;
-  background: #667eea;
-  border: none;
-  border-radius: 50%;
-  color: white;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(102,126,234,0.4);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-  z-index: 999;
-}
-
-.scroll-to-top.show {
-  display: flex;
-}
-
-.scroll-to-top:hover {
-  background: #764ba2;
-  transform: translateY(-5px);
-}
-
-/* 북마크 버튼 */
-.bookmark-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #999;
-  font-size: 20px;
-  transition: color 0.2s;
-  margin-left: 10px;
-}
-
-.bookmark-btn.active {
-  color: #ff9800;
-}
-
-.bookmark-btn:hover {
-  color: #ff9800;
-}
-
-/* 자동 저장 인디케이터 */
-.autosave-indicator {
-  position: fixed;
-  bottom: 30px;
-  left: 30px;
-  padding: 8px 16px;
-  background: rgba(255,255,255,0.95);
-  border-radius: 20px;
-  font-size: 12px;
-  color: #666;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  opacity: 0;
-  transition: opacity 0.3s;
-  z-index: 998;
-}
-
-.autosave-indicator.show {
-  opacity: 1;
-}
-
-/* 스켈레톤 로딩 */
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-  border-radius: 4px;
-}
-
-@keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.skeleton-line {
-  height: 16px;
-  margin: 10px 0;
-}
-
-/* 개선된 토스트 */
-.toast-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
   gap: 10px;
-  max-width: 400px;
 }
 
-.toast {
+.btn-primary {
   background: white;
-  padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  animation: toastSlide 0.3s ease-out;
-  border-left: 4px solid #667eea;
+  color: #667eea;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
 
-@keyframes toastSlide {
-  from {
-    transform: translateX(400px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
 }
 
-.toast.success {
-  border-left-color: #27ae60;
+.btn-secondary {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 2px solid white;
+  backdrop-filter: blur(10px);
 }
 
-.toast.error {
-  border-left-color: #c0392b;
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.3);
 }
 
-.toast.info {
-  border-left-color: #667eea;
+/* Features Section */
+.features {
+  background: white;
+  padding: 100px 20px;
 }
 
-.toast-icon {
-  font-size: 20px;
-  flex-shrink: 0;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.toast-message {
-  flex: 1;
-  font-size: 14px;
+.section-title {
+  text-align: center;
+  font-size: 42px;
+  font-weight: 900;
+  margin-bottom: 60px;
   color: #333;
 }
 
-/* 툴팁 */
-.tooltip {
-  position: relative;
-  display: inline-block;
-}
-
-.tooltip .tooltip-text {
-  visibility: hidden;
-  width: 200px;
-  background: #333;
-  color: white;
+.section-subtitle {
   text-align: center;
-  border-radius: 6px;
-  padding: 8px;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s;
-  font-size: 12px;
+  font-size: 18px;
+  color: #666;
+  margin-top: -40px;
+  margin-bottom: 60px;
 }
 
-.tooltip:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  margin-bottom: 80px;
 }
 
-/* 모바일 반응형 */
-@media (max-width: 768px) {
-  .container {
-    padding: 20px;
-  }
-
-  h1 {
-    font-size: 24px;
-  }
-
-  .settings-btn {
-    top: 20px;
-    right: 20px;
-    width: 36px;
-    height: 36px;
-  }
-
-  .filter-tabs {
-    flex-direction: column;
-  }
-
-  .filter-tab {
-    width: 100%;
-  }
-
-  .scroll-to-top {
-    bottom: 20px;
-    right: 20px;
-    width: 45px;
-    height: 45px;
-  }
-
-  .toast-container {
-    right: 10px;
-    left: 10px;
-    max-width: none;
-  }
-
-  .autosave-indicator {
-    left: 10px;
-    bottom: 20px;
-  }
-}
-
-/* 포커스 스타일 개선 */
-input:focus,
-select:focus,
-textarea:focus,
-button:focus {
-  outline: 2px solid #667eea;
-  outline-offset: 2px;
-}
-
-/* 버튼 클릭 피드백 */
-button:active {
-  transform: scale(0.98);
-}
-
-/* 부드러운 전환 */
-.fade-in {
-  animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.voice-practice {
-  margin-top: 20px;
-  padding: 20px;
+.feature-card {
   background: white;
-  border-radius: 12px;
-  border: 2px dashed #667eea;
-}
-
-.voice-btn {
-  padding: 12px 24px;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  margin: 5px;
-  transition: all 0.3s;
-}
-
-.voice-btn:hover {
-  background: #5568d3;
-}
-
-.voice-btn.recording {
-  background: #c0392b;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.loading {
-  text-align: center;
   padding: 40px;
-  color: #667eea;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+  border: 2px solid #f0f0f0;
 }
 
-.loading:after {
-  content: '...';
-  animation: dots 1.5s steps(4, end) infinite;
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(102,126,234,0.2);
+  border-color: #667eea;
 }
 
-@keyframes dots {
-  0%, 20% { content: '.'; }
-  40% { content: '..'; }
-  60%, 100% { content: '...'; }
+.feature-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
 }
 
-.alert {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 15px 25px;
-  background: #667eea;
-  color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  z-index: 9999;
-  animation: slideDown 0.3s;
+.feature-card h3 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #333;
 }
 
-@keyframes slideDown {
-  from { transform: translateX(-50%) translateY(-100%); }
-  to { transform: translateX(-50%) translateY(0); }
-}
-
-.alert.error {
-  background: #c0392b;
-}
-
-.alert.success {
-  background: #27ae60;
-}
-
-footer {
-  margin-top: 60px;
-  padding: 30px;
-  background: #f5f5f5;
-  text-align: center;
-  border-radius: 12px;
-}
-
-footer .company-info {
-  margin-bottom: 20px;
+.feature-card p {
+  font-size: 16px;
+  color: #666;
   line-height: 1.8;
 }
 
-footer .disclaimer {
-  font-size: 12px;
+/* Stats Section */
+.stats {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 80px 20px;
+  color: white;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 40px;
+  text-align: center;
+}
+
+.stat-item h2 {
+  font-size: 48px;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.stat-item p {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+/* How it works */
+.how-it-works {
+  background: #f8f9fa;
+  padding: 100px 20px;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  position: relative;
+}
+
+.step {
+  text-align: center;
+  position: relative;
+}
+
+.step-number {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 900;
+  margin: 0 auto 20px;
+  box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+}
+
+.step h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.step p {
+  font-size: 15px;
   color: #666;
   line-height: 1.6;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #ddd;
 }
 
-footer .copyright {
-  margin-top: 20px;
-  font-size: 11px;
-  color: #999;
+/* CTA Section */
+.cta {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  padding: 100px 20px;
+  text-align: center;
+  color: white;
 }
 
-.hidden {
-  display: none !important;
+.cta h2 {
+  font-size: 42px;
+  font-weight: 900;
+  margin-bottom: 24px;
 }
 
-#apiKeyBox {
-  background: #fff3cd;
-  border: 2px solid #ff9800;
-  padding: 20px;
-  border-radius: 12px;
-  margin: 20px 0;
+.cta p {
+  font-size: 20px;
+  margin-bottom: 40px;
+  opacity: 0.95;
 }
 
-#apiKeyBox input {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  margin: 10px 0;
+/* Footer */
+footer {
+  background: #2c3e50;
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-links {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: white;
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.footer-links a:hover {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 36px;
+  }
+
+  .hero-subtitle {
+    font-size: 18px;
+  }
+
+  .section-title {
+    font-size: 32px;
+  }
+
+  .btn {
+    padding: 14px 30px;
+    font-size: 16px;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.8s ease-out;
 }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <!-- 설정 버튼 -->
-  <button class="settings-btn" id="settingsBtn" title="설정">
-    <i data-lucide="settings" style="width:20px; height:20px"></i>
-  </button>
-
-  <h1><i data-lucide="graduation-cap" style="width:32px; height:32px; vertical-align:-6px; margin-right:8px"></i>2027 대입 AI 면접코치</h1>
-  <p class="subtitle">학생부종합 전형 면접 완벽 대비 | 전 학과 지원 (간호학과 제외)</p>
-
-  <!-- 안내 -->
-  <div class="info-box">
-    <h3>✅ 이 서비스는:</h3>
-    <ul>
-      <li>학생부종합 전형 <strong>면접 연습 도구</strong>입니다</li>
-      <li>주요 10개 대학의 면접 전형을 분석합니다</li>
-      <li>학과별 맞춤 예상 질문을 생성합니다</li>
-      <li>음성 인식으로 실전처럼 연습할 수 있습니다</li>
-    </ul>
-
-    <h3 style="margin-top:15px">⚠️ 지원 학과 안내:</h3>
-    <ul>
-      <li>✅ 인문/자연/사범/예체능 대부분의 학과 지원</li>
-      <li style="color:#c0392b">❌ <strong>간호학과는 현재 지원하지 않습니다</strong></li>
-      <li style="color:#666; font-size:13px; list-style-type:none">
-        (간호학과는 별도 서비스로 제공될 예정입니다)
-      </li>
-    </ul>
-  </div>
-
-  <div class="warning-box">
-    <strong>⚠️ 필수 안내:</strong> 본 서비스는 <strong>면접 연습 도구</strong>입니다.
-    실제 면접 결과는 대학 평가위원회가 결정하며, 본 서비스는 합격을 보장하지 않습니다.
-  </div>
-
-  <!-- API 키 상태 -->
-  <div id="apiStatus" class="api-status not-configured">
-    <i data-lucide="alert-circle" style="width:16px; height:16px"></i>
-    <span>Claude API 키가 설정되지 않았습니다. 우상단 <strong>⚙️ 설정</strong> 버튼을 클릭하여 API 키를 입력하세요.</span>
-  </div>
-
-  <!-- 대학/학과/전형 선택 -->
-  <div class="select-container">
-    <!-- 대학 선택 -->
-    <div class="select-box">
-      <label><i data-lucide="building-2" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>대학 선택</label>
-      <select id="university">
-        <option value="">대학을 선택하세요</option>
-        <option value="서울대학교">서울대학교</option>
-        <option value="연세대학교">연세대학교</option>
-        <option value="고려대학교">고려대학교</option>
-        <option value="성균관대학교">성균관대학교</option>
-        <option value="한양대학교">한양대학교</option>
-        <option value="중앙대학교">중앙대학교</option>
-        <option value="경희대학교">경희대학교</option>
-        <option value="한국외국어대학교">한국외국어대학교</option>
-        <option value="서울시립대학교">서울시립대학교</option>
-        <option value="건국대학교">건국대학교</option>
-      </select>
-    </div>
-
-    <!-- 학과 선택 -->
-    <div class="select-box">
-      <label><i data-lucide="graduation-cap" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>학과 선택</label>
-      <select id="department">
-        <option value="">학과를 선택하세요</option>
-        <optgroup label="인문계열">
-          <option value="경영학과">경영학과</option>
-          <option value="경제학과">경제학과</option>
-          <option value="법학과">법학과</option>
-          <option value="행정학과">행정학과</option>
-          <option value="언론정보학과">언론정보학과</option>
-          <option value="심리학과">심리학과</option>
-          <option value="사회학과">사회학과</option>
-          <option value="철학과">철학과</option>
-          <option value="국어국문학과">국어국문학과</option>
-          <option value="영어영문학과">영어영문학과</option>
-        </optgroup>
-        <optgroup label="자연계열">
-          <option value="전기공학과">전기공학과</option>
-          <option value="컴퓨터공학과">컴퓨터공학과</option>
-          <option value="기계공학과">기계공학과</option>
-          <option value="화학공학과">화학공학과</option>
-          <option value="생명과학과">생명과학과</option>
-          <option value="수학과">수학과</option>
-          <option value="물리학과">물리학과</option>
-          <option value="화학과">화학과</option>
-        </optgroup>
-        <optgroup label="의학계열">
-          <option value="의예과">의예과</option>
-          <option value="치의예과">치의예과</option>
-          <option value="한의예과">한의예과</option>
-          <option value="약학과">약학과</option>
-          <option value="수의예과">수의예과</option>
-        </optgroup>
-        <optgroup label="사범계열">
-          <option value="국어교육과">국어교육과</option>
-          <option value="영어교육과">영어교육과</option>
-          <option value="수학교육과">수학교육과</option>
-          <option value="체육교육과">체육교육과</option>
-          <option value="교육학과">교육학과</option>
-        </optgroup>
-        <optgroup label="예체능">
-          <option value="디자인학과">디자인학과</option>
-          <option value="미술학과">미술학과</option>
-          <option value="음악과">음악과</option>
-          <option value="체육학과">체육학과</option>
-        </optgroup>
-        <optgroup label="기타">
-          <option value="직접입력">직접 입력</option>
-        </optgroup>
-      </select>
-      <input
-        type="text"
-        id="departmentCustom"
-        placeholder="학과명 입력 (간호학과 제외)"
-        style="display:none"
-      />
-    </div>
-
-    <!-- 전형 선택 -->
-    <div class="select-box">
-      <label><i data-lucide="clipboard-list" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>전형 선택</label>
-      <select id="admission">
-        <option value="">대학을 먼저 선택하세요</option>
-      </select>
-    </div>
-
-    <!-- 질문 개수 선택 -->
-    <div class="select-box">
-      <label><i data-lucide="hash" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>생성할 질문 개수</label>
-      <select id="questionCount">
-        <option value="10">10개 (빠른 분석)</option>
-        <option value="50" selected>50개 (추천)</option>
-        <option value="100">100개 (전체 분석)</option>
-      </select>
-      <small style="display:block; margin-top:5px; color:#666">
-        💡 개수가 많을수록 분석 시간과 API 비용이 증가합니다
-      </small>
-    </div>
-  </div>
-
-  <!-- 개인정보 보호 안내 -->
-  <div style="background:#fff3cd; border-left:4px solid #ff9800; padding:16px; margin:20px 0; border-radius:8px">
-    <h3 style="color:#d97706; margin:0 0 10px 0; font-size:16px">
-      <i data-lucide="lock" style="width:18px; height:18px; vertical-align:-3px; margin-right:6px"></i>개인정보 보호 안내
-    </h3>
-    <p style="margin:0 0 10px 0; font-size:14px; line-height:1.6">
-      <strong>학생부 입력 시 다음 정보는 제거하고 입력하세요:</strong>
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content fade-in-up">
+    <h1>
+      <i data-lucide="graduation-cap" style="width:56px; height:56px; vertical-align:-12px; margin-right:12px"></i>
+      2027 대입 AI 면접코치
+    </h1>
+    <p class="hero-subtitle">
+      학생부(생기부) 기반 맞춤형 면접 질문 생성<br>
+      AI와 함께하는 완벽한 면접 준비
     </p>
-    <ul style="margin:0 0 10px 0; padding-left:20px; font-size:14px; line-height:1.8">
-      <li><strong>이름, 생년월일, 전화번호, 이메일, 주소</strong></li>
-      <li><strong>학교명, 반/번호, 학생 ID</strong></li>
-      <li>기타 개인 식별 가능한 정보</li>
-    </ul>
-    <p style="margin:0; font-size:13px; color:#666">
-      ✅ <strong>활동 내용만</strong> 입력하세요 (동아리, 봉사, 수상, 탐구, 독서 활동 등)<br>
-      ✅ 개인정보는 면접 질문 생성에 필요하지 않습니다
-    </p>
-  </div>
-
-  <!-- 생기부 업로드 -->
-  <div class="textarea-box">
-    <label><i data-lucide="file-text" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>학생부 내용 입력 (개인정보 제거 후)</label>
-    <textarea
-      id="record"
-      placeholder="⚠️ 개인정보(이름, 생년월일, 전화번호, 학교명 등)는 제거하고 활동 내용만 입력하세요
-
-예시:
-[자율활동]
-- 학급 회장으로서 학급 행사 기획 및 운영 (리더십 발휘)
-- 동아리 부장으로 환경 캠페인 프로젝트 주도 (기획력, 실행력)
-
-[동아리활동]
-- 과학 동아리에서 미세플라스틱 연구 수행 (탐구 능력)
-- 실험 설계 및 데이터 분석 (문제해결력)
-
-[봉사활동]
-- 지역 복지센터에서 정기 봉사 활동 (나눔, 배려)
-- 독거노인 말벗 활동 (공감, 소통)
-
-[진로활동]
-- 경영학 관련 진로 탐색 활동
-- 기업 탐방 및 직업인 인터뷰
-
-[독서활동]
-- 경영 관련 도서 읽고 서평 작성
-- 토론 활동 참여
-"
-    ></textarea>
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px">
-      <small style="color:#666">💡 최소 100자 이상 입력하세요</small>
-      <small id="charCount" style="color:#667eea; font-weight:600">0자</small>
+    <div class="hero-buttons">
+      <a href="login.html" class="btn btn-primary">
+        <i data-lucide="log-in" style="width:20px; height:20px"></i>
+        시작하기
+      </a>
+      <a href="#features" class="btn btn-secondary">
+        <i data-lucide="info" style="width:20px; height:20px"></i>
+        더 알아보기
+      </a>
     </div>
   </div>
+</section>
 
-  <!-- 분석 시작 버튼 -->
-  <button class="btn" id="analyzeBtn" onclick="startAnalysis()">
-    <i data-lucide="target" style="width:18px; height:18px; vertical-align:-3px; margin-right:8px"></i>면접 예상 질문 생성
-  </button>
+<!-- Features Section -->
+<section class="features" id="features">
+  <div class="container">
+    <h2 class="section-title">왜 AI 면접코치인가?</h2>
+    <p class="section-subtitle">학생부종합 전형 면접을 완벽하게 대비하세요</p>
 
-  <!-- 결과 영역 -->
-  <div id="resultContainer" class="hidden"></div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i data-lucide="brain" style="width:40px; height:40px; color:white"></i>
+        </div>
+        <h3>AI 맞춤형 질문 생성</h3>
+        <p>Claude AI가 학생부(생기부) 내용을 심층 분석하여 실제 면접에 나올 법한 질문 10~100개를 자동 생성합니다.</p>
+      </div>
 
-  <!-- 면책 사항 -->
-  <div style="margin-top:60px; padding:30px; background:#f8f9fa; border-radius:12px; border-left:4px solid #c0392b">
-    <h3 style="color:#c0392b; margin:0 0 15px 0; font-size:18px">
-      <i data-lucide="alert-triangle" style="width:20px; height:20px; vertical-align:-4px; margin-right:8px"></i>필수 안내사항
-    </h3>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i data-lucide="lightbulb" style="width:40px; height:40px; color:white"></i>
+        </div>
+        <h3>모범 답변 가이드</h3>
+        <p>각 질문마다 학생부 활동을 활용한 모범 답변 예시, 핵심 포인트, 차별화 전략을 제공합니다.</p>
+      </div>
 
-    <div style="margin-bottom:20px">
-      <h4 style="font-size:16px; margin:0 0 10px 0">면책 사항</h4>
-      <ul style="margin:0; padding-left:20px; line-height:1.8; font-size:14px">
-        <li>본 서비스는 <strong>면접 연습 도구</strong>입니다</li>
-        <li>면접 예상 질문은 공개 자료 및 일반적인 평가 기준을 바탕으로 생성되며 <strong>실제 면접과 다를 수 있습니다</strong></li>
-        <li>분석 결과는 <strong>참고용</strong>이며 실제 입시 결과에 대해 책임지지 않습니다</li>
-        <li>전형 정보는 변경될 수 있으니 <strong>반드시 대학 공식 모집요강을 확인</strong>하세요</li>
-        <li><strong>실제 면접 결과는 대학 평가위원회가 결정</strong>하며, 본 서비스는 <strong>합격을 보장하지 않습니다</strong></li>
-      </ul>
-    </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i data-lucide="mic" style="width:40px; height:40px; color:white"></i>
+        </div>
+        <h3>음성 인식 연습</h3>
+        <p>Web Speech API를 활용한 실전 면접 연습으로 답변 길이와 완성도를 실시간으로 피드백합니다.</p>
+      </div>
 
-    <div>
-      <h4 style="font-size:16px; margin:0 0 10px 0">🔒 개인정보 처리</h4>
-      <ul style="margin:0; padding-left:20px; line-height:1.8; font-size:14px">
-        <li><strong>이름, 생년월일, 전화번호, 학교명 등 개인정보는 수집하지 않습니다</strong></li>
-        <li>입력하신 학생부 <strong>활동 내용</strong>과 API 키는 브라우저에만 저장됩니다</li>
-        <li>Anthropic API로 전송되어 분석에만 사용되며, 당사 서버에는 저장되지 않습니다</li>
-        <li><strong>반드시 개인정보를 제거한 후</strong> 학생부 내용을 입력하세요</li>
-      </ul>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i data-lucide="filter" style="width:40px; height:40px; color:white"></i>
+        </div>
+        <h3>카테고리별 분류</h3>
+        <p>전공적합성, 학업역량, 인성, 발전가능성으로 질문을 분류하여 체계적인 준비가 가능합니다.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i data-lucide="bookmark" style="width:40px; height:40px; color:white"></i>
+        </div>
+        <h3>북마크 & 검색</h3>
+        <p>중요한 질문을 북마크하고, 키워드 검색으로 원하는 질문을 빠르게 찾을 수 있습니다.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i data-lucide="download" style="width:40px; height:40px; color:white"></i>
+        </div>
+        <h3>인쇄 & 다운로드</h3>
+        <p>생성된 모든 질문과 답변을 텍스트 파일로 다운로드하거나 깔끔하게 인쇄할 수 있습니다.</p>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- UNIVERSITY_DB 포함 -->
-<script>
-// 2027학년도 주요 대학 입시 DB (일반적인 평가 기준 기반)
-// 출처: 교육부 학생부종합 전형 가이드라인
-// 최종 업데이트: 2026-09-10
-
-const UNIVERSITY_DB = {
-  "서울대학교": {
-    id: "snu",
-    name: "서울대학교",
-    category: "서울권",
-    lastUpdated: "2026-09-10",
-    admissions: {
-      "학생부종합_지역균형": {
-        interview: { hasInterview: true, weight: 30, type: "개인면접", duration: "10분" },
-        criteria: {
-          전공적합성: { weight: 30, description: "전공 관련 관심과 이해" },
-          학업역량: { weight: 30, description: "학업 수행 능력" },
-          인성: { weight: 20, description: "공동체 의식" },
-          발전가능성: { weight: 20, description: "성장 잠재력" }
-        }
-      }
-    }
-  },
-  "연세대학교": {
-    id: "yonsei",
-    name: "연세대학교",
-    category: "서울권",
-    lastUpdated: "2026-09-10",
-    admissions: {
-      "학생부종합_활동우수형": {
-        interview: { hasInterview: true, weight: 40, type: "개인면접", duration: "10분" },
-        criteria: {
-          전공적합성: { weight: 30 },
-          학업역량: { weight: 30 },
-          인성: { weight: 20 },
-          발전가능성: { weight: 20 }
-        }
-      }
-    }
-  },
-  "고려대학교": {
-    id: "korea",
-    name: "고려대학교",
-    category: "서울권",
-    lastUpdated: "2026-09-10",
-    admissions: {
-      "학생부종합_학업우수형": {
-        interview: { hasInterview: true, weight: 30, type: "개인면접", duration: "10분" },
-        criteria: {
-          전공적합성: { weight: 30 },
-          학업역량: { weight: 30 },
-          인성: { weight: 20 },
-          발전가능성: { weight: 20 }
-        }
-      }
-    }
-  },
-  "성균관대학교": {
-    id: "skku",
-    name: "성균관대학교",
-    category: "서울권",
-    lastUpdated: "2026-09-10",
-    admissions: {
-      "학생부종합_계열모집": {
-        interview: { hasInterview: true, weight: 30, type: "개인면접", duration: "10분" },
-        criteria: {
-          전공적합성: { weight: 30 },
-          학업역량: { weight: 30 },
-          인성: { weight: 20 },
-          발전가능성: { weight: 20 }
-        }
-      }
-    }
-  },
-  "한양대학교": {
-    id: "hanyang",
-    name: "한양대학교",
-    category: "서울권",
-    lastUpdated: "2026-09-10",
-    admissions: {
-      "학생부종합_일반": {
-        interview: { hasInterview: true, weight: 30, type: "개인면접", duration: "10분" },
-        criteria: {
-          전공적합성: { weight: 30 },
-          학업역량: { weight: 30 },
-          인성: { weight: 20 },
-          발전가능성: { weight: 20 }
-        }
-      }
-    }
-  },
-  "중앙대학교": {
-    id: "cau",
-    name: "중앙대학교",
-    category: "서울권",
-    lastUpdated: "2026-09-10",
-    admissions: {
-      "학생부종합_다빈치형인재": {
-        interview: { hasInterview: true, weight: 30, type: "개인면접", duration: "10분" },
-        criteria: {
-          전공적합성: { weight: 30 },
-          학업역량: { weight: 30 },
-          인성: { weight: 20 },
-          발전가능성: { weight: 20 }
-        }
-      },
-      "학생부종합_탐구형인재": {
-        interview: { hasInterview: true, weight: 30, type: "개인면접", duration: "10분" },
-        criteria: {
-          전공적합성: { weight: 30 },
-          학업역량: { weight: 30 },
-          인성: { weight: 20 },
-          발전가능성: { weight: 20 }
-        }
-      }
-    }
-  },
-  "경희대학교": {
-    id: "khu",
-    name: "경희대학교",
-    category: "서울권",
-    lastUpdated: "2026-09-10",
-    admissions: {
-      "학생부종합_네오르네상스": {
-        interview: { hasInterview: true, weight: 30, type: "개인면접", duration: "10분" },
-        criteria: {
-          전공적합성: { weight: 30 },
-          학업역량: { weight: 30 },
-          인성: { weight: 20 },
-          발전가능성: { weight: 20 }
-        }
-      }
-    }
-  },
-  "한국외국어대학교": {
-    id: "hufs",
-    name: "한국외국어대학교",
-    category: "서울권",
-    lastUpdated: "2026-09-10",
-    admissions: {
-      "학생부종합_학생부종합전형": {
-        interview: { hasInterview: true, weight: 30, type: "개인면접", duration: "10분" },
-        criteria: {
-          전공적합성: { weight: 30 },
-          학업역량: { weight: 30 },
-          인성: { weight: 20 },
-          발전가능성: { weight: 20 }
-        }
-      }
-    }
-  },
-  "서울시립대학교": {
-    id: "uos",
-    name: "서울시립대학교",
-    category: "서울권",
-    lastUpdated: "2026-09-10",
-    admissions: {
-      "학생부종합_학생부종합": {
-        interview: { hasInterview: true, weight: 30, type: "개인면접", duration: "10분" },
-        criteria: {
-          전공적합성: { weight: 30 },
-          학업역량: { weight: 30 },
-          인성: { weight: 20 },
-          발전가능성: { weight: 20 }
-        }
-      }
-    }
-  },
-  "건국대학교": {
-    id: "konkuk",
-    name: "건국대학교",
-    category: "서울권",
-    lastUpdated: "2026-09-10",
-    admissions: {
-      "학생부종합_KU자기추천": {
-        interview: { hasInterview: true, weight: 30, type: "개인면접", duration: "10분" },
-        criteria: {
-          전공적합성: { weight: 30 },
-          학업역량: { weight: 30 },
-          인성: { weight: 20 },
-          발전가능성: { weight: 20 }
-        }
-      }
-    }
-  }
-};
-
-// 학과별 특화 질문
-const DEPARTMENT_SPECIALIZATION = {
-  "경영학과": {
-    keywords: ["리더십", "경영 이론", "기업 분석"],
-    sampleQuestions: [
-      "리더십을 발휘한 경험은?",
-      "관심 있는 기업이나 산업은?",
-      "경영 관련 독서 활동은?"
-    ]
-  },
-  "컴퓨터공학과": {
-    keywords: ["프로그래밍", "알고리즘", "소프트웨어"],
-    sampleQuestions: [
-      "프로그래밍 프로젝트 경험은?",
-      "사용해본 프로그래밍 언어는?",
-      "기술적 문제 해결 경험은?"
-    ]
-  },
-  "의예과": {
-    keywords: ["의료 윤리", "봉사정신", "생명 존중"],
-    sampleQuestions: [
-      "의사가 되고자 하는 동기는?",
-      "의료 윤리에 대한 생각은?",
-      "봉사활동 경험은?"
-    ]
-  }
-};
-</script>
-
-<script>
-// 전역 변수
-let currentQuestions = [];
-let recognition = null;
-
-// DOM 로드 완료 후
-document.addEventListener('DOMContentLoaded', () => {
-  // 학과 직접입력 처리
-  document.getElementById('department').addEventListener('change', (e) => {
-    const custom = document.getElementById('departmentCustom');
-    custom.style.display = e.target.value === '직접입력' ? 'block' : 'none';
-  });
-
-  // 간호학과 입력 차단
-  document.getElementById('departmentCustom').addEventListener('input', (e) => {
-    const value = e.target.value.trim();
-    if (value.includes('간호')) {
-      showAlert('error', '⚠️ 간호학과는 현재 지원하지 않습니다.\n다른 학과를 선택해주세요.');
-      e.target.value = '';
-    }
-  });
-
-  // 대학 선택 시 전형 목록 업데이트
-  document.getElementById('university').addEventListener('change', (e) => {
-    updateAdmissions(e.target.value);
-  });
-
-  // 음성 인식 초기화
-  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.lang = 'ko-KR';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-  }
-});
-
-// 전형 목록 업데이트
-function updateAdmissions(universityName) {
-  const admissionSelect = document.getElementById('admission');
-  admissionSelect.innerHTML = '<option value="">전형을 선택하세요</option>';
-
-  if (!universityName || !UNIVERSITY_DB[universityName]) {
-    return;
-  }
-
-  const admissions = UNIVERSITY_DB[universityName].admissions;
-  for (const [key, value] of Object.entries(admissions)) {
-    const option = document.createElement('option');
-    option.value = key;
-    option.textContent = key.replace(/_/g, ' - ');
-    admissionSelect.appendChild(option);
-  }
-}
-
-// 분석 시작
-async function startAnalysis() {
-  const apiKey = localStorage.getItem('anthropicApiKey') || '';
-  const university = document.getElementById('university').value;
-  const department = document.getElementById('department').value === '직접입력'
-    ? document.getElementById('departmentCustom').value.trim()
-    : document.getElementById('department').value;
-  const admission = document.getElementById('admission').value;
-  const record = document.getElementById('record').value.trim();
-  const questionCount = parseInt(document.getElementById('questionCount').value) || 50;
-
-  // 유효성 검사
-  if (!apiKey) {
-    showAlert('error', '⚠️ Claude API 키를 설정해주세요. 우상단 ⚙️ 설정 버튼을 클릭하세요.');
-    return;
-  }
-
-  if (!university) {
-    showAlert('error', '⚠️ 대학을 선택해주세요');
-    return;
-  }
-
-  if (!department) {
-    showAlert('error', '⚠️ 학과를 선택해주세요');
-    return;
-  }
-
-  // 간호학과 최종 차단
-  if (department.includes('간호')) {
-    showAlert('error', '⚠️ 간호학과는 현재 지원하지 않습니다.\n다른 학과를 선택해주세요.');
-    return;
-  }
-
-  if (!admission) {
-    showAlert('error', '⚠️ 전형을 선택해주세요');
-    return;
-  }
-
-  if (!record || record.length < 100) {
-    showAlert('error', '⚠️ 학생부 내용을 충분히 입력해주세요 (최소 100자)');
-    return;
-  }
-
-  // 버튼 비활성화
-  const btn = document.getElementById('analyzeBtn');
-  btn.disabled = true;
-  btn.textContent = '분석 중...';
-
-  // 프로그레스 바 표시
-  const progressInterval = showProgress(`${questionCount}개 질문 생성 중`);
-
-  try {
-    // Claude API 호출
-    const admissionData = UNIVERSITY_DB[university].admissions[admission];
-    const departmentData = DEPARTMENT_SPECIALIZATION[department] || {};
-
-    const systemPrompt = createSystemPrompt(university, department, admission, admissionData, departmentData, questionCount);
-
-    // 질문 개수에 따라 max_tokens 조정
-    const maxTokensMap = { 10: 4000, 50: 16000, 100: 32000 };
-    const maxTokens = maxTokensMap[questionCount] || 16000;
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: maxTokens,
-        temperature: 0.7,
-        messages: [{
-          role: 'user',
-          content: `[학생부]\n${record}\n\n위 학생부를 바탕으로 면접 예상 질문 ${questionCount}개를 생성해주세요.`
-        }],
-        system: systemPrompt
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || '분석 실패');
-    }
-
-    const data = await response.json();
-    const content = data.content[0].text;
-
-    // JSON 파싱
-    let result;
-    try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      result = JSON.parse(jsonMatch[0]);
-    } catch (e) {
-      throw new Error('응답 파싱 실패');
-    }
-
-    // 결과 표시
-    displayResult(result, university, department, admission);
-    showAlert('success', '✅ 면접 예상 질문이 생성되었습니다!');
-
-  } catch (error) {
-    console.error(error);
-    clearInterval(progressInterval);
-    const resultContainer = document.getElementById('resultContainer');
-    resultContainer.innerHTML = `
-      <div class="warning-box">
-        <strong>❌ 오류 발생:</strong> ${error.message}
-        <br><br>
-        <small>API 키를 확인하고 다시 시도해주세요.</small>
+<!-- Stats Section -->
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <h2>10개 대학</h2>
+        <p>서울대, 연세대, 고려대 등<br>주요 대학 지원</p>
       </div>
-    `;
-    showAlert('error', '분석 중 오류가 발생했습니다');
-  } finally {
-    clearInterval(progressInterval);
-    btn.disabled = false;
-    btn.textContent = '🎯 면접 예상 질문 생성';
-  }
-}
-
-// 시스템 프롬프트 생성
-function createSystemPrompt(university, department, admission, admissionData, departmentData, questionCount = 50) {
-  const distribution = {
-    10: { 전공적합성: 3, 학업역량: 3, 인성: 2, 발전가능성: 2 },
-    50: { 전공적합성: 15, 학업역량: 15, 인성: 10, 발전가능성: 10 },
-    100: { 전공적합성: 30, 학업역량: 30, 인성: 20, 발전가능성: 20 }
-  };
-
-  const dist = distribution[questionCount] || distribution[50];
-
-  return `너는 2027학년도 대입 학생부종합 전형 면접 전문가이다.
-
-**지원 정보:**
-- 대학: ${university}
-- 학과: ${department}
-- 전형: ${admission}
-
-**면접 정보:**
-${admissionData.interview ? `- 면접 형식: ${admissionData.interview.type}
-- 면접 시간: ${admissionData.interview.duration}
-- 반영 비율: ${admissionData.interview.weight}%` : '- 면접 정보 없음'}
-
-**평가 기준:**
-${Object.entries(admissionData.criteria || {}).map(([key, val]) =>
-  `- ${key} (${val.weight}%): ${val.description || ''}`
-).join('\n')}
-
-**학과 특성:**
-${departmentData.keywords ? `- 핵심 키워드: ${departmentData.keywords.join(', ')}
-- 주요 분야: ${departmentData.focusAreas?.join(', ') || '일반'}` : '- 일반 학과'}
-
-**역할:**
-위 정보를 바탕으로 학생부에서 나올 수 있는 구체적인 면접 질문 ${questionCount}개를 생성하라.
-
-**카테고리별 분배:**
-- 전공적합성: ${dist.전공적합성}개
-- 학업역량: ${dist.학업역량}개
-- 인성: ${dist.인성}개
-- 발전가능성: ${dist.발전가능성}개
-
-**출력 형식:**
-JSON 형식으로만 응답하라:
-{
-  "strengths": ["강점 ${questionCount <= 10 ? '3-5' : questionCount <= 50 ? '5-7' : '7-10'}개"],
-  "weaknesses": ["보완점 ${questionCount <= 10 ? '2-3' : questionCount <= 50 ? '3-5' : '5-7'}개"],
-  "questions": [
-    {
-      "category": "전공적합성",
-      "question": "질문 내용",
-      "answer": "학생부 내용을 활용한 모범 답변 예시 (3-5문장, 구체적 사례 포함)",
-      "keypoints": ["답변 시 강조할 핵심 포인트 3-4개"],
-      "differentiation": "다른 수험생과 차별화할 수 있는 전략 (1-2문장)"
-    }
-    // ... 총 ${questionCount}개
-  ]
-}
-
-**질문 생성 원칙:**
-1. 학생부에 명시된 구체적 활동/경험을 반드시 언급
-2. 학과별 특성과 전공 핵심역량을 반영
-3. 단순 Yes/No가 아닌 스토리를 끌어낼 수 있는 질문
-4. 실제 면접에서 나올 법한 현실적인 질문
-5. 난이도 다양화 (기본 30% / 중급 50% / 심화 20%)
-
-**답변 예시 작성 원칙:**
-1. 학생부 내용을 구체적으로 활용 (활동명, 결과, 배운 점)
-2. STAR 기법 적용 (Situation → Task → Action → Result)
-3. 전공 연계성 강조
-4. 개인의 성장/변화 스토리 포함
-5. 3-5문장으로 간결하게 구성
-6. 다른 학생과 차별화되는 독창적 관점 제시
-
-**학과별 특화 질문:**
-- ${department === '경영학과' ? '경영/리더십/마케팅/경제 관련 질문 비중 높게, 기업 사례 분석 질문 포함' : ''}
-- ${department === '컴퓨터공학과' ? '프로그래밍/알고리즘/AI/데이터 관련 질문 포함, 기술 트렌드 이해도 확인' : ''}
-- ${department === '의예과' ? '의료윤리/봉사정신/생명존중/환자중심 사고 관련 질문 포함' : ''}
-- ${department.includes('교육') ? '교육철학/학습자 이해/교수법/교사 소명의식 관련 질문 포함' : ''}
-- ${department.includes('공학') ? '문제해결능력/창의적 설계/팀 프로젝트 경험 관련 질문 포함' : ''}
-- ${department.includes('사회') ? '사회현상 분석/비판적 사고/공동체 의식 관련 질문 포함' : ''}
-
-**주의사항:**
-- 개인정보(이름, 학교명 등)는 언급하지 말 것
-- 모든 질문은 학생부 내용과 연결될 수 있어야 함
-- 답변 예시는 실제 면접에서 30초-1분 내 답변 가능한 분량
-- 진부한 답변이 아닌 개성 있는 답변 제시
-`;
-}
-
-// 결과 표시
-let currentFilter = '전체';
-let searchQuery = '';
-
-function displayResult(result, university, department, admission) {
-  currentQuestions = result.questions || [];
-
-  const html = `
-    <div class="result-container">
-      <h2 style="margin-bottom:20px; color:#667eea">
-        📝 ${university} ${department} ${admission.replace(/_/g, ' ')} 면접 예상 질문
-      </h2>
-
-      <!-- 강점 -->
-      ${result.strengths && result.strengths.length > 0 ? `
-        <div style="background:white; padding:20px; border-radius:12px; margin-bottom:20px">
-          <h3 style="color:#27ae60; margin-bottom:15px">✅ 강점</h3>
-          <ul style="list-style:none; padding:0">
-            ${result.strengths.map(s => `<li style="padding:8px 0; padding-left:20px; position:relative">
-              <span style="position:absolute; left:0">•</span>${s}
-            </li>`).join('')}
-          </ul>
-        </div>
-      ` : ''}
-
-      <!-- 약점/보완점 -->
-      ${result.weaknesses && result.weaknesses.length > 0 ? `
-        <div style="background:white; padding:20px; border-radius:12px; margin-bottom:20px">
-          <h3 style="color:#ff9800; margin-bottom:15px">⚠️ 보완이 필요한 부분</h3>
-          <ul style="list-style:none; padding:0">
-            ${result.weaknesses.map(w => `<li style="padding:8px 0; padding-left:20px; position:relative">
-              <span style="position:absolute; left:0">•</span>${w}
-            </li>`).join('')}
-          </ul>
-        </div>
-      ` : ''}
-
-      <!-- 질문 목록 -->
-      <div style="background:white; padding:20px; border-radius:12px">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px">
-          <h3 style="color:#667eea; margin:0">🎤 면접 예상 질문 (${currentQuestions.length}개)</h3>
-          <div style="display:flex; gap:10px">
-            <button class="download-btn" onclick="printQuestions()">
-              <i data-lucide="printer" style="width:16px; height:16px"></i>
-              인쇄
-            </button>
-            <button class="download-btn" onclick="downloadQuestions()">
-              <i data-lucide="download" style="width:16px; height:16px"></i>
-              다운로드
-            </button>
-          </div>
-        </div>
-
-        <!-- 카테고리 필터 -->
-        <div class="filter-tabs">
-          <button class="filter-tab active" onclick="filterByCategory('전체')">전체 (${currentQuestions.length})</button>
-          <button class="filter-tab" onclick="filterByCategory('북마크')">★ 북마크 (${bookmarkedQuestions.length})</button>
-          <button class="filter-tab" onclick="filterByCategory('전공적합성')">전공적합성 (${currentQuestions.filter(q => q.category === '전공적합성').length})</button>
-          <button class="filter-tab" onclick="filterByCategory('학업역량')">학업역량 (${currentQuestions.filter(q => q.category === '학업역량').length})</button>
-          <button class="filter-tab" onclick="filterByCategory('인성')">인성 (${currentQuestions.filter(q => q.category === '인성').length})</button>
-          <button class="filter-tab" onclick="filterByCategory('발전가능성')">발전가능성 (${currentQuestions.filter(q => q.category === '발전가능성').length})</button>
-        </div>
-
-        <!-- 검색 -->
-        <div class="search-box">
-          <input type="text" id="searchInput" placeholder="질문 검색..." onkeyup="searchQuestions(this.value)">
-        </div>
-
-        <!-- 질문 리스트 -->
-        <ul class="question-list" id="questionList">
-          ${renderQuestions(currentQuestions)}
-        </ul>
+      <div class="stat-item">
+        <h2>100개 질문</h2>
+        <p>최대 100개의<br>맞춤형 면접 질문</p>
+      </div>
+      <div class="stat-item">
+        <h2>4가지 평가</h2>
+        <p>전공적합성, 학업역량<br>인성, 발전가능성</p>
+      </div>
+      <div class="stat-item">
+        <h2>실시간 분석</h2>
+        <p>30초~2분 내<br>즉시 결과 제공</p>
       </div>
     </div>
-  `;
+  </div>
+</section>
 
-  document.getElementById('resultContainer').innerHTML = html;
-  lucide.createIcons();
-}
+<!-- How it Works -->
+<section class="how-it-works">
+  <div class="container">
+    <h2 class="section-title">사용 방법</h2>
+    <p class="section-subtitle">4단계로 간편하게 면접 준비를 시작하세요</p>
 
-function renderQuestions(questions) {
-  return questions.map((q, i) => `
-    <li class="question-item" data-category="${q.category || '일반'}" data-index="${i}">
-      <div style="display:flex; justify-content:space-between; align-items:center">
-        <strong>${q.category || '일반'}</strong>
-        <button class="bookmark-btn ${bookmarkedQuestions.includes(i) ? 'active' : ''}" onclick="toggleBookmark(${i})" title="북마크">
-          ${bookmarkedQuestions.includes(i) ? '★' : '☆'}
-        </button>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>로그인 & API 키 설정</h3>
+        <p>회원가입 후 Anthropic Claude API 키를 설정합니다</p>
       </div>
-      <p><strong>Q${i+1}.</strong> ${q.question}</p>
 
-      ${q.answer || q.guidance ? `
-        <button class="toggle-detail-btn" onclick="toggleDetail(${i})">
-          📖 모범 답변 및 가이드 보기
-        </button>
-        <div class="question-detail" id="detail-${i}">
-          ${q.answer ? `
-            <h4>💡 모범 답변 예시</h4>
-            <p>${q.answer}</p>
-          ` : ''}
-
-          ${q.keypoints && q.keypoints.length > 0 ? `
-            <h4>🎯 핵심 포인트</h4>
-            <ul>
-              ${q.keypoints.map(kp => `<li>${kp}</li>`).join('')}
-            </ul>
-          ` : ''}
-
-          ${q.differentiation ? `
-            <h4>✨ 차별화 전략</h4>
-            <p>${q.differentiation}</p>
-          ` : ''}
-
-          ${!q.answer && q.guidance ? `
-            <h4>💡 답변 가이드</h4>
-            <p>${q.guidance}</p>
-          ` : ''}
-        </div>
-      ` : ''}
-
-      <button class="voice-btn" onclick="startVoicePractice(${i})" style="margin-top:10px">
-        🎙️ 음성으로 답변 연습
-      </button>
-    </li>
-  `).join('');
-}
-
-function filterByCategory(category) {
-  currentFilter = category;
-
-  // 버튼 활성화 상태 업데이트
-  document.querySelectorAll('.filter-tab').forEach(btn => {
-    btn.classList.remove('active');
-  });
-  event.target.classList.add('active');
-
-  applyFilter();
-}
-
-function searchQuestions(query) {
-  searchQuery = query.toLowerCase();
-  applyFilter();
-}
-
-function applyFilter() {
-  const items = document.querySelectorAll('.question-item');
-
-  items.forEach(item => {
-    const category = item.dataset.category;
-    const index = parseInt(item.dataset.index);
-    const text = item.textContent.toLowerCase();
-
-    let matchCategory;
-    if (currentFilter === '전체') {
-      matchCategory = true;
-    } else if (currentFilter === '북마크') {
-      matchCategory = bookmarkedQuestions.includes(index);
-    } else {
-      matchCategory = category === currentFilter;
-    }
-
-    const matchSearch = !searchQuery || text.includes(searchQuery);
-
-    if (matchCategory && matchSearch) {
-      item.style.display = '';
-    } else {
-      item.style.display = 'none';
-    }
-  });
-}
-
-function toggleDetail(index) {
-  const detail = document.getElementById(`detail-${index}`);
-  const btn = event.target;
-
-  if (detail.classList.contains('show')) {
-    detail.classList.remove('show');
-    btn.textContent = '📖 모범 답변 및 가이드 보기';
-  } else {
-    detail.classList.add('show');
-    btn.textContent = '📖 모범 답변 및 가이드 닫기';
-  }
-}
-
-function downloadQuestions() {
-  let text = `${document.querySelector('.result-container h2').textContent}\n\n`;
-  text += `생성 날짜: ${new Date().toLocaleDateString('ko-KR')}\n\n`;
-  text += '=' .repeat(80) + '\n\n';
-
-  currentQuestions.forEach((q, i) => {
-    text += `Q${i+1}. [${q.category}] ${q.question}\n\n`;
-
-    if (q.answer) {
-      text += `💡 모범 답변:\n${q.answer}\n\n`;
-    }
-
-    if (q.keypoints && q.keypoints.length > 0) {
-      text += `🎯 핵심 포인트:\n`;
-      q.keypoints.forEach(kp => text += `  - ${kp}\n`);
-      text += '\n';
-    }
-
-    if (q.differentiation) {
-      text += `✨ 차별화 전략:\n${q.differentiation}\n\n`;
-    }
-
-    if (q.guidance && !q.answer) {
-      text += `💡 답변 가이드:\n${q.guidance}\n\n`;
-    }
-
-    text += '-'.repeat(80) + '\n\n';
-  });
-
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `면접질문_${new Date().getTime()}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
-
-  showAlert('success', '✅ 질문이 다운로드되었습니다!');
-}
-
-function printQuestions() {
-  // 인쇄용 HTML 생성
-  let printHTML = `
-    <!DOCTYPE html>
-    <html lang="ko">
-    <head>
-      <meta charset="UTF-8">
-      <title>면접 예상 질문</title>
-      <style>
-        @media print {
-          body { margin: 0; padding: 20px; font-family: 'Pretendard', sans-serif; }
-          h1 { font-size: 24px; color: #333; margin-bottom: 10px; }
-          h2 { font-size: 18px; color: #667eea; margin-top: 20px; margin-bottom: 10px; }
-          .question { page-break-inside: avoid; margin-bottom: 30px; padding: 15px; border-left: 4px solid #667eea; }
-          .question-number { font-weight: bold; color: #667eea; }
-          .category { font-size: 12px; color: #999; text-transform: uppercase; }
-          .answer { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px; }
-          .keypoints { margin-top: 10px; }
-          .keypoints li { margin: 5px 0; }
-          .page-break { page-break-after: always; }
-        }
-      </style>
-    </head>
-    <body>
-      <h1>${document.querySelector('.result-container h2').textContent}</h1>
-      <p>생성 날짜: ${new Date().toLocaleDateString('ko-KR')}</p>
-      <hr>
-  `;
-
-  currentQuestions.forEach((q, i) => {
-    printHTML += `
-      <div class="question">
-        <div class="category">${q.category || '일반'}</div>
-        <div class="question-number">Q${i+1}.</div>
-        <p>${q.question}</p>
-
-        ${q.answer ? `
-          <div class="answer">
-            <strong>💡 모범 답변:</strong><br>
-            ${q.answer}
-          </div>
-        ` : ''}
-
-        ${q.keypoints && q.keypoints.length > 0 ? `
-          <div class="keypoints">
-            <strong>🎯 핵심 포인트:</strong>
-            <ul>
-              ${q.keypoints.map(kp => `<li>${kp}</li>`).join('')}
-            </ul>
-          </div>
-        ` : ''}
-
-        ${q.differentiation ? `
-          <div class="answer">
-            <strong>✨ 차별화 전략:</strong><br>
-            ${q.differentiation}
-          </div>
-        ` : ''}
-
-        ${q.guidance && !q.answer ? `
-          <div class="answer">
-            <strong>💡 답변 가이드:</strong><br>
-            ${q.guidance}
-          </div>
-        ` : ''}
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>대학/학과/전형 선택</h3>
+        <p>지원할 대학, 학과, 전형을 선택하고 질문 개수를 정합니다</p>
       </div>
-    `;
 
-    // 10개마다 페이지 구분
-    if ((i + 1) % 10 === 0 && i !== currentQuestions.length - 1) {
-      printHTML += '<div class="page-break"></div>';
-    }
-  });
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>학생부(생기부) 입력</h3>
+        <p>개인정보를 제거한 활동 내용을 입력합니다</p>
+      </div>
 
-  printHTML += `
-    </body>
-    </html>
-  `;
+      <div class="step">
+        <div class="step-number">4</div>
+        <h3>질문 생성 & 연습</h3>
+        <p>AI가 질문과 답변을 생성하면 음성으로 연습합니다</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-  // 새 창에서 인쇄
-  const printWindow = window.open('', '', 'width=800,height=600');
-  printWindow.document.write(printHTML);
-  printWindow.document.close();
-  printWindow.focus();
-  setTimeout(() => {
-    printWindow.print();
-    printWindow.close();
-  }, 250);
-
-  showAlert('success', '✅ 인쇄 창이 열렸습니다!');
-}
-
-// 음성 연습
-function startVoicePractice(index) {
-  if (!recognition) {
-    showAlert('error', '음성 인식이 지원되지 않는 브라우저입니다');
-    return;
-  }
-
-  const question = currentQuestions[index];
-  const btn = event.target;
-
-  if (btn.classList.contains('recording')) {
-    // 녹음 중지
-    recognition.stop();
-    btn.classList.remove('recording');
-    btn.textContent = '🎙️ 음성으로 답변 연습';
-    return;
-  }
-
-  // 녹음 시작
-  btn.classList.add('recording');
-  btn.textContent = '⏸️ 녹음 중지 (답변하세요...)';
-
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    showAlert('success', `답변이 인식되었습니다: "${transcript.substring(0, 50)}..."`);
-
-    // 간단한 피드백
-    const wordCount = transcript.split(' ').length;
-    let feedback = '';
-    if (wordCount < 30) {
-      feedback = '💬 답변이 다소 짧습니다. 더 구체적으로 설명해보세요.';
-    } else if (wordCount > 100) {
-      feedback = '💬 답변이 다소 깁니다. 핵심만 간결하게 정리해보세요.';
-    } else {
-      feedback = '✅ 적절한 길이의 답변입니다!';
-    }
-
-    setTimeout(() => showAlert('success', feedback), 1000);
-  };
-
-  recognition.onerror = (event) => {
-    showAlert('error', '음성 인식 오류: ' + event.error);
-    btn.classList.remove('recording');
-    btn.textContent = '🎙️ 음성으로 답변 연습';
-  };
-
-  recognition.onend = () => {
-    btn.classList.remove('recording');
-    btn.textContent = '🎙️ 음성으로 답변 연습';
-  };
-
-  recognition.start();
-}
-
-// 알림 표시
-function showAlert(type, message) {
-  const alert = document.createElement('div');
-  alert.className = `alert ${type}`;
-  alert.textContent = message;
-  document.body.appendChild(alert);
-
-  setTimeout(() => {
-    alert.remove();
-  }, 5000);
-}
-</script>
+<!-- CTA Section -->
+<section class="cta">
+  <div class="container">
+    <h2>지금 바로 시작하세요!</h2>
+    <p>2027학년도 학생부종합 전형 면접을 완벽하게 준비하세요</p>
+    <a href="login.html" class="btn btn-primary">
+      <i data-lucide="rocket" style="width:20px; height:20px"></i>
+      무료로 시작하기
+    </a>
+  </div>
+</section>
 
 <!-- Footer -->
 <footer>
-  <div class="company-info">
-    <strong>JOBIZIC</strong><br>
-    대표: 박영철 | 사업자등록번호: 566-18-02615<br>
-    통신판매업 신고: 제2026-수원장안-0527호<br>
-    주소: 경기도 수원시 장안구 화산로 87, 404호<br>
-    이메일: support@jobizic.com
-  </div>
-
-
-  <div class="copyright">
-    © 2026 JOBIZIC. All rights reserved.
+  <div class="footer-content">
+    <div class="footer-links">
+      <a href="#features">서비스 소개</a>
+      <a href="login.html">로그인</a>
+      <a href="mailto:support@jobizic.com">문의하기</a>
+    </div>
+    <p style="opacity:0.7; margin-top:20px">
+      <strong>운영사:</strong> JOBIZIC |
+      <strong>사업자등록번호:</strong> 566-18-02615
+    </p>
+    <p style="opacity:0.5; margin-top:10px; font-size:14px">
+      © 2026 JOBIZIC. All rights reserved.
+    </p>
   </div>
 </footer>
-
-<!-- 맨 위로 가기 버튼 -->
-<button class="scroll-to-top" id="scrollToTop" title="맨 위로">
-  <i data-lucide="arrow-up" style="width:24px; height:24px"></i>
-</button>
-
-<!-- 자동 저장 인디케이터 -->
-<div class="autosave-indicator" id="autosaveIndicator">
-  <i data-lucide="save" style="width:14px; height:14px; vertical-align:-2px; margin-right:4px"></i>
-  <span id="autosaveText">저장됨</span>
-</div>
-
-<!-- 설정 모달 -->
-<div id="settingsModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>
-        <i data-lucide="settings" style="width:20px; height:20px"></i>
-        설정
-      </h2>
-      <button class="modal-close" id="closeModal">
-        <i data-lucide="x" style="width:20px; height:20px"></i>
-      </button>
-    </div>
-
-    <!-- API Key 입력 -->
-    <div id="apiKeyBox">
-      <h3 style="margin-bottom:10px; font-size:16px; display:flex; align-items:center; gap:6px">
-        <i data-lucide="key" style="width:18px; height:18px"></i>
-        Claude API 키
-      </h3>
-      <p style="font-size:13px; color:#666; margin-bottom:10px">
-        Anthropic Claude API 키를 입력하세요.
-        (<a href="https://console.anthropic.com" target="_blank" style="color:#667eea">console.anthropic.com</a>에서 발급)
-      </p>
-      <input
-        type="password"
-        id="apiKey"
-        placeholder="sk-ant-api03-..."
-        autocomplete="off"
-        style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:14px; margin:10px 0"
-      />
-      <small style="color:#666; font-size:12px">
-        ※ API 키는 브라우저에만 저장되며 외부로 전송되지 않습니다
-      </small>
-      <button id="saveApiKey">
-        저장
-      </button>
-    </div>
-  </div>
-</div>
 
 <script>
   // Lucide 아이콘 초기화
   lucide.createIcons();
-
-  // 설정 모달 관리
-  const settingsBtn = document.getElementById('settingsBtn');
-  const settingsModal = document.getElementById('settingsModal');
-  const closeModal = document.getElementById('closeModal');
-  const saveApiKeyBtn = document.getElementById('saveApiKey');
-  const apiKeyInput = document.getElementById('apiKey');
-  const apiStatus = document.getElementById('apiStatus');
-
-  // API 키 상태 업데이트
-  function updateApiKeyStatus() {
-    const savedKey = localStorage.getItem('anthropicApiKey');
-    if (savedKey && savedKey.trim()) {
-      apiStatus.className = 'api-status configured';
-      apiStatus.innerHTML = `
-        <i data-lucide="check-circle" style="width:16px; height:16px"></i>
-        <span>Claude API 키가 설정되었습니다.</span>
-      `;
-    } else {
-      apiStatus.className = 'api-status not-configured';
-      apiStatus.innerHTML = `
-        <i data-lucide="alert-circle" style="width:16px; height:16px"></i>
-        <span>Claude API 키가 설정되지 않았습니다. 우상단 <strong>⚙️ 설정</strong> 버튼을 클릭하여 API 키를 입력하세요.</span>
-      `;
-    }
-    lucide.createIcons(); // 아이콘 다시 렌더링
-  }
-
-  // 설정 모달 열기
-  settingsBtn.addEventListener('click', () => {
-    const savedKey = localStorage.getItem('anthropicApiKey');
-    if (savedKey) {
-      apiKeyInput.value = savedKey;
-    }
-    settingsModal.classList.add('show');
-    lucide.createIcons(); // 모달 내 아이콘 렌더링
-  });
-
-  // 설정 모달 닫기
-  closeModal.addEventListener('click', () => {
-    settingsModal.classList.remove('show');
-  });
-
-  // 배경 클릭 시 닫기
-  settingsModal.addEventListener('click', (e) => {
-    if (e.target === settingsModal) {
-      settingsModal.classList.remove('show');
-    }
-  });
-
-  // API 키 저장
-  saveApiKeyBtn.addEventListener('click', () => {
-    const apiKey = apiKeyInput.value.trim();
-    if (!apiKey) {
-      alert('API 키를 입력해주세요.');
-      return;
-    }
-    if (!apiKey.startsWith('sk-ant-')) {
-      alert('올바른 Anthropic API 키 형식이 아닙니다. (sk-ant-로 시작해야 함)');
-      return;
-    }
-    localStorage.setItem('anthropicApiKey', apiKey);
-    updateApiKeyStatus();
-    settingsModal.classList.remove('show');
-    alert('✅ API 키가 저장되었습니다!');
-  });
-
-  // 페이지 로드 시 상태 업데이트
-  updateApiKeyStatus();
-
-  // ========== UX 개선 기능 ==========
-
-  // 맨 위로 가기 버튼
-  const scrollToTopBtn = document.getElementById('scrollToTop');
-
-  window.addEventListener('scroll', () => {
-    if (window.pageYOffset > 300) {
-      scrollToTopBtn.classList.add('show');
-    } else {
-      scrollToTopBtn.classList.remove('show');
-    }
-  });
-
-  scrollToTopBtn.addEventListener('click', () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  });
-
-  // 자동 저장 기능
-  let autosaveTimeout;
-  const autosaveIndicator = document.getElementById('autosaveIndicator');
-  const autosaveText = document.getElementById('autosaveText');
-
-  function showAutosave(message = '저장됨') {
-    autosaveText.textContent = message;
-    autosaveIndicator.classList.add('show');
-    setTimeout(() => {
-      autosaveIndicator.classList.remove('show');
-    }, 2000);
-  }
-
-  function autoSave(key, value) {
-    clearTimeout(autosaveTimeout);
-    autosaveTimeout = setTimeout(() => {
-      localStorage.setItem(key, value);
-      showAutosave('자동 저장됨');
-    }, 1000);
-  }
-
-  // 학생부 입력 자동 저장 및 글자 수 카운터
-  const recordTextarea = document.getElementById('record');
-  const charCount = document.getElementById('charCount');
-
-  function updateCharCount() {
-    const count = recordTextarea.value.length;
-    charCount.textContent = `${count}자`;
-
-    if (count < 100) {
-      charCount.style.color = '#c0392b';
-    } else if (count < 500) {
-      charCount.style.color = '#ff9800';
-    } else {
-      charCount.style.color = '#27ae60';
-    }
-  }
-
-  if (recordTextarea) {
-    // 저장된 내용 복원
-    const savedRecord = localStorage.getItem('draft_record');
-    if (savedRecord) {
-      recordTextarea.value = savedRecord;
-      updateCharCount();
-      showAutosave('이전 작성 내용 복원됨');
-    }
-
-    recordTextarea.addEventListener('input', (e) => {
-      autoSave('draft_record', e.target.value);
-      updateCharCount();
-    });
-
-    // 초기 카운트 업데이트
-    updateCharCount();
-  }
-
-  // 대학/학과/전형 선택 자동 저장
-  ['university', 'department', 'admission', 'questionCount'].forEach(id => {
-    const element = document.getElementById(id);
-    if (element) {
-      const saved = localStorage.getItem(`draft_${id}`);
-      if (saved) {
-        element.value = saved;
-        if (id === 'university') updateDepartmentOptions();
-        if (id === 'department') updateAdmissionOptions();
-      }
-
-      element.addEventListener('change', (e) => {
-        localStorage.setItem(`draft_${id}`, e.target.value);
-      });
-    }
-  });
-
-  // 개선된 토스트 알림
-  let toastContainer = null;
-
-  function showToast(type, message) {
-    if (!toastContainer) {
-      toastContainer = document.createElement('div');
-      toastContainer.className = 'toast-container';
-      document.body.appendChild(toastContainer);
-    }
-
-    const icons = {
-      success: '✓',
-      error: '✕',
-      info: 'ⓘ'
-    };
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-      <span class="toast-icon">${icons[type] || 'ⓘ'}</span>
-      <span class="toast-message">${message}</span>
-    `;
-
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.animation = 'toastSlide 0.3s ease-out reverse';
-      setTimeout(() => {
-        toastContainer.removeChild(toast);
-      }, 300);
-    }, 3000);
-  }
-
-  // 기존 showAlert를 showToast로 리다이렉트
-  const originalShowAlert = window.showAlert;
-  window.showAlert = function(type, message) {
-    showToast(type, message);
-  };
-
-  // 북마크 기능 (질문)
-  let bookmarkedQuestions = JSON.parse(localStorage.getItem('bookmarked_questions') || '[]');
-
-  window.toggleBookmark = function(index) {
-    const bookmarkIndex = bookmarkedQuestions.indexOf(index);
-    if (bookmarkIndex > -1) {
-      bookmarkedQuestions.splice(bookmarkIndex, 1);
-      showToast('info', '북마크가 제거되었습니다');
-    } else {
-      bookmarkedQuestions.push(index);
-      showToast('success', '북마크에 추가되었습니다');
-    }
-    localStorage.setItem('bookmarked_questions', JSON.stringify(bookmarkedQuestions));
-
-    // 버튼 상태 업데이트
-    const btn = event.target.closest('.bookmark-btn');
-    if (btn) {
-      btn.classList.toggle('active');
-      btn.textContent = btn.classList.contains('active') ? '★' : '☆';
-    }
-
-    // 북마크 필터 카운트 업데이트
-    const bookmarkTab = Array.from(document.querySelectorAll('.filter-tab')).find(tab => tab.textContent.includes('북마크'));
-    if (bookmarkTab) {
-      bookmarkTab.textContent = `★ 북마크 (${bookmarkedQuestions.length})`;
-    }
-
-    // 현재 북마크 필터 적용 중이면 필터 다시 적용
-    if (currentFilter === '북마크') {
-      applyFilter();
-    }
-  };
-
-  // 프로그레스 바 표시
-  window.showProgress = function(message) {
-    const resultContainer = document.getElementById('resultContainer');
-    resultContainer.className = 'fade-in';
-    resultContainer.innerHTML = `
-      <div class="progress-container">
-        <h3 style="color:#667eea; margin-bottom:10px; text-align:center">
-          <i data-lucide="sparkles" style="width:20px; height:20px; vertical-align:-3px; margin-right:6px"></i>
-          ${message || 'AI가 면접 질문을 생성하고 있습니다'}
-        </h3>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <div class="progress-text" id="progressText">분석 시작...</div>
-
-        <div style="margin-top:20px; padding:15px; background:#f8f9fa; border-radius:8px">
-          <p style="font-size:13px; color:#666; text-align:center; margin:0">
-            💡 질문 개수에 따라 30초~2분 정도 소요됩니다
-          </p>
-        </div>
-      </div>
-    `;
-    lucide.createIcons();
-
-    // 프로그레스 애니메이션
-    let progress = 0;
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
-
-    const steps = [
-      { percent: 20, text: '학생부 분석 중...' },
-      { percent: 40, text: '학과 특성 파악 중...' },
-      { percent: 60, text: '질문 생성 중...' },
-      { percent: 80, text: '답변 가이드 작성 중...' },
-      { percent: 95, text: '최종 검토 중...' }
-    ];
-
-    let stepIndex = 0;
-    const interval = setInterval(() => {
-      if (stepIndex < steps.length) {
-        progress = steps[stepIndex].percent;
-        progressFill.style.width = progress + '%';
-        progressText.textContent = steps[stepIndex].text;
-        stepIndex++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 3000);
-
-    return interval;
-  };
-
-  // 키보드 단축키
-  document.addEventListener('keydown', (e) => {
-    // Ctrl/Cmd + S: 자동 저장 트리거
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-      e.preventDefault();
-      const record = document.getElementById('record').value;
-      localStorage.setItem('draft_record', record);
-      showToast('success', '저장되었습니다');
-    }
-
-    // ESC: 모달 닫기
-    if (e.key === 'Escape') {
-      const modal = document.getElementById('settingsModal');
-      if (modal.classList.contains('show')) {
-        modal.classList.remove('show');
-      }
-    }
-  });
-
-  // 페이지 떠나기 전 경고 (작성 중인 경우)
-  window.addEventListener('beforeunload', (e) => {
-    const record = document.getElementById('record').value;
-    if (record && record.length > 100 && !localStorage.getItem('draft_record')) {
-      e.preventDefault();
-      e.returnValue = '작성 중인 내용이 있습니다. 정말 나가시겠습니까?';
-    }
-  });
-
-  // 결과 생성 시 임시 저장 지우기
-  const originalDisplayResult = window.displayResult;
-  if (originalDisplayResult) {
-    window.displayResult = function(...args) {
-      localStorage.removeItem('draft_record');
-      return originalDisplayResult.apply(this, args);
-    };
-  }
 </script>
 
 </body>

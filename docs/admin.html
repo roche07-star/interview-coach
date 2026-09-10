@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>관리자 페이지 | 2027 대입 AI 면접코치</title>
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  background: #f5f5f5;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header h1 {
+  font-size: 24px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.user-info {
+  font-size: 14px;
+  color: #666;
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border-radius: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+}
+
+.btn-secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.btn-secondary:hover {
+  background: #f8f9fa;
+}
+
+.btn-danger {
+  background: #c0392b;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #a93226;
+}
+
+/* Main Content */
+.main-content {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 24px;
+}
+
+/* Sidebar */
+.sidebar {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  height: fit-content;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-item {
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #666;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  background: #f8f9fa;
+  color: #667eea;
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+/* Content Area */
+.content-area {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.content-header {
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content-header h2 {
+  font-size: 28px;
+  color: #333;
+}
+
+/* User Management */
+.user-form {
+  background: #f8f9fa;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.user-table thead {
+  background: #f8f9fa;
+}
+
+.user-table th,
+.user-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.user-table th {
+  font-weight: 600;
+  color: #333;
+}
+
+.user-table td {
+  color: #666;
+}
+
+.user-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-admin {
+  background: #667eea;
+  color: white;
+}
+
+.badge-user {
+  background: #e0e0e0;
+  color: #666;
+}
+
+.action-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.alert {
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: none;
+}
+
+.alert.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.alert.show {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-table {
+    font-size: 13px;
+  }
+
+  .user-table th,
+  .user-table td {
+    padding: 12px 8px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>
+      <i data-lucide="shield" style="width:28px; height:28px; color:#667eea"></i>
+      관리자 페이지
+    </h1>
+    <div class="header-actions">
+      <span class="user-info" id="userInfo"></span>
+      <a href="app.html" class="btn btn-secondary">
+        <i data-lucide="layout-dashboard" style="width:16px; height:16px"></i>
+        메인 페이지
+      </a>
+      <button class="btn btn-danger" id="logoutBtn">
+        <i data-lucide="log-out" style="width:16px; height:16px"></i>
+        로그아웃
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <nav>
+        <div class="nav-item active" data-tab="users">
+          <i data-lucide="users" style="width:18px; height:18px"></i>
+          사용자 관리
+        </div>
+        <div class="nav-item" data-tab="stats">
+          <i data-lucide="bar-chart" style="width:18px; height:18px"></i>
+          통계 (준비 중)
+        </div>
+        <div class="nav-item" data-tab="settings">
+          <i data-lucide="settings" style="width:18px; height:18px"></i>
+          설정 (준비 중)
+        </div>
+      </nav>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <div id="alert" class="alert"></div>
+
+      <!-- Users Tab -->
+      <div id="tab-users" class="tab-content">
+        <div class="content-header">
+          <h2>사용자 관리</h2>
+        </div>
+
+        <!-- Add User Form -->
+        <div class="user-form">
+          <h3 style="margin-bottom:20px; font-size:18px">새 사용자 추가</h3>
+          <form id="addUserForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>이메일 <span style="color:#c0392b">*</span></label>
+                <input type="email" id="newEmail" placeholder="user@example.com" required>
+              </div>
+              <div class="form-group">
+                <label>비밀번호 <span style="color:#c0392b">*</span></label>
+                <input type="text" id="newPassword" placeholder="최소 4자 이상" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>권한</label>
+              <select id="newRole">
+                <option value="user">일반 사용자</option>
+                <option value="admin">관리자</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i data-lucide="user-plus" style="width:16px; height:16px"></i>
+              사용자 추가
+            </button>
+          </form>
+        </div>
+
+        <!-- User List -->
+        <div>
+          <h3 style="margin-bottom:16px; font-size:18px">등록된 사용자 (<span id="userCount">0</span>명)</h3>
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th>이메일</th>
+                <th>권한</th>
+                <th>등록일</th>
+                <th>작업</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Stats Tab -->
+      <div id="tab-stats" class="tab-content" style="display:none">
+        <div class="content-header">
+          <h2>통계</h2>
+        </div>
+        <p style="color:#999; text-align:center; padding:60px 0">준비 중입니다...</p>
+      </div>
+
+      <!-- Settings Tab -->
+      <div id="tab-settings" class="tab-content" style="display:none">
+        <div class="content-header">
+          <h2>설정</h2>
+        </div>
+        <p style="color:#999; text-align:center; padding:60px 0">준비 중입니다...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Lucide 아이콘 초기화
+  lucide.createIcons();
+
+  // 로그인 체크
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  if (!currentUser || currentUser.role !== 'admin') {
+    window.location.href = 'login.html';
+  }
+
+  // 사용자 정보 표시
+  document.getElementById('userInfo').textContent = currentUser.email;
+
+  // 알림 함수
+  function showAlert(type, message) {
+    const alert = document.getElementById('alert');
+    alert.className = `alert ${type} show`;
+    alert.textContent = message;
+    setTimeout(() => {
+      alert.classList.remove('show');
+    }, 5000);
+  }
+
+  // 사용자 목록 로드
+  function loadUsers() {
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const tbody = document.getElementById('userTableBody');
+    const userCount = document.getElementById('userCount');
+
+    tbody.innerHTML = '';
+    const userList = Object.values(users);
+    userCount.textContent = userList.length;
+
+    userList.forEach(user => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${user.email}</td>
+        <td>
+          <span class="badge ${user.role === 'admin' ? 'badge-admin' : 'badge-user'}">
+            ${user.role === 'admin' ? '관리자' : '일반 사용자'}
+          </span>
+        </td>
+        <td>${new Date(user.createdAt).toLocaleDateString('ko-KR')}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-secondary btn-sm" onclick="editUser('${user.email}')">
+              <i data-lucide="edit-2" style="width:12px; height:12px"></i>
+              수정
+            </button>
+            ${user.email !== 'roche07m@gmail.com' ? `
+              <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.email}')">
+                <i data-lucide="trash-2" style="width:12px; height:12px"></i>
+                삭제
+              </button>
+            ` : ''}
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    lucide.createIcons();
+  }
+
+  // 사용자 추가
+  document.getElementById('addUserForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('newEmail').value.trim();
+    const password = document.getElementById('newPassword').value;
+    const role = document.getElementById('newRole').value;
+
+    if (!email || !password) {
+      showAlert('error', '이메일과 비밀번호를 입력해주세요.');
+      return;
+    }
+
+    if (password.length < 4) {
+      showAlert('error', '비밀번호는 최소 4자 이상이어야 합니다.');
+      return;
+    }
+
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+
+    if (users[email]) {
+      showAlert('error', '이미 등록된 이메일입니다.');
+      return;
+    }
+
+    users[email] = {
+      email: email,
+      password: password,
+      role: role,
+      createdAt: new Date().toISOString()
+    };
+
+    localStorage.setItem('users', JSON.stringify(users));
+    showAlert('success', '사용자가 추가되었습니다.');
+
+    // 폼 초기화
+    document.getElementById('addUserForm').reset();
+    loadUsers();
+  });
+
+  // 사용자 수정
+  window.editUser = function(email) {
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const user = users[email];
+
+    if (!user) return;
+
+    const newPassword = prompt(`${email}의 새 비밀번호를 입력하세요:`, user.password);
+    if (newPassword === null) return;
+
+    if (newPassword.length < 4) {
+      showAlert('error', '비밀번호는 최소 4자 이상이어야 합니다.');
+      return;
+    }
+
+    user.password = newPassword;
+    localStorage.setItem('users', JSON.stringify(users));
+    showAlert('success', '비밀번호가 변경되었습니다.');
+    loadUsers();
+  };
+
+  // 사용자 삭제
+  window.deleteUser = function(email) {
+    if (!confirm(`${email} 사용자를 삭제하시겠습니까?`)) return;
+
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    delete users[email];
+    localStorage.setItem('users', JSON.stringify(users));
+    showAlert('success', '사용자가 삭제되었습니다.');
+    loadUsers();
+  };
+
+  // 탭 전환
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const tab = item.dataset.tab;
+
+      // 활성 탭 변경
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+
+      // 탭 콘텐츠 표시
+      document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+      document.getElementById(`tab-${tab}`).style.display = 'block';
+    });
+  });
+
+  // 로그아웃
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    if (confirm('로그아웃하시겠습니까?')) {
+      localStorage.removeItem('currentUser');
+      window.location.href = 'login.html';
+    }
+  });
+
+  // 초기 로드
+  loadUsers();
+</script>
+
+</body>
+</html>
