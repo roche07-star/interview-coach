@@ -25,6 +25,138 @@ body {
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.settings-btn {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  background: #667eea;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(102,126,234,0.3);
+}
+
+.settings-btn:hover {
+  background: #764ba2;
+  transform: rotate(90deg);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.modal-header h2 {
+  font-size: 20px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.api-status {
+  background: #f0f4ff;
+  border-left: 4px solid #667eea;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.api-status.configured {
+  background: #e8f5e9;
+  border-left-color: #4caf50;
+  color: #2e7d32;
+}
+
+.api-status.not-configured {
+  background: #fff3cd;
+  border-left-color: #ff9800;
+  color: #e65100;
+}
+
+#saveApiKey {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#saveApiKey:hover {
+  background: #764ba2;
 }
 
 h1 {
@@ -347,6 +479,11 @@ footer .copyright {
 <body>
 
 <div class="container">
+  <!-- 설정 버튼 -->
+  <button class="settings-btn" id="settingsBtn" title="설정">
+    <i data-lucide="settings" style="width:20px; height:20px"></i>
+  </button>
+
   <h1><i data-lucide="graduation-cap" style="width:32px; height:32px; vertical-align:-6px; margin-right:8px"></i>2027 대입 AI 면접코치</h1>
   <p class="subtitle">학생부종합 전형 면접 완벽 대비 | 전 학과 지원 (간호학과 제외)</p>
 
@@ -375,22 +512,10 @@ footer .copyright {
     실제 면접 결과는 대학 평가위원회가 결정하며, 본 서비스는 합격을 보장하지 않습니다.
   </div>
 
-  <!-- API Key 입력 -->
-  <div id="apiKeyBox">
-    <h3 style="margin-bottom:10px"><i data-lucide="key" style="width:18px; height:18px; vertical-align:-3px; margin-right:6px"></i>Claude API 키 입력</h3>
-    <p style="font-size:13px; color:#666; margin-bottom:10px">
-      Anthropic Claude API 키를 입력하세요.
-      (<a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>에서 발급)
-    </p>
-    <input
-      type="password"
-      id="apiKey"
-      placeholder="sk-ant-api03-..."
-      autocomplete="off"
-    />
-    <small style="color:#666">
-      ※ API 키는 브라우저에만 저장되며 외부로 전송되지 않습니다
-    </small>
+  <!-- API 키 상태 -->
+  <div id="apiStatus" class="api-status not-configured">
+    <i data-lucide="alert-circle" style="width:16px; height:16px"></i>
+    <span>Claude API 키가 설정되지 않았습니다. 우상단 <strong>⚙️ 설정</strong> 버튼을 클릭하여 API 키를 입력하세요.</span>
   </div>
 
   <!-- 대학/학과/전형 선택 -->
@@ -842,7 +967,7 @@ function updateAdmissions(universityName) {
 
 // 분석 시작
 async function startAnalysis() {
-  const apiKey = document.getElementById('apiKey').value.trim();
+  const apiKey = localStorage.getItem('anthropicApiKey') || '';
   const university = document.getElementById('university').value;
   const department = document.getElementById('department').value === '직접입력'
     ? document.getElementById('departmentCustom').value.trim()
@@ -852,7 +977,7 @@ async function startAnalysis() {
 
   // 유효성 검사
   if (!apiKey) {
-    showAlert('error', '⚠️ Claude API 키를 입력해주세요');
+    showAlert('error', '⚠️ Claude API 키를 설정해주세요. 우상단 ⚙️ 설정 버튼을 클릭하세요.');
     return;
   }
 
@@ -1145,9 +1270,118 @@ function showAlert(type, message) {
   </div>
 </footer>
 
+<!-- 설정 모달 -->
+<div id="settingsModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>
+        <i data-lucide="settings" style="width:20px; height:20px"></i>
+        설정
+      </h2>
+      <button class="modal-close" id="closeModal">
+        <i data-lucide="x" style="width:20px; height:20px"></i>
+      </button>
+    </div>
+
+    <!-- API Key 입력 -->
+    <div id="apiKeyBox">
+      <h3 style="margin-bottom:10px; font-size:16px; display:flex; align-items:center; gap:6px">
+        <i data-lucide="key" style="width:18px; height:18px"></i>
+        Claude API 키
+      </h3>
+      <p style="font-size:13px; color:#666; margin-bottom:10px">
+        Anthropic Claude API 키를 입력하세요.
+        (<a href="https://console.anthropic.com" target="_blank" style="color:#667eea">console.anthropic.com</a>에서 발급)
+      </p>
+      <input
+        type="password"
+        id="apiKey"
+        placeholder="sk-ant-api03-..."
+        autocomplete="off"
+        style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:14px; margin:10px 0"
+      />
+      <small style="color:#666; font-size:12px">
+        ※ API 키는 브라우저에만 저장되며 외부로 전송되지 않습니다
+      </small>
+      <button id="saveApiKey">
+        저장
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
   // Lucide 아이콘 초기화
   lucide.createIcons();
+
+  // 설정 모달 관리
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsModal = document.getElementById('settingsModal');
+  const closeModal = document.getElementById('closeModal');
+  const saveApiKeyBtn = document.getElementById('saveApiKey');
+  const apiKeyInput = document.getElementById('apiKey');
+  const apiStatus = document.getElementById('apiStatus');
+
+  // API 키 상태 업데이트
+  function updateApiKeyStatus() {
+    const savedKey = localStorage.getItem('anthropicApiKey');
+    if (savedKey && savedKey.trim()) {
+      apiStatus.className = 'api-status configured';
+      apiStatus.innerHTML = `
+        <i data-lucide="check-circle" style="width:16px; height:16px"></i>
+        <span>Claude API 키가 설정되었습니다.</span>
+      `;
+    } else {
+      apiStatus.className = 'api-status not-configured';
+      apiStatus.innerHTML = `
+        <i data-lucide="alert-circle" style="width:16px; height:16px"></i>
+        <span>Claude API 키가 설정되지 않았습니다. 우상단 <strong>⚙️ 설정</strong> 버튼을 클릭하여 API 키를 입력하세요.</span>
+      `;
+    }
+    lucide.createIcons(); // 아이콘 다시 렌더링
+  }
+
+  // 설정 모달 열기
+  settingsBtn.addEventListener('click', () => {
+    const savedKey = localStorage.getItem('anthropicApiKey');
+    if (savedKey) {
+      apiKeyInput.value = savedKey;
+    }
+    settingsModal.classList.add('show');
+    lucide.createIcons(); // 모달 내 아이콘 렌더링
+  });
+
+  // 설정 모달 닫기
+  closeModal.addEventListener('click', () => {
+    settingsModal.classList.remove('show');
+  });
+
+  // 배경 클릭 시 닫기
+  settingsModal.addEventListener('click', (e) => {
+    if (e.target === settingsModal) {
+      settingsModal.classList.remove('show');
+    }
+  });
+
+  // API 키 저장
+  saveApiKeyBtn.addEventListener('click', () => {
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) {
+      alert('API 키를 입력해주세요.');
+      return;
+    }
+    if (!apiKey.startsWith('sk-ant-')) {
+      alert('올바른 Anthropic API 키 형식이 아닙니다. (sk-ant-로 시작해야 함)');
+      return;
+    }
+    localStorage.setItem('anthropicApiKey', apiKey);
+    updateApiKeyStatus();
+    settingsModal.classList.remove('show');
+    alert('✅ API 키가 저장되었습니다!');
+  });
+
+  // 페이지 로드 시 상태 업데이트
+  updateApiKeyStatus();
 </script>
 
 </body>
