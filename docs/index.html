@@ -10,12 +10,24 @@
 
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   padding: 20px;
   line-height: 1.6;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
 }
 
 .container {
@@ -466,6 +478,285 @@ h1 {
   background: #229954;
 }
 
+/* 프로그레스 바 */
+.progress-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  width: 0%;
+  transition: width 0.3s ease;
+  animation: progressShine 1.5s infinite;
+}
+
+@keyframes progressShine {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+.progress-text {
+  text-align: center;
+  color: #667eea;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* 맨 위로 가기 버튼 */
+.scroll-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  background: #667eea;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  z-index: 999;
+}
+
+.scroll-to-top.show {
+  display: flex;
+}
+
+.scroll-to-top:hover {
+  background: #764ba2;
+  transform: translateY(-5px);
+}
+
+/* 북마크 버튼 */
+.bookmark-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  font-size: 20px;
+  transition: color 0.2s;
+  margin-left: 10px;
+}
+
+.bookmark-btn.active {
+  color: #ff9800;
+}
+
+.bookmark-btn:hover {
+  color: #ff9800;
+}
+
+/* 자동 저장 인디케이터 */
+.autosave-indicator {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 20px;
+  font-size: 12px;
+  color: #666;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 998;
+}
+
+.autosave-indicator.show {
+  opacity: 1;
+}
+
+/* 스켈레톤 로딩 */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-line {
+  height: 16px;
+  margin: 10px 0;
+}
+
+/* 개선된 토스트 */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.toast {
+  background: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: toastSlide 0.3s ease-out;
+  border-left: 4px solid #667eea;
+}
+
+@keyframes toastSlide {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast.success {
+  border-left-color: #27ae60;
+}
+
+.toast.error {
+  border-left-color: #c0392b;
+}
+
+.toast.info {
+  border-left-color: #667eea;
+}
+
+.toast-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+/* 툴팁 */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background: #333;
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .settings-btn {
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .filter-tabs {
+    flex-direction: column;
+  }
+
+  .filter-tab {
+    width: 100%;
+  }
+
+  .scroll-to-top {
+    bottom: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+  }
+
+  .toast-container {
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .autosave-indicator {
+    left: 10px;
+    bottom: 20px;
+  }
+}
+
+/* 포커스 스타일 개선 */
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* 버튼 클릭 피드백 */
+button:active {
+  transform: scale(0.98);
+}
+
+/* 부드러운 전환 */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .voice-practice {
   margin-top: 20px;
   padding: 20px;
@@ -784,6 +1075,10 @@ footer .copyright {
 - 토론 활동 참여
 "
     ></textarea>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px">
+      <small style="color:#666">💡 최소 100자 이상 입력하세요</small>
+      <small id="charCount" style="color:#667eea; font-weight:600">0자</small>
+    </div>
   </div>
 
   <!-- 분석 시작 버튼 -->
@@ -1143,10 +1438,8 @@ async function startAnalysis() {
   btn.disabled = true;
   btn.textContent = '분석 중...';
 
-  // 로딩 표시
-  const resultContainer = document.getElementById('resultContainer');
-  resultContainer.className = '';
-  resultContainer.innerHTML = '<div class="loading">AI가 면접 예상 질문을 생성하고 있습니다</div>';
+  // 프로그레스 바 표시
+  const progressInterval = showProgress(`${questionCount}개 질문 생성 중`);
 
   try {
     // Claude API 호출
@@ -1201,6 +1494,8 @@ async function startAnalysis() {
 
   } catch (error) {
     console.error(error);
+    clearInterval(progressInterval);
+    const resultContainer = document.getElementById('resultContainer');
     resultContainer.innerHTML = `
       <div class="warning-box">
         <strong>❌ 오류 발생:</strong> ${error.message}
@@ -1210,6 +1505,7 @@ async function startAnalysis() {
     `;
     showAlert('error', '분석 중 오류가 발생했습니다');
   } finally {
+    clearInterval(progressInterval);
     btn.disabled = false;
     btn.textContent = '🎯 면접 예상 질문 생성';
   }
@@ -1359,6 +1655,7 @@ function displayResult(result, university, department, admission) {
         <!-- 카테고리 필터 -->
         <div class="filter-tabs">
           <button class="filter-tab active" onclick="filterByCategory('전체')">전체 (${currentQuestions.length})</button>
+          <button class="filter-tab" onclick="filterByCategory('북마크')">★ 북마크 (${bookmarkedQuestions.length})</button>
           <button class="filter-tab" onclick="filterByCategory('전공적합성')">전공적합성 (${currentQuestions.filter(q => q.category === '전공적합성').length})</button>
           <button class="filter-tab" onclick="filterByCategory('학업역량')">학업역량 (${currentQuestions.filter(q => q.category === '학업역량').length})</button>
           <button class="filter-tab" onclick="filterByCategory('인성')">인성 (${currentQuestions.filter(q => q.category === '인성').length})</button>
@@ -1385,7 +1682,12 @@ function displayResult(result, university, department, admission) {
 function renderQuestions(questions) {
   return questions.map((q, i) => `
     <li class="question-item" data-category="${q.category || '일반'}" data-index="${i}">
-      <strong>${q.category || '일반'}</strong>
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <strong>${q.category || '일반'}</strong>
+        <button class="bookmark-btn ${bookmarkedQuestions.includes(i) ? 'active' : ''}" onclick="toggleBookmark(${i})" title="북마크">
+          ${bookmarkedQuestions.includes(i) ? '★' : '☆'}
+        </button>
+      </div>
       <p><strong>Q${i+1}.</strong> ${q.question}</p>
 
       ${q.answer || q.guidance ? `
@@ -1446,9 +1748,18 @@ function applyFilter() {
 
   items.forEach(item => {
     const category = item.dataset.category;
+    const index = parseInt(item.dataset.index);
     const text = item.textContent.toLowerCase();
 
-    const matchCategory = currentFilter === '전체' || category === currentFilter;
+    let matchCategory;
+    if (currentFilter === '전체') {
+      matchCategory = true;
+    } else if (currentFilter === '북마크') {
+      matchCategory = bookmarkedQuestions.includes(index);
+    } else {
+      matchCategory = category === currentFilter;
+    }
+
     const matchSearch = !searchQuery || text.includes(searchQuery);
 
     if (matchCategory && matchSearch) {
@@ -1687,6 +1998,17 @@ function showAlert(type, message) {
   </div>
 </footer>
 
+<!-- 맨 위로 가기 버튼 -->
+<button class="scroll-to-top" id="scrollToTop" title="맨 위로">
+  <i data-lucide="arrow-up" style="width:24px; height:24px"></i>
+</button>
+
+<!-- 자동 저장 인디케이터 -->
+<div class="autosave-indicator" id="autosaveIndicator">
+  <i data-lucide="save" style="width:14px; height:14px; vertical-align:-2px; margin-right:4px"></i>
+  <span id="autosaveText">저장됨</span>
+</div>
+
 <!-- 설정 모달 -->
 <div id="settingsModal" class="modal">
   <div class="modal-content">
@@ -1799,6 +2121,260 @@ function showAlert(type, message) {
 
   // 페이지 로드 시 상태 업데이트
   updateApiKeyStatus();
+
+  // ========== UX 개선 기능 ==========
+
+  // 맨 위로 가기 버튼
+  const scrollToTopBtn = document.getElementById('scrollToTop');
+
+  window.addEventListener('scroll', () => {
+    if (window.pageYOffset > 300) {
+      scrollToTopBtn.classList.add('show');
+    } else {
+      scrollToTopBtn.classList.remove('show');
+    }
+  });
+
+  scrollToTopBtn.addEventListener('click', () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+
+  // 자동 저장 기능
+  let autosaveTimeout;
+  const autosaveIndicator = document.getElementById('autosaveIndicator');
+  const autosaveText = document.getElementById('autosaveText');
+
+  function showAutosave(message = '저장됨') {
+    autosaveText.textContent = message;
+    autosaveIndicator.classList.add('show');
+    setTimeout(() => {
+      autosaveIndicator.classList.remove('show');
+    }, 2000);
+  }
+
+  function autoSave(key, value) {
+    clearTimeout(autosaveTimeout);
+    autosaveTimeout = setTimeout(() => {
+      localStorage.setItem(key, value);
+      showAutosave('자동 저장됨');
+    }, 1000);
+  }
+
+  // 학생부 입력 자동 저장 및 글자 수 카운터
+  const recordTextarea = document.getElementById('record');
+  const charCount = document.getElementById('charCount');
+
+  function updateCharCount() {
+    const count = recordTextarea.value.length;
+    charCount.textContent = `${count}자`;
+
+    if (count < 100) {
+      charCount.style.color = '#c0392b';
+    } else if (count < 500) {
+      charCount.style.color = '#ff9800';
+    } else {
+      charCount.style.color = '#27ae60';
+    }
+  }
+
+  if (recordTextarea) {
+    // 저장된 내용 복원
+    const savedRecord = localStorage.getItem('draft_record');
+    if (savedRecord) {
+      recordTextarea.value = savedRecord;
+      updateCharCount();
+      showAutosave('이전 작성 내용 복원됨');
+    }
+
+    recordTextarea.addEventListener('input', (e) => {
+      autoSave('draft_record', e.target.value);
+      updateCharCount();
+    });
+
+    // 초기 카운트 업데이트
+    updateCharCount();
+  }
+
+  // 대학/학과/전형 선택 자동 저장
+  ['university', 'department', 'admission', 'questionCount'].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      const saved = localStorage.getItem(`draft_${id}`);
+      if (saved) {
+        element.value = saved;
+        if (id === 'university') updateDepartmentOptions();
+        if (id === 'department') updateAdmissionOptions();
+      }
+
+      element.addEventListener('change', (e) => {
+        localStorage.setItem(`draft_${id}`, e.target.value);
+      });
+    }
+  });
+
+  // 개선된 토스트 알림
+  let toastContainer = null;
+
+  function showToast(type, message) {
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.className = 'toast-container';
+      document.body.appendChild(toastContainer);
+    }
+
+    const icons = {
+      success: '✓',
+      error: '✕',
+      info: 'ⓘ'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+      <span class="toast-icon">${icons[type] || 'ⓘ'}</span>
+      <span class="toast-message">${message}</span>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'toastSlide 0.3s ease-out reverse';
+      setTimeout(() => {
+        toastContainer.removeChild(toast);
+      }, 300);
+    }, 3000);
+  }
+
+  // 기존 showAlert를 showToast로 리다이렉트
+  const originalShowAlert = window.showAlert;
+  window.showAlert = function(type, message) {
+    showToast(type, message);
+  };
+
+  // 북마크 기능 (질문)
+  let bookmarkedQuestions = JSON.parse(localStorage.getItem('bookmarked_questions') || '[]');
+
+  window.toggleBookmark = function(index) {
+    const bookmarkIndex = bookmarkedQuestions.indexOf(index);
+    if (bookmarkIndex > -1) {
+      bookmarkedQuestions.splice(bookmarkIndex, 1);
+      showToast('info', '북마크가 제거되었습니다');
+    } else {
+      bookmarkedQuestions.push(index);
+      showToast('success', '북마크에 추가되었습니다');
+    }
+    localStorage.setItem('bookmarked_questions', JSON.stringify(bookmarkedQuestions));
+
+    // 버튼 상태 업데이트
+    const btn = event.target.closest('.bookmark-btn');
+    if (btn) {
+      btn.classList.toggle('active');
+      btn.textContent = btn.classList.contains('active') ? '★' : '☆';
+    }
+
+    // 북마크 필터 카운트 업데이트
+    const bookmarkTab = Array.from(document.querySelectorAll('.filter-tab')).find(tab => tab.textContent.includes('북마크'));
+    if (bookmarkTab) {
+      bookmarkTab.textContent = `★ 북마크 (${bookmarkedQuestions.length})`;
+    }
+
+    // 현재 북마크 필터 적용 중이면 필터 다시 적용
+    if (currentFilter === '북마크') {
+      applyFilter();
+    }
+  };
+
+  // 프로그레스 바 표시
+  window.showProgress = function(message) {
+    const resultContainer = document.getElementById('resultContainer');
+    resultContainer.className = 'fade-in';
+    resultContainer.innerHTML = `
+      <div class="progress-container">
+        <h3 style="color:#667eea; margin-bottom:10px; text-align:center">
+          <i data-lucide="sparkles" style="width:20px; height:20px; vertical-align:-3px; margin-right:6px"></i>
+          ${message || 'AI가 면접 질문을 생성하고 있습니다'}
+        </h3>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">분석 시작...</div>
+
+        <div style="margin-top:20px; padding:15px; background:#f8f9fa; border-radius:8px">
+          <p style="font-size:13px; color:#666; text-align:center; margin:0">
+            💡 질문 개수에 따라 30초~2분 정도 소요됩니다
+          </p>
+        </div>
+      </div>
+    `;
+    lucide.createIcons();
+
+    // 프로그레스 애니메이션
+    let progress = 0;
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+
+    const steps = [
+      { percent: 20, text: '학생부 분석 중...' },
+      { percent: 40, text: '학과 특성 파악 중...' },
+      { percent: 60, text: '질문 생성 중...' },
+      { percent: 80, text: '답변 가이드 작성 중...' },
+      { percent: 95, text: '최종 검토 중...' }
+    ];
+
+    let stepIndex = 0;
+    const interval = setInterval(() => {
+      if (stepIndex < steps.length) {
+        progress = steps[stepIndex].percent;
+        progressFill.style.width = progress + '%';
+        progressText.textContent = steps[stepIndex].text;
+        stepIndex++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 3000);
+
+    return interval;
+  };
+
+  // 키보드 단축키
+  document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + S: 자동 저장 트리거
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      const record = document.getElementById('record').value;
+      localStorage.setItem('draft_record', record);
+      showToast('success', '저장되었습니다');
+    }
+
+    // ESC: 모달 닫기
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('settingsModal');
+      if (modal.classList.contains('show')) {
+        modal.classList.remove('show');
+      }
+    }
+  });
+
+  // 페이지 떠나기 전 경고 (작성 중인 경우)
+  window.addEventListener('beforeunload', (e) => {
+    const record = document.getElementById('record').value;
+    if (record && record.length > 100 && !localStorage.getItem('draft_record')) {
+      e.preventDefault();
+      e.returnValue = '작성 중인 내용이 있습니다. 정말 나가시겠습니까?';
+    }
+  });
+
+  // 결과 생성 시 임시 저장 지우기
+  const originalDisplayResult = window.displayResult;
+  if (originalDisplayResult) {
+    window.displayResult = function(...args) {
+      localStorage.removeItem('draft_record');
+      return originalDisplayResult.apply(this, args);
+    };
+  }
 </script>
 
 </body>
