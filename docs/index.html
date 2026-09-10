@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2027 대입 AI 면접코치 | 학생부종합 전형 면접 대비</title>
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
@@ -343,7 +347,7 @@ footer .copyright {
 <body>
 
 <div class="container">
-  <h1>🎓 2027 대입 AI 면접코치</h1>
+  <h1><i data-lucide="graduation-cap" style="width:32px; height:32px; vertical-align:-6px; margin-right:8px"></i>2027 대입 AI 면접코치</h1>
   <p class="subtitle">학생부종합 전형 면접 완벽 대비 | 전 학과 지원 (간호학과 제외)</p>
 
   <!-- 안내 -->
@@ -373,7 +377,7 @@ footer .copyright {
 
   <!-- API Key 입력 -->
   <div id="apiKeyBox">
-    <h3 style="margin-bottom:10px">🔑 Claude API 키 입력</h3>
+    <h3 style="margin-bottom:10px"><i data-lucide="key" style="width:18px; height:18px; vertical-align:-3px; margin-right:6px"></i>Claude API 키 입력</h3>
     <p style="font-size:13px; color:#666; margin-bottom:10px">
       Anthropic Claude API 키를 입력하세요.
       (<a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>에서 발급)
@@ -393,7 +397,7 @@ footer .copyright {
   <div class="select-container">
     <!-- 대학 선택 -->
     <div class="select-box">
-      <label>🏫 대학 선택</label>
+      <label><i data-lucide="building-2" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>대학 선택</label>
       <select id="university">
         <option value="">대학을 선택하세요</option>
         <option value="서울대학교">서울대학교</option>
@@ -411,7 +415,7 @@ footer .copyright {
 
     <!-- 학과 선택 -->
     <div class="select-box">
-      <label>🎓 학과 선택</label>
+      <label><i data-lucide="graduation-cap" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>학과 선택</label>
       <select id="department">
         <option value="">학과를 선택하세요</option>
         <optgroup label="인문계열">
@@ -470,7 +474,7 @@ footer .copyright {
 
     <!-- 전형 선택 -->
     <div class="select-box">
-      <label>📋 전형 선택</label>
+      <label><i data-lucide="clipboard-list" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>전형 선택</label>
       <select id="admission">
         <option value="">대학을 먼저 선택하세요</option>
       </select>
@@ -480,7 +484,7 @@ footer .copyright {
   <!-- 개인정보 보호 안내 -->
   <div style="background:#fff3cd; border-left:4px solid #ff9800; padding:16px; margin:20px 0; border-radius:8px">
     <h3 style="color:#d97706; margin:0 0 10px 0; font-size:16px">
-      🔒 개인정보 보호 안내
+      <i data-lucide="lock" style="width:18px; height:18px; vertical-align:-3px; margin-right:6px"></i>개인정보 보호 안내
     </h3>
     <p style="margin:0 0 10px 0; font-size:14px; line-height:1.6">
       <strong>학생부 입력 시 다음 정보는 제거하고 입력하세요:</strong>
@@ -498,7 +502,7 @@ footer .copyright {
 
   <!-- 생기부 업로드 -->
   <div class="textarea-box">
-    <label>📄 학생부 내용 입력 (개인정보 제거 후)</label>
+    <label><i data-lucide="file-text" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>학생부 내용 입력 (개인정보 제거 후)</label>
     <textarea
       id="record"
       placeholder="⚠️ 개인정보(이름, 생년월일, 전화번호, 학교명 등)는 제거하고 활동 내용만 입력하세요
@@ -529,7 +533,7 @@ footer .copyright {
 
   <!-- 분석 시작 버튼 -->
   <button class="btn" id="analyzeBtn" onclick="startAnalysis()">
-    🎯 면접 예상 질문 생성
+    <i data-lucide="target" style="width:18px; height:18px; vertical-align:-3px; margin-right:8px"></i>면접 예상 질문 생성
   </button>
 
   <!-- 결과 영역 -->
@@ -538,7 +542,7 @@ footer .copyright {
   <!-- 면책 사항 -->
   <div style="margin-top:60px; padding:30px; background:#f8f9fa; border-radius:12px; border-left:4px solid #c0392b">
     <h3 style="color:#c0392b; margin:0 0 15px 0; font-size:18px">
-      ⚠️ 필수 안내사항
+      <i data-lucide="alert-triangle" style="width:20px; height:20px; vertical-align:-4px; margin-right:8px"></i>필수 안내사항
     </h3>
 
     <div style="margin-bottom:20px">
@@ -1140,6 +1144,11 @@ function showAlert(type, message) {
     © 2026 JOBIZIC. All rights reserved.
   </div>
 </footer>
+
+<script>
+  // Lucide 아이콘 초기화
+  lucide.createIcons();
+</script>
 
 </body>
 </html>
