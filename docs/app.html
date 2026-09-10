@@ -1036,12 +1036,12 @@ footer .copyright {
     <div class="select-box">
       <label><i data-lucide="hash" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>생성할 질문 개수</label>
       <select id="questionCount">
-        <option value="10">10개 (빠른 분석)</option>
-        <option value="50" selected>50개 (추천)</option>
-        <option value="100">100개 (전체 분석)</option>
+        <option value="10">10개 (빠른 준비)</option>
+        <option value="50">50개 (표준)</option>
+        <option value="100" selected>100개 (완벽 대비 - 추천)</option>
       </select>
       <small style="display:block; margin-top:5px; color:#666">
-        💡 개수가 많을수록 분석 시간과 API 비용이 증가합니다
+        💡 100개 권장: 질문+답변 스크립트로 미리 연습 후 AI 면접 테스트
       </small>
     </div>
   </div>
@@ -1659,7 +1659,11 @@ function displayResult(result, university, department, admission) {
       <div style="background:white; padding:20px; border-radius:12px">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px">
           <h3 style="color:#667eea; margin:0">🎤 면접 예상 질문 (${currentQuestions.length}개)</h3>
-          <div style="display:flex; gap:10px">
+          <div style="display:flex; gap:10px; flex-wrap:wrap">
+            <button class="btn-primary" onclick="startAiInterview()" style="padding:10px 20px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px">
+              <i data-lucide="play-circle" style="width:16px; height:16px"></i>
+              AI 면접 시작
+            </button>
             <button class="download-btn" onclick="printQuestions()">
               <i data-lucide="printer" style="width:16px; height:16px"></i>
               인쇄
@@ -2408,6 +2412,398 @@ function showAlert(type, message) {
       return originalDisplayResult.apply(this, args);
     };
   }
+
+  // ========== AI 면접 모드 ==========
+  let interviewMode = false;
+  let currentInterviewIndex = 0;
+  let interviewResults = [];
+
+  window.startAiInterview = function() {
+    if (!currentQuestions || currentQuestions.length === 0) {
+      showToast('error', '질문이 없습니다.');
+      return;
+    }
+
+    if (!recognition) {
+      showToast('error', '음성 인식이 지원되지 않는 브라우저입니다.');
+      return;
+    }
+
+    const apiKey = localStorage.getItem('anthropicApiKey');
+    if (!apiKey) {
+      showToast('error', 'API 키를 먼저 설정해주세요.');
+      return;
+    }
+
+    interviewMode = true;
+    currentInterviewIndex = 0;
+    interviewResults = [];
+
+    showInterviewQuestion();
+  };
+
+  function showInterviewQuestion() {
+    const question = currentQuestions[currentInterviewIndex];
+    const totalQuestions = currentQuestions.length;
+
+    const html = `
+      <div class="ai-interview-mode" style="background:white; padding:40px; border-radius:20px; max-width:800px; margin:40px auto">
+        <div style="text-align:center; margin-bottom:30px">
+          <h2 style="color:#667eea; margin-bottom:10px">🎙️ AI 면접 진행 중</h2>
+          <p style="color:#666">질문 ${currentInterviewIndex + 1} / ${totalQuestions}</p>
+          <div style="width:100%; height:8px; background:#e0e0e0; border-radius:4px; margin-top:16px">
+            <div style="width:${((currentInterviewIndex + 1) / totalQuestions * 100)}%; height:100%; background:linear-gradient(90deg,#667eea,#764ba2); border-radius:4px; transition:width 0.3s"></div>
+          </div>
+        </div>
+
+        <div style="background:#f8f9fa; padding:30px; border-radius:16px; margin-bottom:30px">
+          <div style="font-size:12px; color:#667eea; font-weight:600; margin-bottom:8px">${question.category || '일반'}</div>
+          <h3 style="font-size:22px; color:#333; line-height:1.6; margin:0">Q${currentInterviewIndex + 1}. ${question.question}</h3>
+        </div>
+
+        <div style="text-align:center">
+          <button id="startRecordBtn" onclick="startInterviewRecording()" style="padding:20px 40px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:50px; font-size:18px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:12px; box-shadow:0 8px 24px rgba(102,126,234,0.3); transition:all 0.3s">
+            <i data-lucide="mic" style="width:24px; height:24px"></i>
+            답변 녹음 시작 (60초)
+          </button>
+
+          <div id="recordingStatus" style="display:none; margin-top:20px">
+            <div style="font-size:48px; font-weight:900; color:#c0392b; margin-bottom:10px" id="timer">60</div>
+            <p style="color:#666; margin-bottom:20px">답변을 말씀해주세요...</p>
+            <button onclick="stopInterviewRecording()" style="padding:12px 30px; background:#c0392b; color:white; border:none; border-radius:30px; font-size:16px; font-weight:600; cursor:pointer">
+              <i data-lucide="square" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>
+              녹음 중지
+            </button>
+          </div>
+
+          <div style="margin-top:30px; display:flex; gap:10px; justify-content:center">
+            ${currentInterviewIndex > 0 ? `
+              <button onclick="previousQuestion()" style="padding:12px 24px; background:white; color:#667eea; border:2px solid #667eea; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer">
+                <i data-lucide="chevron-left" style="width:16px; height:16px; vertical-align:-2px; margin-right:4px"></i>
+                이전 질문
+              </button>
+            ` : ''}
+            <button onclick="skipQuestion()" style="padding:12px 24px; background:white; color:#999; border:2px solid #ddd; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer">
+              건너뛰기
+            </button>
+            <button onclick="exitInterview()" style="padding:12px 24px; background:#c0392b; color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer">
+              <i data-lucide="x" style="width:16px; height:16px; vertical-align:-2px; margin-right:4px"></i>
+              면접 종료
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const resultContainer = document.getElementById('resultContainer');
+    resultContainer.innerHTML = html;
+    lucide.createIcons();
+  }
+
+  let recordingTimer;
+  let timeLeft = 60;
+  let currentTranscript = '';
+
+  window.startInterviewRecording = function() {
+    const btn = document.getElementById('startRecordBtn');
+    const status = document.getElementById('recordingStatus');
+
+    btn.style.display = 'none';
+    status.style.display = 'block';
+
+    timeLeft = 60;
+    currentTranscript = '';
+    updateTimer();
+
+    // 타이머 시작
+    recordingTimer = setInterval(() => {
+      timeLeft--;
+      updateTimer();
+      if (timeLeft <= 0) {
+        stopInterviewRecording();
+      }
+    }, 1000);
+
+    // 음성 인식 시작
+    recognition.start();
+
+    recognition.onresult = (event) => {
+      currentTranscript = event.results[0][0].transcript;
+    };
+
+    recognition.onerror = (event) => {
+      clearInterval(recordingTimer);
+      showToast('error', '음성 인식 오류: ' + event.error);
+      const btn = document.getElementById('startRecordBtn');
+      const status = document.getElementById('recordingStatus');
+      if (btn && status) {
+        btn.style.display = 'inline-flex';
+        status.style.display = 'none';
+      }
+    };
+  };
+
+  function updateTimer() {
+    const timerEl = document.getElementById('timer');
+    if (timerEl) {
+      timerEl.textContent = timeLeft;
+      if (timeLeft <= 10) {
+        timerEl.style.color = '#c0392b';
+      }
+    }
+  }
+
+  window.stopInterviewRecording = async function() {
+    clearInterval(recordingTimer);
+    recognition.stop();
+
+    if (!currentTranscript || currentTranscript.length < 10) {
+      showToast('error', '답변이 너무 짧습니다. 다시 시도해주세요.');
+      const btn = document.getElementById('startRecordBtn');
+      const status = document.getElementById('recordingStatus');
+      if (btn && status) {
+        btn.style.display = 'inline-flex';
+        status.style.display = 'none';
+      }
+      return;
+    }
+
+    // 답변 평가
+    await evaluateAnswer(currentTranscript);
+  };
+
+  async function evaluateAnswer(transcript) {
+    const question = currentQuestions[currentInterviewIndex];
+    const apiKey = localStorage.getItem('anthropicApiKey');
+
+    showToast('info', 'AI가 답변을 평가하고 있습니다...');
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 2000,
+          messages: [{
+            role: 'user',
+            content: `다음은 면접 질문과 수험생의 답변입니다.
+
+[질문]
+${question.question}
+
+[모범 답변]
+${question.answer || '없음'}
+
+[수험생의 답변]
+${transcript}
+
+위 답변을 평가하여 다음 JSON 형식으로 응답하세요:
+{
+  "score": 85,
+  "strengths": ["강점 2-3개"],
+  "improvements": ["개선점 2-3개"],
+  "feedback": "종합 피드백 (2-3문장)"
+}
+
+평가 기준:
+- 질문의 핵심을 파악했는가?
+- 구체적인 사례를 들었는가?
+- 논리적으로 답변했는가?
+- 모범 답변과 얼마나 유사한가?`
+          }]
+        })
+      });
+
+      const data = await response.json();
+      const evaluation = JSON.parse(data.content[0].text);
+
+      // 결과 저장
+      interviewResults.push({
+        questionIndex: currentInterviewIndex,
+        question: question.question,
+        transcript: transcript,
+        evaluation: evaluation
+      });
+
+      // 결과 표시
+      showEvaluationResult(evaluation, transcript);
+
+    } catch (error) {
+      console.error(error);
+      showToast('error', '평가 중 오류가 발생했습니다.');
+      nextQuestion();
+    }
+  }
+
+  function showEvaluationResult(evaluation, transcript) {
+    const html = `
+      <div style="background:white; padding:40px; border-radius:20px; max-width:800px; margin:40px auto">
+        <h2 style="color:#667eea; text-align:center; margin-bottom:30px">📊 답변 평가 결과</h2>
+
+        <div style="text-align:center; margin-bottom:30px">
+          <div style="font-size:72px; font-weight:900; color:#667eea; margin-bottom:10px">${evaluation.score}점</div>
+          <div style="font-size:18px; color:#666">
+            ${evaluation.score >= 90 ? '🌟 탁월합니다!' : evaluation.score >= 80 ? '✨ 우수합니다!' : evaluation.score >= 70 ? '👍 좋습니다!' : evaluation.score >= 60 ? '📝 보통입니다' : '💪 더 노력이 필요합니다'}
+          </div>
+        </div>
+
+        <div style="background:#f8f9fa; padding:20px; border-radius:12px; margin-bottom:20px">
+          <h4 style="color:#333; margin-bottom:10px">📝 당신의 답변</h4>
+          <p style="color:#666; line-height:1.8; margin:0">${transcript}</p>
+        </div>
+
+        <div style="background:#e8f5e9; padding:20px; border-radius:12px; margin-bottom:20px">
+          <h4 style="color:#27ae60; margin-bottom:10px">✅ 강점</h4>
+          <ul style="margin:0; padding-left:20px">
+            ${evaluation.strengths.map(s => `<li style="color:#666; margin:8px 0">${s}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div style="background:#fff3cd; padding:20px; border-radius:12px; margin-bottom:20px">
+          <h4 style="color:#ff9800; margin-bottom:10px">📌 개선할 점</h4>
+          <ul style="margin:0; padding-left:20px">
+            ${evaluation.improvements.map(i => `<li style="color:#666; margin:8px 0">${i}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div style="background:#f0f4ff; padding:20px; border-radius:12px; margin-bottom:30px">
+          <h4 style="color:#667eea; margin-bottom:10px">💬 피드백</h4>
+          <p style="color:#666; line-height:1.8; margin:0">${evaluation.feedback}</p>
+        </div>
+
+        <div style="text-align:center">
+          ${currentInterviewIndex < currentQuestions.length - 1 ? `
+            <button onclick="nextQuestion()" style="padding:16px 40px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:50px; font-size:18px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:10px; box-shadow:0 8px 24px rgba(102,126,234,0.3)">
+              <i data-lucide="arrow-right" style="width:20px; height:20px"></i>
+              다음 질문
+            </button>
+          ` : `
+            <button onclick="finishInterview()" style="padding:16px 40px; background:linear-gradient(135deg,#27ae60,#229954); color:white; border:none; border-radius:50px; font-size:18px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:10px; box-shadow:0 8px 24px rgba(39,174,96,0.3)">
+              <i data-lucide="check-circle" style="width:20px; height:20px"></i>
+              면접 완료
+            </button>
+          `}
+          <button onclick="exitInterview()" style="padding:12px 24px; background:white; color:#999; border:2px solid #ddd; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; margin-left:10px">
+            면접 종료
+          </button>
+        </div>
+      </div>
+    `;
+
+    const resultContainer = document.getElementById('resultContainer');
+    resultContainer.innerHTML = html;
+    lucide.createIcons();
+  }
+
+  window.nextQuestion = function() {
+    currentInterviewIndex++;
+    if (currentInterviewIndex < currentQuestions.length) {
+      showInterviewQuestion();
+    } else {
+      finishInterview();
+    }
+  };
+
+  window.previousQuestion = function() {
+    if (currentInterviewIndex > 0) {
+      currentInterviewIndex--;
+      showInterviewQuestion();
+    }
+  };
+
+  window.skipQuestion = function() {
+    if (confirm('이 질문을 건너뛰시겠습니까?')) {
+      nextQuestion();
+    }
+  };
+
+  window.exitInterview = function() {
+    if (confirm('면접을 종료하시겠습니까? 진행 중인 결과가 저장됩니다.')) {
+      finishInterview();
+    }
+  };
+
+  window.finishInterview = function() {
+    const totalQuestions = interviewResults.length;
+    const avgScore = totalQuestions > 0
+      ? Math.round(interviewResults.reduce((sum, r) => sum + r.evaluation.score, 0) / totalQuestions)
+      : 0;
+
+    const html = `
+      <div style="background:white; padding:40px; border-radius:20px; max-width:900px; margin:40px auto">
+        <h2 style="color:#667eea; text-align:center; margin-bottom:30px">🎉 면접 완료!</h2>
+
+        <div style="text-align:center; margin-bottom:40px">
+          <div style="font-size:64px; font-weight:900; color:#667eea; margin-bottom:10px">${avgScore}점</div>
+          <div style="font-size:18px; color:#666">평균 점수 (${totalQuestions}개 질문 답변)</div>
+        </div>
+
+        <div style="background:#f8f9fa; padding:30px; border-radius:12px; margin-bottom:30px">
+          <h3 style="color:#333; margin-bottom:20px">📊 질문별 점수</h3>
+          ${interviewResults.map((r, i) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #e0e0e0">
+              <span style="color:#666">Q${r.questionIndex + 1}. ${r.question.substring(0, 40)}...</span>
+              <span style="font-weight:700; font-size:18px; color:${r.evaluation.score >= 80 ? '#27ae60' : r.evaluation.score >= 60 ? '#ff9800' : '#c0392b'}">${r.evaluation.score}점</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="text-align:center; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+          <button onclick="location.reload()" style="padding:14px 30px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer">
+            <i data-lucide="refresh-cw" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>
+            새로 시작
+          </button>
+          <button onclick="downloadInterviewResults()" style="padding:14px 30px; background:#27ae60; color:white; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer">
+            <i data-lucide="download" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>
+            결과 다운로드
+          </button>
+        </div>
+      </div>
+    `;
+
+    const resultContainer = document.getElementById('resultContainer');
+    resultContainer.innerHTML = html;
+    lucide.createIcons();
+    interviewMode = false;
+  };
+
+  window.downloadInterviewResults = function() {
+    let text = `AI 면접 결과 보고서\n`;
+    text += `생성 날짜: ${new Date().toLocaleDateString('ko-KR')}\n\n`;
+    text += '='.repeat(80) + '\n\n';
+
+    const totalQuestions = interviewResults.length;
+    const avgScore = Math.round(interviewResults.reduce((sum, r) => sum + r.evaluation.score, 0) / totalQuestions);
+
+    text += `평균 점수: ${avgScore}점\n`;
+    text += `답변한 질문: ${totalQuestions}개\n\n`;
+    text += '='.repeat(80) + '\n\n';
+
+    interviewResults.forEach((r, i) => {
+      text += `Q${r.questionIndex + 1}. ${r.question}\n\n`;
+      text += `[답변]\n${r.transcript}\n\n`;
+      text += `[점수] ${r.evaluation.score}점\n\n`;
+      text += `[강점]\n${r.evaluation.strengths.map(s => `- ${s}`).join('\n')}\n\n`;
+      text += `[개선점]\n${r.evaluation.improvements.map(i => `- ${i}`).join('\n')}\n\n`;
+      text += `[피드백]\n${r.evaluation.feedback}\n\n`;
+      text += '-'.repeat(80) + '\n\n';
+    });
+
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `AI면접결과_${new Date().getTime()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showToast('success', '✅ 면접 결과가 다운로드되었습니다!');
+  };
 </script>
 
 </body>
