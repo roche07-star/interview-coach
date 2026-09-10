@@ -349,6 +349,123 @@ h1 {
   font-size: 13px;
 }
 
+.filter-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  padding: 10px 20px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.filter-tab.active {
+  background: #667eea;
+  color: white;
+}
+
+.filter-tab:hover {
+  background: #764ba2;
+  color: white;
+}
+
+.search-box {
+  margin: 15px 0;
+  position: relative;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 12px 40px 12px 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.question-detail {
+  margin-top: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  display: none;
+}
+
+.question-detail.show {
+  display: block;
+}
+
+.question-detail h4 {
+  font-size: 14px;
+  color: #667eea;
+  margin-bottom: 10px;
+}
+
+.question-detail p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.question-detail ul {
+  list-style: disc;
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+.question-detail li {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 5px 0;
+}
+
+.toggle-detail-btn {
+  background: none;
+  border: none;
+  color: #667eea;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 0;
+  margin-top: 10px;
+  transition: color 0.2s;
+}
+
+.toggle-detail-btn:hover {
+  color: #764ba2;
+}
+
+.download-btn {
+  padding: 12px 24px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download-btn:hover {
+  background: #229954;
+}
+
 .voice-practice {
   margin-top: 20px;
   padding: 20px;
@@ -603,6 +720,19 @@ footer .copyright {
       <select id="admission">
         <option value="">대학을 먼저 선택하세요</option>
       </select>
+    </div>
+
+    <!-- 질문 개수 선택 -->
+    <div class="select-box">
+      <label><i data-lucide="hash" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>생성할 질문 개수</label>
+      <select id="questionCount">
+        <option value="10">10개 (빠른 분석)</option>
+        <option value="50" selected>50개 (추천)</option>
+        <option value="100">100개 (전체 분석)</option>
+      </select>
+      <small style="display:block; margin-top:5px; color:#666">
+        💡 개수가 많을수록 분석 시간과 API 비용이 증가합니다
+      </small>
     </div>
   </div>
 
@@ -974,6 +1104,7 @@ async function startAnalysis() {
     : document.getElementById('department').value;
   const admission = document.getElementById('admission').value;
   const record = document.getElementById('record').value.trim();
+  const questionCount = parseInt(document.getElementById('questionCount').value) || 50;
 
   // 유효성 검사
   if (!apiKey) {
@@ -1022,7 +1153,11 @@ async function startAnalysis() {
     const admissionData = UNIVERSITY_DB[university].admissions[admission];
     const departmentData = DEPARTMENT_SPECIALIZATION[department] || {};
 
-    const systemPrompt = createSystemPrompt(university, department, admission, admissionData, departmentData);
+    const systemPrompt = createSystemPrompt(university, department, admission, admissionData, departmentData, questionCount);
+
+    // 질문 개수에 따라 max_tokens 조정
+    const maxTokensMap = { 10: 4000, 50: 16000, 100: 32000 };
+    const maxTokens = maxTokensMap[questionCount] || 16000;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -1033,11 +1168,11 @@ async function startAnalysis() {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
+        max_tokens: maxTokens,
         temperature: 0.7,
         messages: [{
           role: 'user',
-          content: `[학생부]\n${record}\n\n위 학생부를 바탕으로 면접 예상 질문 20개를 생성해주세요.`
+          content: `[학생부]\n${record}\n\n위 학생부를 바탕으로 면접 예상 질문 ${questionCount}개를 생성해주세요.`
         }],
         system: systemPrompt
       })
@@ -1081,7 +1216,15 @@ async function startAnalysis() {
 }
 
 // 시스템 프롬프트 생성
-function createSystemPrompt(university, department, admission, admissionData, departmentData) {
+function createSystemPrompt(university, department, admission, admissionData, departmentData, questionCount = 50) {
+  const distribution = {
+    10: { 전공적합성: 3, 학업역량: 3, 인성: 2, 발전가능성: 2 },
+    50: { 전공적합성: 15, 학업역량: 15, 인성: 10, 발전가능성: 10 },
+    100: { 전공적합성: 30, 학업역량: 30, 인성: 20, 발전가능성: 20 }
+  };
+
+  const dist = distribution[questionCount] || distribution[50];
+
   return `너는 2027학년도 대입 학생부종합 전형 면접 전문가이다.
 
 **지원 정보:**
@@ -1104,34 +1247,66 @@ ${departmentData.keywords ? `- 핵심 키워드: ${departmentData.keywords.join(
 - 주요 분야: ${departmentData.focusAreas?.join(', ') || '일반'}` : '- 일반 학과'}
 
 **역할:**
-위 정보를 바탕으로 학생부에서 나올 수 있는 구체적인 면접 질문 20개를 생성하라.
+위 정보를 바탕으로 학생부에서 나올 수 있는 구체적인 면접 질문 ${questionCount}개를 생성하라.
+
+**카테고리별 분배:**
+- 전공적합성: ${dist.전공적합성}개
+- 학업역량: ${dist.학업역량}개
+- 인성: ${dist.인성}개
+- 발전가능성: ${dist.발전가능성}개
 
 **출력 형식:**
 JSON 형식으로만 응답하라:
 {
-  "strengths": ["강점 3-5개"],
-  "weaknesses": ["보완점 2-3개"],
+  "strengths": ["강점 ${questionCount <= 10 ? '3-5' : questionCount <= 50 ? '5-7' : '7-10'}개"],
+  "weaknesses": ["보완점 ${questionCount <= 10 ? '2-3' : questionCount <= 50 ? '3-5' : '5-7'}개"],
   "questions": [
     {
       "category": "전공적합성",
       "question": "질문 내용",
-      "guidance": "답변 가이드 (1-2문장)"
+      "answer": "학생부 내용을 활용한 모범 답변 예시 (3-5문장, 구체적 사례 포함)",
+      "keypoints": ["답변 시 강조할 핵심 포인트 3-4개"],
+      "differentiation": "다른 수험생과 차별화할 수 있는 전략 (1-2문장)"
     }
-    // ... 총 20개
+    // ... 총 ${questionCount}개
   ]
 }
 
-**주의:**
-- 학과별 특성을 반드시 반영할 것
-- 학생부에 나온 구체적인 활동을 언급할 것
-- 평가 기준별로 골고루 분배할 것
-- ${department === '경영학과' ? '경영/리더십 관련 질문 비중 높게' : ''}
-- ${department === '컴퓨터공학과' ? '프로그래밍/기술 관련 질문 포함' : ''}
-- ${department === '의예과' ? '의료윤리/봉사정신 관련 질문 포함' : ''}
+**질문 생성 원칙:**
+1. 학생부에 명시된 구체적 활동/경험을 반드시 언급
+2. 학과별 특성과 전공 핵심역량을 반영
+3. 단순 Yes/No가 아닌 스토리를 끌어낼 수 있는 질문
+4. 실제 면접에서 나올 법한 현실적인 질문
+5. 난이도 다양화 (기본 30% / 중급 50% / 심화 20%)
+
+**답변 예시 작성 원칙:**
+1. 학생부 내용을 구체적으로 활용 (활동명, 결과, 배운 점)
+2. STAR 기법 적용 (Situation → Task → Action → Result)
+3. 전공 연계성 강조
+4. 개인의 성장/변화 스토리 포함
+5. 3-5문장으로 간결하게 구성
+6. 다른 학생과 차별화되는 독창적 관점 제시
+
+**학과별 특화 질문:**
+- ${department === '경영학과' ? '경영/리더십/마케팅/경제 관련 질문 비중 높게, 기업 사례 분석 질문 포함' : ''}
+- ${department === '컴퓨터공학과' ? '프로그래밍/알고리즘/AI/데이터 관련 질문 포함, 기술 트렌드 이해도 확인' : ''}
+- ${department === '의예과' ? '의료윤리/봉사정신/생명존중/환자중심 사고 관련 질문 포함' : ''}
+- ${department.includes('교육') ? '교육철학/학습자 이해/교수법/교사 소명의식 관련 질문 포함' : ''}
+- ${department.includes('공학') ? '문제해결능력/창의적 설계/팀 프로젝트 경험 관련 질문 포함' : ''}
+- ${department.includes('사회') ? '사회현상 분석/비판적 사고/공동체 의식 관련 질문 포함' : ''}
+
+**주의사항:**
+- 개인정보(이름, 학교명 등)는 언급하지 말 것
+- 모든 질문은 학생부 내용과 연결될 수 있어야 함
+- 답변 예시는 실제 면접에서 30초-1분 내 답변 가능한 분량
+- 진부한 답변이 아닌 개성 있는 답변 제시
 `;
 }
 
 // 결과 표시
+let currentFilter = '전체';
+let searchQuery = '';
+
 function displayResult(result, university, department, admission) {
   currentQuestions = result.questions || [];
 
@@ -1167,24 +1342,266 @@ function displayResult(result, university, department, admission) {
 
       <!-- 질문 목록 -->
       <div style="background:white; padding:20px; border-radius:12px">
-        <h3 style="color:#667eea; margin-bottom:15px">🎤 면접 예상 질문 (${currentQuestions.length}개)</h3>
-        <ul class="question-list">
-          ${currentQuestions.map((q, i) => `
-            <li class="question-item">
-              <strong>${q.category || '일반'}</strong>
-              <p><strong>Q${i+1}.</strong> ${q.question}</p>
-              ${q.guidance ? `<small>💡 ${q.guidance}</small>` : ''}
-              <button class="voice-btn" onclick="startVoicePractice(${i})" style="margin-top:10px">
-                🎙️ 음성으로 답변 연습
-              </button>
-            </li>
-          `).join('')}
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px">
+          <h3 style="color:#667eea; margin:0">🎤 면접 예상 질문 (${currentQuestions.length}개)</h3>
+          <div style="display:flex; gap:10px">
+            <button class="download-btn" onclick="printQuestions()">
+              <i data-lucide="printer" style="width:16px; height:16px"></i>
+              인쇄
+            </button>
+            <button class="download-btn" onclick="downloadQuestions()">
+              <i data-lucide="download" style="width:16px; height:16px"></i>
+              다운로드
+            </button>
+          </div>
+        </div>
+
+        <!-- 카테고리 필터 -->
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="filterByCategory('전체')">전체 (${currentQuestions.length})</button>
+          <button class="filter-tab" onclick="filterByCategory('전공적합성')">전공적합성 (${currentQuestions.filter(q => q.category === '전공적합성').length})</button>
+          <button class="filter-tab" onclick="filterByCategory('학업역량')">학업역량 (${currentQuestions.filter(q => q.category === '학업역량').length})</button>
+          <button class="filter-tab" onclick="filterByCategory('인성')">인성 (${currentQuestions.filter(q => q.category === '인성').length})</button>
+          <button class="filter-tab" onclick="filterByCategory('발전가능성')">발전가능성 (${currentQuestions.filter(q => q.category === '발전가능성').length})</button>
+        </div>
+
+        <!-- 검색 -->
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="질문 검색..." onkeyup="searchQuestions(this.value)">
+        </div>
+
+        <!-- 질문 리스트 -->
+        <ul class="question-list" id="questionList">
+          ${renderQuestions(currentQuestions)}
         </ul>
       </div>
     </div>
   `;
 
   document.getElementById('resultContainer').innerHTML = html;
+  lucide.createIcons();
+}
+
+function renderQuestions(questions) {
+  return questions.map((q, i) => `
+    <li class="question-item" data-category="${q.category || '일반'}" data-index="${i}">
+      <strong>${q.category || '일반'}</strong>
+      <p><strong>Q${i+1}.</strong> ${q.question}</p>
+
+      ${q.answer || q.guidance ? `
+        <button class="toggle-detail-btn" onclick="toggleDetail(${i})">
+          📖 모범 답변 및 가이드 보기
+        </button>
+        <div class="question-detail" id="detail-${i}">
+          ${q.answer ? `
+            <h4>💡 모범 답변 예시</h4>
+            <p>${q.answer}</p>
+          ` : ''}
+
+          ${q.keypoints && q.keypoints.length > 0 ? `
+            <h4>🎯 핵심 포인트</h4>
+            <ul>
+              ${q.keypoints.map(kp => `<li>${kp}</li>`).join('')}
+            </ul>
+          ` : ''}
+
+          ${q.differentiation ? `
+            <h4>✨ 차별화 전략</h4>
+            <p>${q.differentiation}</p>
+          ` : ''}
+
+          ${!q.answer && q.guidance ? `
+            <h4>💡 답변 가이드</h4>
+            <p>${q.guidance}</p>
+          ` : ''}
+        </div>
+      ` : ''}
+
+      <button class="voice-btn" onclick="startVoicePractice(${i})" style="margin-top:10px">
+        🎙️ 음성으로 답변 연습
+      </button>
+    </li>
+  `).join('');
+}
+
+function filterByCategory(category) {
+  currentFilter = category;
+
+  // 버튼 활성화 상태 업데이트
+  document.querySelectorAll('.filter-tab').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+
+  applyFilter();
+}
+
+function searchQuestions(query) {
+  searchQuery = query.toLowerCase();
+  applyFilter();
+}
+
+function applyFilter() {
+  const items = document.querySelectorAll('.question-item');
+
+  items.forEach(item => {
+    const category = item.dataset.category;
+    const text = item.textContent.toLowerCase();
+
+    const matchCategory = currentFilter === '전체' || category === currentFilter;
+    const matchSearch = !searchQuery || text.includes(searchQuery);
+
+    if (matchCategory && matchSearch) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+function toggleDetail(index) {
+  const detail = document.getElementById(`detail-${index}`);
+  const btn = event.target;
+
+  if (detail.classList.contains('show')) {
+    detail.classList.remove('show');
+    btn.textContent = '📖 모범 답변 및 가이드 보기';
+  } else {
+    detail.classList.add('show');
+    btn.textContent = '📖 모범 답변 및 가이드 닫기';
+  }
+}
+
+function downloadQuestions() {
+  let text = `${document.querySelector('.result-container h2').textContent}\n\n`;
+  text += `생성 날짜: ${new Date().toLocaleDateString('ko-KR')}\n\n`;
+  text += '=' .repeat(80) + '\n\n';
+
+  currentQuestions.forEach((q, i) => {
+    text += `Q${i+1}. [${q.category}] ${q.question}\n\n`;
+
+    if (q.answer) {
+      text += `💡 모범 답변:\n${q.answer}\n\n`;
+    }
+
+    if (q.keypoints && q.keypoints.length > 0) {
+      text += `🎯 핵심 포인트:\n`;
+      q.keypoints.forEach(kp => text += `  - ${kp}\n`);
+      text += '\n';
+    }
+
+    if (q.differentiation) {
+      text += `✨ 차별화 전략:\n${q.differentiation}\n\n`;
+    }
+
+    if (q.guidance && !q.answer) {
+      text += `💡 답변 가이드:\n${q.guidance}\n\n`;
+    }
+
+    text += '-'.repeat(80) + '\n\n';
+  });
+
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `면접질문_${new Date().getTime()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  showAlert('success', '✅ 질문이 다운로드되었습니다!');
+}
+
+function printQuestions() {
+  // 인쇄용 HTML 생성
+  let printHTML = `
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+      <meta charset="UTF-8">
+      <title>면접 예상 질문</title>
+      <style>
+        @media print {
+          body { margin: 0; padding: 20px; font-family: 'Pretendard', sans-serif; }
+          h1 { font-size: 24px; color: #333; margin-bottom: 10px; }
+          h2 { font-size: 18px; color: #667eea; margin-top: 20px; margin-bottom: 10px; }
+          .question { page-break-inside: avoid; margin-bottom: 30px; padding: 15px; border-left: 4px solid #667eea; }
+          .question-number { font-weight: bold; color: #667eea; }
+          .category { font-size: 12px; color: #999; text-transform: uppercase; }
+          .answer { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+          .keypoints { margin-top: 10px; }
+          .keypoints li { margin: 5px 0; }
+          .page-break { page-break-after: always; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>${document.querySelector('.result-container h2').textContent}</h1>
+      <p>생성 날짜: ${new Date().toLocaleDateString('ko-KR')}</p>
+      <hr>
+  `;
+
+  currentQuestions.forEach((q, i) => {
+    printHTML += `
+      <div class="question">
+        <div class="category">${q.category || '일반'}</div>
+        <div class="question-number">Q${i+1}.</div>
+        <p>${q.question}</p>
+
+        ${q.answer ? `
+          <div class="answer">
+            <strong>💡 모범 답변:</strong><br>
+            ${q.answer}
+          </div>
+        ` : ''}
+
+        ${q.keypoints && q.keypoints.length > 0 ? `
+          <div class="keypoints">
+            <strong>🎯 핵심 포인트:</strong>
+            <ul>
+              ${q.keypoints.map(kp => `<li>${kp}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+
+        ${q.differentiation ? `
+          <div class="answer">
+            <strong>✨ 차별화 전략:</strong><br>
+            ${q.differentiation}
+          </div>
+        ` : ''}
+
+        ${q.guidance && !q.answer ? `
+          <div class="answer">
+            <strong>💡 답변 가이드:</strong><br>
+            ${q.guidance}
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    // 10개마다 페이지 구분
+    if ((i + 1) % 10 === 0 && i !== currentQuestions.length - 1) {
+      printHTML += '<div class="page-break"></div>';
+    }
+  });
+
+  printHTML += `
+    </body>
+    </html>
+  `;
+
+  // 새 창에서 인쇄
+  const printWindow = window.open('', '', 'width=800,height=600');
+  printWindow.document.write(printHTML);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 250);
+
+  showAlert('success', '✅ 인쇄 창이 열렸습니다!');
 }
 
 // 음성 연습
