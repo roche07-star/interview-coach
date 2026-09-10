@@ -477,26 +477,52 @@ footer .copyright {
     </div>
   </div>
 
+  <!-- 개인정보 보호 안내 -->
+  <div style="background:#fff3cd; border-left:4px solid #ff9800; padding:16px; margin:20px 0; border-radius:8px">
+    <h3 style="color:#d97706; margin:0 0 10px 0; font-size:16px">
+      🔒 개인정보 보호 안내
+    </h3>
+    <p style="margin:0 0 10px 0; font-size:14px; line-height:1.6">
+      <strong>학생부 입력 시 다음 정보는 제거하고 입력하세요:</strong>
+    </p>
+    <ul style="margin:0 0 10px 0; padding-left:20px; font-size:14px; line-height:1.8">
+      <li><strong>이름, 생년월일, 전화번호, 이메일, 주소</strong></li>
+      <li><strong>학교명, 반/번호, 학생 ID</strong></li>
+      <li>기타 개인 식별 가능한 정보</li>
+    </ul>
+    <p style="margin:0; font-size:13px; color:#666">
+      ✅ <strong>활동 내용만</strong> 입력하세요 (동아리, 봉사, 수상, 탐구, 독서 활동 등)<br>
+      ✅ 개인정보는 면접 질문 생성에 필요하지 않습니다
+    </p>
+  </div>
+
   <!-- 생기부 업로드 -->
   <div class="textarea-box">
-    <label>📄 학생부 내용 입력</label>
+    <label>📄 학생부 내용 입력 (개인정보 제거 후)</label>
     <textarea
       id="record"
-      placeholder="학생부 내용을 붙여넣으세요...
+      placeholder="⚠️ 개인정보(이름, 생년월일, 전화번호, 학교명 등)는 제거하고 활동 내용만 입력하세요
 
 예시:
 [자율활동]
-- 학급 회장으로서 학급 행사 기획 및 운영
-- 동아리 부장으로 ○○ 프로젝트 주도
+- 학급 회장으로서 학급 행사 기획 및 운영 (리더십 발휘)
+- 동아리 부장으로 환경 캠페인 프로젝트 주도 (기획력, 실행력)
 
 [동아리활동]
-- △△ 동아리에서 ××× 연구 수행
+- 과학 동아리에서 미세플라스틱 연구 수행 (탐구 능력)
+- 실험 설계 및 데이터 분석 (문제해결력)
 
 [봉사활동]
-- □□ 센터에서 정기 봉사 활동
+- 지역 복지센터에서 정기 봉사 활동 (나눔, 배려)
+- 독거노인 말벗 활동 (공감, 소통)
 
 [진로활동]
-- ◇◇ 관련 진로 탐색 활동
+- 경영학 관련 진로 탐색 활동
+- 기업 탐방 및 직업인 인터뷰
+
+[독서활동]
+- 경영 관련 도서 읽고 서평 작성
+- 토론 활동 참여
 "
     ></textarea>
   </div>
@@ -1088,10 +1114,11 @@ function showAlert(type, message) {
     분석 결과는 참고용이며 실제 입시 결과에 대해 책임지지 않습니다.<br>
     전형 정보는 변경될 수 있으니 반드시 대학 공식 모집요강을 확인하세요.<br>
     <br>
-    <strong>개인정보 처리:</strong>
-    입력하신 학생부 내용과 API 키는 브라우저에만 저장되며,
-    Anthropic API로 전송되어 분석에만 사용됩니다.
-    당사 서버에는 저장되지 않습니다.
+    <strong>🔒 개인정보 처리:</strong><br>
+    • <strong>이름, 생년월일, 전화번호, 학교명 등 개인정보는 수집하지 않습니다.</strong><br>
+    • 입력하신 학생부 <strong>활동 내용</strong>과 API 키는 브라우저에만 저장됩니다.<br>
+    • Anthropic API로 전송되어 분석에만 사용되며, 당사 서버에는 저장되지 않습니다.<br>
+    • <strong>반드시 개인정보를 제거한 후</strong> 학생부 내용을 입력하세요.
   </div>
 
   <div class="copyright">
