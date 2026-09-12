@@ -643,6 +643,161 @@ textarea {
 
 <script>
 // ============================================================
+// DB 추상화 레이어 (IndexedDB → Supabase 전환 용이)
+// ============================================================
+class Database {
+  constructor() {
+    this.dbName = 'interview-coach-db';
+    this.version = 1;
+    this.db = null;
+  }
+
+  async init() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, this.version);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        this.db = request.result;
+        resolve(this.db);
+      };
+
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+
+        // Store 1: students
+        if (!db.objectStoreNames.contains('students')) {
+          const studentsStore = db.createObjectStore('students', { keyPath: 'id', autoIncrement: true });
+          studentsStore.createIndex('createdAt', 'createdAt', { unique: false });
+        }
+
+        // Store 2: questions
+        if (!db.objectStoreNames.contains('questions')) {
+          const questionsStore = db.createObjectStore('questions', { keyPath: 'id', autoIncrement: true });
+          questionsStore.createIndex('studentId', 'studentId', { unique: false });
+        }
+
+        // Store 3: interviews
+        if (!db.objectStoreNames.contains('interviews')) {
+          const interviewsStore = db.createObjectStore('interviews', { keyPath: 'id', autoIncrement: true });
+          interviewsStore.createIndex('studentId', 'studentId', { unique: false });
+        }
+      };
+    });
+  }
+
+  async saveStudent(data) {
+    const transaction = this.db.transaction(['students'], 'readwrite');
+    const store = transaction.objectStore('students');
+
+    const studentData = {
+      university: data.university,
+      department: data.department,
+      record: data.record,
+      maskedRecord: data.maskedRecord,
+      createdAt: new Date().toISOString()
+    };
+
+    return new Promise((resolve, reject) => {
+      const request = store.add(studentData);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getLatestStudent() {
+    const transaction = this.db.transaction(['students'], 'readonly');
+    const store = transaction.objectStore('students');
+    const index = store.index('createdAt');
+
+    return new Promise((resolve, reject) => {
+      const request = index.openCursor(null, 'prev');
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (cursor) {
+          resolve({ id: cursor.value.id, ...cursor.value });
+        } else {
+          resolve(null);
+        }
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async saveQuestions(studentId, questions) {
+    const transaction = this.db.transaction(['questions'], 'readwrite');
+    const store = transaction.objectStore('questions');
+
+    const data = {
+      studentId: studentId,
+      questions: questions,
+      createdAt: new Date().toISOString()
+    };
+
+    return new Promise((resolve, reject) => {
+      const request = store.add(data);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getQuestions(studentId) {
+    const transaction = this.db.transaction(['questions'], 'readonly');
+    const store = transaction.objectStore('questions');
+    const index = store.index('studentId');
+
+    return new Promise((resolve, reject) => {
+      const request = index.get(studentId);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async saveInterview(data) {
+    const transaction = this.db.transaction(['interviews'], 'readwrite');
+    const store = transaction.objectStore('interviews');
+
+    const interviewData = {
+      studentId: data.studentId,
+      questionNumber: data.questionNumber,
+      question: data.question,
+      answer: data.answer,
+      transcript: data.transcript,
+      createdAt: new Date().toISOString()
+    };
+
+    return new Promise((resolve, reject) => {
+      const request = store.add(interviewData);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getInterviews(studentId) {
+    const transaction = this.db.transaction(['interviews'], 'readonly');
+    const store = transaction.objectStore('interviews');
+    const index = store.index('studentId');
+
+    return new Promise((resolve, reject) => {
+      const request = index.getAll(studentId);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getAllStudents() {
+    const transaction = this.db.transaction(['students'], 'readonly');
+    const store = transaction.objectStore('students');
+
+    return new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+}
+
+// ============================================================
 // 전역 변수
 // ============================================================
 let currentStep = 1;
@@ -651,13 +806,23 @@ let maskedRecord = '';
 let questions = [];
 let currentQuestion = 0;
 let recognition = null;
+let db = new Database();
+let currentStudentId = null;
 
 // ============================================================
 // 초기화
 // ============================================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   lucide.createIcons();
   loadSettings();
+
+  // DB 초기화
+  try {
+    await db.init();
+    console.log('✅ DB 초기화 완료');
+  } catch (error) {
+    console.error('❌ DB 초기화 실패:', error);
+  }
 
   // 음성 인식 초기화
   if ('webkitSpeechRecognition' in window) {
@@ -740,13 +905,21 @@ function completeStep(step) {
 // ============================================================
 async function saveStudentRecord() {
   const record = document.getElementById('studentRecord').value.trim();
+  const university = localStorage.getItem('university');
+  const department = localStorage.getItem('department');
 
   if (!record || record.length < 100) {
     showToast('error', '⚠️ 생기부 내용을 충분히 입력하세요 (최소 100자)');
     return;
   }
 
-  showLoading('생기부 분석 중...', '개인정보 마스킹 및 핵심 키워드 추출');
+  if (!university || !department) {
+    showToast('error', '⚠️ 설정에서 대학/학과를 먼저 선택하세요');
+    openSettings();
+    return;
+  }
+
+  showLoading('생기부 분석 중...', '개인정보 마스킹 및 DB 저장');
 
   // 개인정보 마스킹
   maskedRecord = maskPersonalInfo(record);
@@ -755,21 +928,39 @@ async function saveStudentRecord() {
   // 마스킹된 정보 표시
   const maskedCount = countMasked(record, maskedRecord);
 
-  setTimeout(() => {
+  try {
+    // DB에 저장
+    currentStudentId = await db.saveStudent({
+      university: university,
+      department: department,
+      record: savedRecord,
+      maskedRecord: maskedRecord
+    });
+
+    console.log('✅ 생기부 DB 저장 완료 (ID:', currentStudentId + ')');
+
+    setTimeout(() => {
+      hideLoading();
+
+      document.getElementById('maskedInfo').innerHTML = `
+        <strong>마스킹 처리:</strong>
+        ${maskedCount > 0 ? `${maskedCount}개 항목이 마스킹되었습니다` : '마스킹할 개인정보가 없습니다'}
+        <br>
+        <small style="color:#666;">DB에 저장됨 (ID: ${currentStudentId})</small>
+      `;
+
+      document.getElementById('analysisResult').style.display = 'block';
+      completeStep(1);
+      showToast('success', '✅ 생기부 저장 완료!');
+
+      // 다음 단계로 이동
+      setTimeout(() => switchStep(2), 1500);
+    }, 1500);
+
+  } catch (error) {
     hideLoading();
-
-    document.getElementById('maskedInfo').innerHTML = `
-      <strong>마스킹 처리:</strong>
-      ${maskedCount > 0 ? `${maskedCount}개 항목이 마스킹되었습니다` : '마스킹할 개인정보가 없습니다'}
-    `;
-
-    document.getElementById('analysisResult').style.display = 'block';
-    completeStep(1);
-    showToast('success', '✅ 생기부 저장 완료!');
-
-    // 다음 단계로 이동
-    setTimeout(() => switchStep(2), 1500);
-  }, 2000);
+    showToast('error', `❌ DB 저장 실패: ${error.message}`);
+  }
 }
 
 function maskPersonalInfo(text) {
@@ -890,6 +1081,14 @@ JSON만 출력하고 다른 설명은 하지 마.`
     const result = JSON.parse(jsonMatch[0]);
     questions = result.questions.slice(0, 10); // 10개만
 
+    // DB에 저장
+    try {
+      await db.saveQuestions(currentStudentId, questions);
+      console.log('✅ 질문 DB 저장 완료');
+    } catch (error) {
+      console.error('❌ 질문 DB 저장 실패:', error);
+    }
+
     hideLoading();
     displayQuestions();
     completeStep(2);
@@ -993,8 +1192,25 @@ function startRecording() {
   };
 }
 
-function stopRecording() {
+async function stopRecording() {
   recognition.stop();
+
+  const transcript = document.getElementById('transcript').textContent;
+  const q = questions[currentQuestion];
+
+  // DB에 저장
+  try {
+    await db.saveInterview({
+      studentId: currentStudentId,
+      questionNumber: currentQuestion + 1,
+      question: q.question,
+      answer: q.answer,
+      transcript: transcript
+    });
+    console.log(`✅ 질문 ${currentQuestion + 1} 답변 DB 저장 완료`);
+  } catch (error) {
+    console.error('❌ 답변 DB 저장 실패:', error);
+  }
 
   showToast('success', '✅ 답변 완료!');
 
