@@ -3,16 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>로그인 | 2027 대입 AI 면접코치</title>
-
-<!-- Lucide Icons -->
+<title>로그인 - AI 면접코치</title>
 <script src="https://unpkg.com/lucide@latest"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  font-family: 'Pretendard', -apple-system, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   display: flex;
@@ -21,13 +23,13 @@ body {
   padding: 20px;
 }
 
-.login-container {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+.container {
   max-width: 450px;
   width: 100%;
+  background: white;
+  border-radius: 20px;
   padding: 50px 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
 
 .logo {
@@ -36,19 +38,48 @@ body {
 }
 
 .logo h1 {
-  font-size: 28px;
-  font-weight: 900;
-  color: #667eea;
+  font-size: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   margin-bottom: 8px;
 }
 
 .logo p {
-  font-size: 14px;
   color: #666;
+  font-size: 14px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 30px;
+  background: #f5f5f5;
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.tab {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.tab.active {
+  background: white;
+  color: #667eea;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .form-group {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
@@ -61,285 +92,235 @@ body {
 
 .form-group input {
   width: 100%;
-  padding: 14px 16px;
+  padding: 14px;
   border: 2px solid #e0e0e0;
   border-radius: 10px;
   font-size: 15px;
-  transition: all 0.3s;
+  transition: border-color 0.2s;
 }
 
 .form-group input:focus {
   outline: none;
   border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
 }
 
-.btn-login {
+.btn {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
-  margin-top: 8px;
-}
-
-.btn-login:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102,126,234,0.4);
-}
-
-.btn-login:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.divider {
-  text-align: center;
-  margin: 30px 0;
-  position: relative;
-}
-
-.divider::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 100%;
-  height: 1px;
-  background: #e0e0e0;
-}
-
-.divider span {
-  position: relative;
-  background: white;
-  padding: 0 16px;
-  color: #999;
-  font-size: 13px;
-}
-
-.btn-back {
-  width: 100%;
-  padding: 14px;
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
-  border-radius: 10px;
-  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
-  text-decoration: none;
-  display: inline-block;
-  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-top: 10px;
 }
 
-.btn-back:hover {
-  background: #f8f9fa;
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
 
-.alert {
-  padding: 12px 16px;
+.btn:active {
+  transform: translateY(0);
+}
+
+.error {
+  background: #fee;
+  color: #c00;
+  padding: 12px;
   border-radius: 8px;
-  margin-bottom: 20px;
   font-size: 14px;
+  margin-bottom: 20px;
   display: none;
 }
 
-.alert.error {
-  background: #fee;
-  color: #c00;
-  border: 1px solid #fcc;
-}
-
-.alert.success {
-  background: #efe;
-  color: #0a0;
-  border: 1px solid #cfc;
-}
-
-.alert.show {
+.error.show {
   display: block;
 }
 
-.info-box {
-  background: #f8f9fa;
-  border-left: 4px solid #667eea;
-  padding: 16px;
-  border-radius: 8px;
-  margin-top: 24px;
-  font-size: 13px;
+.loading {
+  display: none;
+  text-align: center;
+  padding: 20px;
   color: #666;
 }
 
-.info-box strong {
-  color: #667eea;
+.loading.show {
+  display: block;
 }
 
-@media (max-width: 500px) {
-  .login-container {
-    padding: 40px 30px;
-  }
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  color: #999;
+  font-size: 13px;
 }
 </style>
 </head>
 <body>
 
-<div class="login-container">
+<div class="container">
   <div class="logo">
-    <i data-lucide="graduation-cap" style="width:48px; height:48px; color:#667eea"></i>
-    <h1>AI 면접코치</h1>
-    <p>2027 학생부종합 전형 면접 대비</p>
+    <h1>🎓 AI 면접코치</h1>
+    <p>학생부종합 전형 면접 대비</p>
   </div>
 
-  <div id="alert" class="alert"></div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login')">로그인</button>
+    <button class="tab" onclick="switchTab('signup')">회원가입</button>
+  </div>
 
-  <form id="loginForm">
+  <div id="error" class="error"></div>
+  <div id="loading" class="loading">처리 중...</div>
+
+  <!-- 로그인 폼 -->
+  <form id="loginForm" style="display:block;">
     <div class="form-group">
-      <label for="email">
-        <i data-lucide="mail" style="width:14px; height:14px; vertical-align:-1px; margin-right:4px"></i>
-        이메일
-      </label>
-      <input
-        type="email"
-        id="email"
-        placeholder="이메일을 입력하세요"
-        required
-        autocomplete="email"
-      >
+      <label>이메일</label>
+      <input type="email" id="loginEmail" placeholder="이메일 주소" required>
     </div>
-
     <div class="form-group">
-      <label for="password">
-        <i data-lucide="lock" style="width:14px; height:14px; vertical-align:-1px; margin-right:4px"></i>
-        비밀번호
-      </label>
-      <input
-        type="password"
-        id="password"
-        placeholder="비밀번호를 입력하세요"
-        required
-        autocomplete="current-password"
-      >
+      <label>비밀번호</label>
+      <input type="password" id="loginPassword" placeholder="비밀번호" required>
     </div>
-
-    <button type="submit" class="btn-login" id="loginBtn">
-      <i data-lucide="log-in" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>
-      로그인
-    </button>
+    <button type="submit" class="btn">로그인</button>
   </form>
 
-  <div class="divider">
-    <span>또는</span>
-  </div>
+  <!-- 회원가입 폼 -->
+  <form id="signupForm" style="display:none;">
+    <div class="form-group">
+      <label>이메일</label>
+      <input type="email" id="signupEmail" placeholder="이메일 주소" required>
+    </div>
+    <div class="form-group">
+      <label>비밀번호</label>
+      <input type="password" id="signupPassword" placeholder="비밀번호 (최소 6자)" required minlength="6">
+    </div>
+    <div class="form-group">
+      <label>비밀번호 확인</label>
+      <input type="password" id="signupPasswordConfirm" placeholder="비밀번호 확인" required minlength="6">
+    </div>
+    <button type="submit" class="btn">회원가입</button>
+  </form>
 
-  <a href="index.html" class="btn-back">
-    <i data-lucide="arrow-left" style="width:16px; height:16px; vertical-align:-2px; margin-right:6px"></i>
-    메인으로 돌아가기
-  </a>
-
-  <div class="info-box">
-    <strong>💡 첫 방문이신가요?</strong><br>
-    관리자에게 계정을 요청하세요.<br>
-    문의: support@jobizic.com
+  <div class="footer">
+    Powered by Jobizic © 2026 · AI Interview Coach
   </div>
 </div>
 
 <script>
-  // Lucide 아이콘 초기화
-  lucide.createIcons();
+// Supabase 초기화
+const SUPABASE_URL = 'https://uflotegcmhkfocvszncd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmbG90ZWdjbWhrZm9jdnN6bmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODE2NDksImV4cCI6MjEwNDg1NzY0OX0.zgeE4lgiy1qnynWFcABLLRG09SrFv1zXdtNhWed39_M';
 
-  // 관리자 계정 초기화
-  function initializeAdmin() {
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    if (!users['roche07m@gmail.com']) {
-      users['roche07m@gmail.com'] = {
-        email: 'roche07m@gmail.com',
-        password: 'ro0722',
-        role: 'admin',
-        createdAt: new Date().toISOString()
-      };
-      localStorage.setItem('users', JSON.stringify(users));
-      console.log('관리자 계정이 초기화되었습니다.');
-    }
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// 이미 로그인된 경우 리다이렉트
+async function checkExistingSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    window.location.href = 'app.html';
+  }
+}
+
+checkExistingSession();
+
+// 탭 전환
+function switchTab(tab) {
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(t => t.classList.remove('active'));
+
+  if (tab === 'login') {
+    tabs[0].classList.add('active');
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('signupForm').style.display = 'none';
+  } else {
+    tabs[1].classList.add('active');
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'block';
   }
 
-  // 페이지 로드 시 관리자 계정 초기화
-  initializeAdmin();
+  hideError();
+}
 
-  // 이미 로그인되어 있으면 리다이렉트
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-  if (currentUser) {
-    if (currentUser.role === 'admin') {
-      window.location.href = 'admin.html';
-    } else {
-      window.location.href = 'app.html';
-    }
-  }
+// 에러 표시
+function showError(message) {
+  const errorEl = document.getElementById('error');
+  errorEl.textContent = message;
+  errorEl.classList.add('show');
+}
 
-  // 알림 표시 함수
-  function showAlert(type, message) {
-    const alert = document.getElementById('alert');
-    alert.className = `alert ${type} show`;
-    alert.textContent = message;
-    setTimeout(() => {
-      alert.classList.remove('show');
-    }, 5000);
-  }
+function hideError() {
+  const errorEl = document.getElementById('error');
+  errorEl.classList.remove('show');
+}
 
-  // 로그인 폼 처리
-  document.getElementById('loginForm').addEventListener('submit', (e) => {
-    e.preventDefault();
+// 로딩 표시
+function showLoading() {
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('signupForm').style.display = 'none';
+}
 
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const loginBtn = document.getElementById('loginBtn');
+function hideLoading() {
+  document.getElementById('loading').classList.remove('show');
+}
 
-    if (!email || !password) {
-      showAlert('error', '이메일과 비밀번호를 입력해주세요.');
-      return;
-    }
+// 로그인
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideError();
+  showLoading();
 
-    // 사용자 확인
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    const user = users[email];
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
 
-    if (!user) {
-      showAlert('error', '등록되지 않은 이메일입니다.');
-      return;
-    }
-
-    if (user.password !== password) {
-      showAlert('error', '비밀번호가 일치하지 않습니다.');
-      return;
-    }
-
-    // 로그인 성공
-    loginBtn.disabled = true;
-    loginBtn.textContent = '로그인 중...';
-
-    // 현재 사용자 정보 저장
-    localStorage.setItem('currentUser', JSON.stringify({
-      email: user.email,
-      role: user.role,
-      loginAt: new Date().toISOString()
-    }));
-
-    showAlert('success', '로그인 성공! 리다이렉트 중...');
-
-    setTimeout(() => {
-      if (user.role === 'admin') {
-        window.location.href = 'admin.html';
-      } else {
-        window.location.href = 'app.html';
-      }
-    }, 1000);
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password
   });
+
+  if (error) {
+    hideLoading();
+    switchTab('login');
+    showError('로그인 실패: ' + error.message);
+  } else {
+    window.location.href = 'app.html';
+  }
+});
+
+// 회원가입
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideError();
+
+  const email = document.getElementById('signupEmail').value;
+  const password = document.getElementById('signupPassword').value;
+  const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+
+  if (password !== passwordConfirm) {
+    showError('비밀번호가 일치하지 않습니다.');
+    return;
+  }
+
+  showLoading();
+
+  const { data, error } = await supabase.auth.signUp({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    hideLoading();
+    switchTab('signup');
+    showError('회원가입 실패: ' + error.message);
+  } else {
+    window.location.href = 'app.html';
+  }
+});
 </script>
 
 </body>
