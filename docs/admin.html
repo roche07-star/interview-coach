@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>관리자 페이지 - AI 면접코치</title>
+<title>관리자 ?�이지 - AI 면접코치</title>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -25,7 +25,7 @@ body {
   margin: 0 auto;
 }
 
-/* 네비게이션 */
+/* ?�비게이??*/
 .navbar {
   background: white;
   border-radius: 12px;
@@ -67,7 +67,7 @@ body {
   box-shadow: 0 4px 12px rgba(102,126,234,0.3);
 }
 
-/* 통계 카드 */
+/* ?�계 카드 */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -115,7 +115,7 @@ body {
   background-clip: text;
 }
 
-/* 섹션 */
+/* ?�션 */
 .section {
   background: white;
   border-radius: 12px;
@@ -157,7 +157,7 @@ body {
   box-shadow: 0 4px 12px rgba(102,126,234,0.3);
 }
 
-/* 유저 목록 테이블 */
+/* ?��? 목록 ?�이�?*/
 .users-table {
   width: 100%;
   border-collapse: collapse;
@@ -367,24 +367,23 @@ body {
 </head>
 <body>
 
-<!-- 네비게이션 -->
+<!-- ?�비게이??-->
 <div class="container">
   <div class="navbar">
-    <div class="nav-logo">🎓 AI 면접코치 관리자</div>
+    <div class="nav-logo">?�� AI 면접코치 관리자</div>
     <button class="nav-btn" onclick="handleLogout()">
       <i data-lucide="log-out" style="width:16px; height:16px"></i>
-      나가기
-    </button>
+      ?��?�?    </button>
   </div>
 
-  <!-- 통계 -->
+  <!-- ?�계 -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-header">
         <div class="stat-icon">
           <i data-lucide="users" style="width:24px; height:24px"></i>
         </div>
-        <div class="stat-label">총 유저 수</div>
+        <div class="stat-label">�??��? ??/div>
       </div>
       <div class="stat-value" id="totalUsers">0</div>
     </div>
@@ -394,7 +393,7 @@ body {
         <div class="stat-icon">
           <i data-lucide="file-text" style="width:24px; height:24px"></i>
         </div>
-        <div class="stat-label">총 학생부 수</div>
+        <div class="stat-label">�??�생부 ??/div>
       </div>
       <div class="stat-value" id="totalStudents">0</div>
     </div>
@@ -404,7 +403,7 @@ body {
         <div class="stat-icon">
           <i data-lucide="help-circle" style="width:24px; height:24px"></i>
         </div>
-        <div class="stat-label">총 질문 수</div>
+        <div class="stat-label">�?질문 ??/div>
       </div>
       <div class="stat-value" id="totalQuestions">0</div>
     </div>
@@ -414,32 +413,32 @@ body {
         <div class="stat-icon">
           <i data-lucide="mic" style="width:24px; height:24px"></i>
         </div>
-        <div class="stat-label">총 면접 연습 수</div>
+        <div class="stat-label">�?면접 ?�습 ??/div>
       </div>
       <div class="stat-value" id="totalInterviews">0</div>
     </div>
   </div>
 
-  <!-- 유저 목록 -->
+  <!-- ?��? 목록 -->
   <div class="section">
     <div class="section-header">
-      <h2 class="section-title">유저 목록</h2>
+      <h2 class="section-title">?��? 목록</h2>
       <button class="btn-primary" onclick="openAddUserModal()">
         <i data-lucide="user-plus" style="width:16px; height:16px"></i>
-        유저 추가
+        ?��? 추�?
       </button>
     </div>
 
     <div id="loadingUsers" class="loading">
-      로딩 중...
+      로딩 �?..
     </div>
 
     <table class="users-table" id="usersTable" style="display:none;">
       <thead>
         <tr>
-          <th>이메일</th>
+          <th>?�메??/th>
           <th>권한</th>
-          <th>가입일</th>
+          <th>가?�일</th>
         </tr>
       </thead>
       <tbody id="usersTableBody">
@@ -448,56 +447,55 @@ body {
 
     <div id="emptyUsers" class="empty-state" style="display:none;">
       <i data-lucide="users" style="width:48px; height:48px"></i>
-      <p>등록된 유저가 없습니다.</p>
+      <p>?�록???��?가 ?�습?�다.</p>
     </div>
   </div>
 </div>
 
-<!-- 유저 추가 모달 -->
+<!-- ?��? 추�? 모달 -->
 <div class="modal" id="addUserModal">
   <div class="modal-content">
-    <h3 class="modal-header">유저 추가</h3>
+    <h3 class="modal-header">?��? 추�?</h3>
     <form id="addUserForm" onsubmit="handleAddUser(event)">
       <div class="form-group">
-        <label>이메일</label>
+        <label>?�메??/label>
         <input type="email" id="newUserEmail" placeholder="example@gmail.com" required>
       </div>
       <div class="form-group">
-        <label>비밀번호</label>
-        <input type="password" id="newUserPassword" placeholder="최소 6자" required minlength="6">
+        <label>비�?번호</label>
+        <input type="password" id="newUserPassword" placeholder="최소 6?? required minlength="6">
       </div>
       <div class="form-group">
-        <label>비밀번호 확인</label>
-        <input type="password" id="newUserPasswordConfirm" placeholder="비밀번호 확인" required minlength="6">
+        <label>비�?번호 ?�인</label>
+        <input type="password" id="newUserPasswordConfirm" placeholder="비�?번호 ?�인" required minlength="6">
       </div>
       <div class="modal-actions">
         <button type="button" class="btn-cancel" onclick="closeAddUserModal()">취소</button>
-        <button type="submit" class="btn-submit">추가</button>
+        <button type="submit" class="btn-submit">추�?</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Toast 알림 -->
+<!-- Toast ?�림 -->
 <div class="toast" id="toast">
   <span id="toastIcon"></span>
   <span id="toastMessage"></span>
 </div>
 
 <script>
-// Supabase 초기화
-const SUPABASE_URL = 'https://uflotegcmhkfocvszncd.supabase.co';
+// Supabase 초기??const SUPABASE_URL = 'https://uflotegcmhkfocvszncd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmbG90ZWdjbWhrZm9jdnN6bmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODE2NDksImV4cCI6MjEwNDg1NzY0OX0.zgeE4lgiy1qnynWFcABLLRG09SrFv1zXdtNhWed39_M';
 
 let supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const ADMIN_EMAIL = 'roche07m@gmail.com';
 
-// 로그아웃
+// 로그?�웃
 async function handleLogout() {
   const { error } = await supabaseClient.auth.signOut();
   if (error) {
-    showToast('error', '로그아웃 실패');
+    showToast('error', '로그?�웃 ?�패');
   } else {
     window.location.href = 'login.html';
   }
@@ -513,7 +511,7 @@ async function checkAuth() {
   }
 
   if (session.user.email !== ADMIN_EMAIL) {
-    alert('관리자 권한이 없습니다.');
+    alert('관리자 권한???�습?�다.');
     window.location.href = 'app.html';
     return;
   }
@@ -521,12 +519,12 @@ async function checkAuth() {
   return session.user;
 }
 
-// 통계 로드
+// ?�계 로드
 async function loadStats() {
   try {
-    // 총 유저 수 (Supabase Auth Admin API는 anon key로는 접근 불가)
-    // 대신 students 테이블의 고유 user_id 수를 사용
-    const { data: users, error: usersError } = await supabase
+    // �??��? ??(Supabase Auth Admin API??anon key로는 ?�근 불�?)
+    // ?�??students ?�이블의 고유 user_id ?��? ?�용
+    const { data: users, error: usersError } = await supabaseClient
       .from('students')
       .select('user_id');
 
@@ -535,8 +533,7 @@ async function loadStats() {
       document.getElementById('totalUsers').textContent = uniqueUsers.size;
     }
 
-    // 총 학생부 수
-    const { count: studentsCount, error: studentsError } = await supabase
+    // �??�생부 ??    const { count: studentsCount, error: studentsError } = await supabaseClient
       .from('students')
       .select('*', { count: 'exact', head: true });
 
@@ -544,8 +541,7 @@ async function loadStats() {
       document.getElementById('totalStudents').textContent = studentsCount || 0;
     }
 
-    // 총 질문 수
-    const { count: questionsCount, error: questionsError } = await supabase
+    // �?질문 ??    const { count: questionsCount, error: questionsError } = await supabaseClient
       .from('questions')
       .select('*', { count: 'exact', head: true });
 
@@ -553,8 +549,7 @@ async function loadStats() {
       document.getElementById('totalQuestions').textContent = questionsCount || 0;
     }
 
-    // 총 면접 연습 수
-    const { count: interviewsCount, error: interviewsError } = await supabase
+    // �?면접 ?�습 ??    const { count: interviewsCount, error: interviewsError } = await supabaseClient
       .from('interviews')
       .select('*', { count: 'exact', head: true });
 
@@ -562,19 +557,19 @@ async function loadStats() {
       document.getElementById('totalInterviews').textContent = interviewsCount || 0;
     }
   } catch (error) {
-    console.error('통계 로드 실패:', error);
+    console.error('?�계 로드 ?�패:', error);
   }
 }
 
-// 유저 목록 로드
+// ?��? 목록 로드
 async function loadUsers() {
   document.getElementById('loadingUsers').classList.add('show');
   document.getElementById('usersTable').style.display = 'none';
   document.getElementById('emptyUsers').style.display = 'none';
 
   try {
-    // students 테이블에서 user_id와 email을 가져옴
-    const { data, error } = await supabase
+    // students ?�이블에??user_id?� email??가?�옴
+    const { data, error } = await supabaseClient
       .from('students')
       .select('user_id, created_at')
       .order('created_at', { ascending: false });
@@ -587,8 +582,7 @@ async function loadUsers() {
       return;
     }
 
-    // user_id로 그룹화
-    const usersMap = new Map();
+    // user_id�?그룹??    const usersMap = new Map();
     data.forEach(student => {
       if (!usersMap.has(student.user_id)) {
         usersMap.set(student.user_id, student);
@@ -598,8 +592,7 @@ async function loadUsers() {
     const tbody = document.getElementById('usersTableBody');
     tbody.innerHTML = '';
 
-    // 각 user_id에 대해 auth 정보 가져오기는 불가능하므로
-    // user_id만 표시
+    // �?user_id???�??auth ?�보 가?�오기는 불�??�하므�?    // user_id�??�시
     usersMap.forEach((student, userId) => {
       const tr = document.createElement('tr');
       const createdDate = new Date(student.created_at).toLocaleDateString('ko-KR');
@@ -607,7 +600,7 @@ async function loadUsers() {
       tr.innerHTML = `
         <td>${userId}</td>
         <td>
-          <span class="badge user">일반</span>
+          <span class="badge user">?�반</span>
         </td>
         <td>${createdDate}</td>
       `;
@@ -615,7 +608,7 @@ async function loadUsers() {
       tbody.appendChild(tr);
     });
 
-    // 관리자 추가
+    // 관리자 추�?
     const adminTr = document.createElement('tr');
     adminTr.innerHTML = `
       <td>${ADMIN_EMAIL}</td>
@@ -629,24 +622,24 @@ async function loadUsers() {
     document.getElementById('loadingUsers').classList.remove('show');
     document.getElementById('usersTable').style.display = 'table';
   } catch (error) {
-    console.error('유저 목록 로드 실패:', error);
-    showToast('error', '유저 목록을 불러올 수 없습니다.');
+    console.error('?��? 목록 로드 ?�패:', error);
+    showToast('error', '?��? 목록??불러?????�습?�다.');
     document.getElementById('loadingUsers').classList.remove('show');
   }
 }
 
-// 유저 추가 모달 열기
+// ?��? 추�? 모달 ?�기
 function openAddUserModal() {
   document.getElementById('addUserModal').classList.add('show');
 }
 
-// 유저 추가 모달 닫기
+// ?��? 추�? 모달 ?�기
 function closeAddUserModal() {
   document.getElementById('addUserModal').classList.remove('show');
   document.getElementById('addUserForm').reset();
 }
 
-// 유저 추가
+// ?��? 추�?
 async function handleAddUser(event) {
   event.preventDefault();
 
@@ -655,7 +648,7 @@ async function handleAddUser(event) {
   const passwordConfirm = document.getElementById('newUserPasswordConfirm').value;
 
   if (password !== passwordConfirm) {
-    showToast('error', '비밀번호가 일치하지 않습니다.');
+    showToast('error', '비�?번호가 ?�치?��? ?�습?�다.');
     return;
   }
 
@@ -667,24 +660,24 @@ async function handleAddUser(event) {
 
     if (error) {
       if (error.message.includes('already registered')) {
-        showToast('error', '이미 등록된 이메일입니다.');
+        showToast('error', '?��? ?�록???�메?�입?�다.');
       } else {
-        showToast('error', '유저 추가 실패: ' + error.message);
+        showToast('error', '?��? 추�? ?�패: ' + error.message);
       }
       return;
     }
 
-    showToast('success', '유저가 추가되었습니다.');
+    showToast('success', '?��?가 추�??�었?�니??');
     closeAddUserModal();
     await loadUsers();
     await loadStats();
   } catch (error) {
-    console.error('유저 추가 실패:', error);
-    showToast('error', '유저 추가에 실패했습니다.');
+    console.error('?��? 추�? ?�패:', error);
+    showToast('error', '?��? 추�????�패?�습?�다.');
   }
 }
 
-// Toast 알림
+// Toast ?�림
 function showToast(type, message) {
   const toast = document.getElementById('toast');
   const icon = document.getElementById('toastIcon');
@@ -692,9 +685,9 @@ function showToast(type, message) {
 
   toast.className = 'toast show ' + type;
 
-  if (type === 'success') icon.textContent = '✅';
-  else if (type === 'error') icon.textContent = '❌';
-  else icon.textContent = 'ℹ️';
+  if (type === 'success') icon.textContent = '??;
+  else if (type === 'error') icon.textContent = '??;
+  else icon.textContent = '?�️';
 
   msg.textContent = message;
 
@@ -703,15 +696,14 @@ function showToast(type, message) {
   }, 3000);
 }
 
-// 초기화
-window.addEventListener('DOMContentLoaded', async () => {
+// 초기??window.addEventListener('DOMContentLoaded', async () => {
   await checkAuth();
   lucide.createIcons();
   await loadStats();
   await loadUsers();
 });
 
-// 모달 외부 클릭 시 닫기
+// 모달 ?��? ?�릭 ???�기
 document.getElementById('addUserModal').addEventListener('click', (e) => {
   if (e.target.id === 'addUserModal') {
     closeAddUserModal();
