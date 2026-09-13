@@ -1,7 +1,8 @@
 {
-  "github": {
-    "silent": true
-  },
-  "cleanUrls": true,
-  "public": true
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
 }
