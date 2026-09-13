@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2027 대입 AI 면접코치 | 학생부종합 전형 면접 대비</title>
 <script src="https://unpkg.com/lucide@latest"></script>
-<!-- 🔥 Supabase Client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -757,35 +755,6 @@ textarea {
 </div>
 
 <script>
-// ============================================================
-// Supabase 초기화
-// ============================================================
-const SUPABASE_URL = 'https://uflotegcmhkfocvszncd.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmbG90ZWdjbWhrZm9jdnN6bmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODE2NDksImV4cCI6MjEwNDg1NzY0OX0.zgeE4lgiy1qnynWFcABLLRG09SrFv1zXdtNhWed39_M';
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// 현재 사용자
-let currentUser = null;
-
-// 인증 상태 확인
-async function checkAuth() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    // 로그인 페이지로 리다이렉트
-    window.location.href = 'login.html';
-    return false;
-  }
-  currentUser = session.user;
-  return true;
-}
-
-// 로그아웃
-async function logout() {
-  await supabase.auth.signOut();
-  window.location.href = 'login.html';
-}
-
 // ============================================================
 // DB 추상화 레이어 (IndexedDB → Supabase 전환 용이)
 // ============================================================
