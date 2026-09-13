@@ -909,168 +909,185 @@ async function checkAuth() {
 }
 
 // ============================================================
-// DB 추상화 레이어 (IndexedDB → Supabase 전환 용이)
+// DB 추상화 레이어 (Supabase)
 // ============================================================
 class Database {
   constructor() {
-    this.dbName = 'interview-coach-db';
-    this.version = 1;
-    this.db = null;
+    // Supabase 클라이언트 사용
   }
 
   async init() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, this.version);
+    // Supabase는 이미 초기화되어 있음
+    if (!supabaseClient) {
+      console.warn('⚠️ Supabase가 초기화되지 않았습니다.');
+      return false;
+    }
+    return true;
+  }
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        this.db = request.result;
-        resolve(this.db);
-      };
+  async getCurrentUserId() {
+    if (!supabaseClient) return null;
 
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
-
-        // Store 1: students
-        if (!db.objectStoreNames.contains('students')) {
-          const studentsStore = db.createObjectStore('students', { keyPath: 'id', autoIncrement: true });
-          studentsStore.createIndex('createdAt', 'createdAt', { unique: false });
-        }
-
-        // Store 2: questions
-        if (!db.objectStoreNames.contains('questions')) {
-          const questionsStore = db.createObjectStore('questions', { keyPath: 'id', autoIncrement: true });
-          questionsStore.createIndex('studentId', 'studentId', { unique: false });
-        }
-
-        // Store 3: interviews
-        if (!db.objectStoreNames.contains('interviews')) {
-          const interviewsStore = db.createObjectStore('interviews', { keyPath: 'id', autoIncrement: true });
-          interviewsStore.createIndex('studentId', 'studentId', { unique: false });
-        }
-      };
-    });
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      return session?.user?.id || null;
+    } catch (error) {
+      console.error('사용자 ID 조회 실패:', error);
+      return null;
+    }
   }
 
   async saveStudent(data) {
-    const transaction = this.db.transaction(['students'], 'readwrite');
-    const store = transaction.objectStore('students');
+    if (!supabaseClient) {
+      throw new Error('Supabase가 초기화되지 않았습니다.');
+    }
 
-    const studentData = {
-      university: data.university,
-      department: data.department,
-      record: data.record,
-      maskedRecord: data.maskedRecord,
-      createdAt: new Date().toISOString()
-    };
+    const userId = await this.getCurrentUserId();
+    if (!userId) {
+      throw new Error('로그인이 필요합니다.');
+    }
 
-    return new Promise((resolve, reject) => {
-      const request = store.add(studentData);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
+    const { data: student, error } = await supabaseClient
+      .from('students')
+      .insert({
+        user_id: userId,
+        university: data.university,
+        department: data.department,
+        record: data.record,
+        masked_record: data.maskedRecord
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return student.id;
   }
 
   async getLatestStudent() {
-    const transaction = this.db.transaction(['students'], 'readonly');
-    const store = transaction.objectStore('students');
-    const index = store.index('createdAt');
+    if (!supabaseClient) return null;
 
-    return new Promise((resolve, reject) => {
-      const request = index.openCursor(null, 'prev');
-      request.onsuccess = () => {
-        const cursor = request.result;
-        if (cursor) {
-          resolve({ id: cursor.value.id, ...cursor.value });
-        } else {
-          resolve(null);
-        }
-      };
-      request.onerror = () => reject(request.error);
-    });
+    try {
+      const { data: students, error } = await supabaseClient
+        .from('students')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+      return students && students.length > 0 ? students[0] : null;
+    } catch (error) {
+      console.error('최신 학생부 조회 실패:', error);
+      return null;
+    }
   }
 
   async saveQuestions(studentId, questions) {
-    const transaction = this.db.transaction(['questions'], 'readwrite');
-    const store = transaction.objectStore('questions');
+    if (!supabaseClient) {
+      throw new Error('Supabase가 초기화되지 않았습니다.');
+    }
 
-    const data = {
-      studentId: studentId,
-      questions: questions,
-      createdAt: new Date().toISOString()
-    };
+    const { data, error } = await supabaseClient
+      .from('questions')
+      .insert({
+        student_id: studentId,
+        questions: questions
+      })
+      .select()
+      .single();
 
-    return new Promise((resolve, reject) => {
-      const request = store.add(data);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
+    if (error) throw error;
+    return data.id;
   }
 
   async getQuestions(studentId) {
-    const transaction = this.db.transaction(['questions'], 'readonly');
-    const store = transaction.objectStore('questions');
-    const index = store.index('studentId');
+    if (!supabaseClient) return null;
 
-    return new Promise((resolve, reject) => {
-      const request = index.get(studentId);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
+    try {
+      const { data, error } = await supabaseClient
+        .from('questions')
+        .select('*')
+        .eq('student_id', studentId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // 데이터 없음
+          return null;
+        }
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      console.error('질문 조회 실패:', error);
+      return null;
+    }
   }
 
   async saveInterview(data) {
-    const transaction = this.db.transaction(['interviews'], 'readwrite');
-    const store = transaction.objectStore('interviews');
+    if (!supabaseClient) {
+      throw new Error('Supabase가 초기화되지 않았습니다.');
+    }
 
-    const interviewData = {
-      studentId: data.studentId,
-      questionNumber: data.questionNumber,
-      question: data.question,
-      answer: data.answer,
-      transcript: data.transcript,
-      createdAt: new Date().toISOString()
-    };
+    const { data: interview, error } = await supabaseClient
+      .from('interviews')
+      .insert({
+        student_id: data.studentId,
+        question_index: data.questionNumber,
+        answer: data.answer
+      })
+      .select()
+      .single();
 
-    return new Promise((resolve, reject) => {
-      const request = store.add(interviewData);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
+    if (error) throw error;
+    return interview.id;
   }
 
   async getInterviews(studentId) {
-    const transaction = this.db.transaction(['interviews'], 'readonly');
-    const store = transaction.objectStore('interviews');
-    const index = store.index('studentId');
+    if (!supabaseClient) return [];
 
-    return new Promise((resolve, reject) => {
-      const request = index.getAll(studentId);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
+    try {
+      const { data, error } = await supabaseClient
+        .from('interviews')
+        .select('*')
+        .eq('student_id', studentId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('면접 조회 실패:', error);
+      return [];
+    }
   }
 
   async getAllStudents() {
-    const transaction = this.db.transaction(['students'], 'readonly');
-    const store = transaction.objectStore('students');
+    if (!supabaseClient) return [];
 
-    return new Promise((resolve, reject) => {
-      const request = store.getAll();
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
+    try {
+      const { data, error } = await supabaseClient
+        .from('students')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('전체 학생부 조회 실패:', error);
+      return [];
+    }
   }
 
   async deleteStudent(studentId) {
-    const transaction = this.db.transaction(['students'], 'readwrite');
-    const store = transaction.objectStore('students');
+    if (!supabaseClient) {
+      throw new Error('Supabase가 초기화되지 않았습니다.');
+    }
 
-    return new Promise((resolve, reject) => {
-      const request = store.delete(studentId);
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
+    const { error } = await supabaseClient
+      .from('students')
+      .delete()
+      .eq('id', studentId);
+
+    if (error) throw error;
   }
 }
 
