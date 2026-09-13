@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 면접코치 선택</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  width: 100%;
+}
+
+h1 {
+  text-align: center;
+  color: white;
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.subtitle {
+  text-align: center;
+  color: rgba(255,255,255,0.9);
+  font-size: 1.1em;
+  margin-bottom: 50px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  text-decoration: none;
+  color: #333;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+}
+
+.card-icon {
+  font-size: 4em;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 15px;
+}
+
+.card-desc {
+  font-size: 1em;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.card-target {
+  display: inline-block;
+  background: #f0f0f0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  color: #667eea;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2em;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎓 2027 대입 AI 면접코치</h1>
+  <p class="subtitle">학생부종합 전형 면접 대비 플랫폼</p>
+
+  <div class="cards">
+    <a href="/app-v2.html" class="card">
+      <div class="card-icon">💼</div>
+      <div class="card-title">V2 - 일반 버전</div>
+      <div class="card-desc">
+        경영학과, 경제학과 등<br>
+        일반 학과 면접 대비
+      </div>
+      <div class="card-target">서울대 • 연세대 • 고려대 외 10개교</div>
+    </a>
+
+    <a href="/app-v3.html" class="card">
+      <div class="card-icon">🏥</div>
+      <div class="card-title">V3 - 간호학과</div>
+      <div class="card-desc">
+        간호학과 전문<br>
+        학생부종합 전형 특화
+      </div>
+      <div class="card-target">아주대 • 중앙대 • 가톨릭대 외 5개교</div>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

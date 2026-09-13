@@ -1415,14 +1415,14 @@ ${isResume ? `⚠️ 이미 ${existingCount}개의 질문이 생성되었습니�
 
 JSON만 출력하고 다른 설명은 하지 마.`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Vercel Function 사용 (CORS 우회)
+    const response = await fetch('/api/claude', {
       method: 'POST',
       headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        apiKey: apiKey,
         model: 'claude-sonnet-4-5-20250929',
         max_tokens: 16000,
         messages: [{
