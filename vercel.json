@@ -1,7 +1,7 @@
 {
-  "buildCommand": null,
-  "outputDirectory": "docs",
-  "rewrites": [
-    { "source": "/api/claude", "destination": "/api/claude.js" }
-  ]
+  "github": {
+    "silent": true
+  },
+  "cleanUrls": true,
+  "public": true
 }
