@@ -1,13 +1,10 @@
 {
-  "buildCommand": "echo 'No build needed'",
-  "outputDirectory": "docs",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" }
-  ],
-  "functions": {
-    "api/**/*.js": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
-  }
+    { "source": "/", "destination": "/docs/index.html" },
+    { "source": "/login.html", "destination": "/docs/login.html" },
+    { "source": "/app.html", "destination": "/docs/app.html" },
+    { "source": "/admin.html", "destination": "/docs/admin.html" },
+    { "source": "/guide.html", "destination": "/docs/guide.html" },
+    { "source": "/api/claude", "destination": "/api/claude.js" }
+  ]
 }
