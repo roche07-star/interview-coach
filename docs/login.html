@@ -308,6 +308,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   const password = document.getElementById('loginPassword').value;
 
   try {
+    // 🔧 기존 세션 정리 (충돌 방지)
+    await supabaseClient.auth.signOut();
+
+    // 로그인 시도
     const { data, error } = await supabaseClient.auth.signInWithPassword({
       email: email,
       password: password
@@ -317,6 +321,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       hideLoading();
       switchTab('login');
       showError('로그인 실패: ' + error.message);
+      console.error('로그인 에러 상세:', error);
     } else {
       // 관리자는 admin.html로, 일반 사용자는 app.html로
       if (email === 'roche07m@gmail.com') {
@@ -329,6 +334,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     hideLoading();
     switchTab('login');
     showError('로그인 오류: ' + error.message);
+    console.error('로그인 예외 상세:', error);
   }
 });
 
