@@ -962,9 +962,12 @@ class Database {
         masked_record: data.maskedRecord
       })
       .select()
-      .single();
+      .maybeSingle();  // 🔧 single() → maybeSingle() (0개여도 에러 안 남)
 
     if (error) throw error;
+    if (!student) {
+      throw new Error('학생부 저장 실패: 데이터가 반환되지 않았습니다.');
+    }
     return student.id;
   }
 
