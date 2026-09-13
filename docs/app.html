@@ -1013,10 +1013,12 @@ let currentTranscript = ''; // 답변 임시 저장 (수정용)
 // 초기화
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
+  // 아이콘 먼저 로드
+  lucide.createIcons();
+
   // 로그인 체크
   await checkAuth();
 
-  lucide.createIcons();
   loadSettings();
 
   // DB 초기화
