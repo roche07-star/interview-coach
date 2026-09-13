@@ -806,12 +806,12 @@ textarea {
 const SUPABASE_URL = 'https://uflotegcmhkfocvszncd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmbG90ZWdjbWhrZm9jdnN6bmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODE2NDksImV4cCI6MjEwNDg1NzY0OX0.zgeE4lgiy1qnynWFcABLLRG09SrFv1zXdtNhWed39_M';
 
-let supabase = null;
+let supabaseClient = null;
 
 // Supabase SDK가 로드되었는지 확인
 if (typeof window.supabase !== 'undefined') {
   try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     console.log('✅ Supabase 초기화 완료');
   } catch (error) {
     console.error('❌ Supabase 초기화 실패:', error);
@@ -822,14 +822,14 @@ if (typeof window.supabase !== 'undefined') {
 
 // 로그아웃 핸들러
 async function handleLogout() {
-  if (!supabase) {
+  if (!supabaseClient) {
     // Supabase가 없으면 바로 로그인 페이지로
     window.location.href = 'login.html';
     return;
   }
 
   try {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabaseClient.auth.signOut();
     if (error) {
       console.error('로그아웃 실패:', error);
     }
@@ -844,13 +844,13 @@ async function handleLogout() {
 
 // 페이지 로드 시 로그인 체크
 async function checkAuth() {
-  if (!supabase) {
+  if (!supabaseClient) {
     console.warn('⚠️ Supabase가 초기화되지 않았습니다. localStorage만 사용합니다.');
     return;
   }
 
   try {
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
 
     if (error) {
       console.error('인증 체크 실패:', error);
