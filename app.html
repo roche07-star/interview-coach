@@ -1427,8 +1427,8 @@ ${isResume ? `⚠️ 이미 ${existingCount}개의 질문이 생성되었습니�
 
 JSON만 출력하고 다른 설명은 하지 마.`;
 
-    // Vercel Function 사용
-    const response = await fetch('/api/claude', {
+    // Netlify Function 사용
+    const response = await fetch('/.netlify/functions/claude', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

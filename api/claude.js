@@ -1,28 +1,35 @@
-// Vercel Serverless Function
-export default async function handler(req, res) {
-  // CORS 허용
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+// Netlify Function
+exports.handler = async function(event, context) {
+  // CORS 헤더
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+  };
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+  // OPTIONS 요청 처리
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  // POST만 허용
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ error: 'Method not allowed' })
+    };
   }
 
   try {
-    const { apiKey, model, max_tokens, messages } = req.body;
+    const { apiKey, model, max_tokens, messages } = JSON.parse(event.body);
 
     if (!apiKey) {
-      return res.status(400).json({ error: 'API key is required' });
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'API key is required' })
+      };
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -39,16 +46,28 @@ export default async function handler(req, res) {
       })
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json();
-      return res.status(response.status).json(errorData);
+      return {
+        statusCode: response.status,
+        headers,
+        body: JSON.stringify(data)
+      };
     }
 
-    const data = await response.json();
-    return res.status(200).json(data);
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(data)
+    };
 
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ error: error.message });
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: error.message })
+    };
   }
-}
+};
