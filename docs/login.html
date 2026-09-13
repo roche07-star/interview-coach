@@ -313,7 +313,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       switchTab('login');
       showError('로그인 실패: ' + error.message);
     } else {
-      window.location.href = 'app.html';
+      // 관리자는 admin.html로, 일반 사용자는 app.html로
+      if (email === 'roche07m@gmail.com') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'app.html';
+      }
     }
   } catch (error) {
     hideLoading();
