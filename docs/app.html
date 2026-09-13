@@ -2497,7 +2497,7 @@ async function loadStudentRecord() {
         minute: '2-digit'
       });
 
-      const preview = student.maskedRecord.substring(0, 100) + '...';
+      const preview = (student.masked_record || student.maskedRecord || student.record || '내용 없음').substring(0, 100) + '...';
 
       return `
         <div class="student-item" onclick="selectStudent(${student.id})" style="
@@ -2601,7 +2601,7 @@ async function selectStudent(studentId) {
     }
 
     document.getElementById('studentRecord').value = student.record;
-    maskedRecord = student.maskedRecord;
+    maskedRecord = student.masked_record || student.maskedRecord || student.record;
     currentStudentId = student.id;
 
     localStorage.setItem('university', student.university);
@@ -2610,7 +2610,7 @@ async function selectStudent(studentId) {
     document.getElementById('department').value = student.department;
 
     document.getElementById('analysisResult').style.display = 'block';
-    const maskedCount = countMasked(student.record, student.maskedRecord);
+    const maskedCount = countMasked(student.record, student.masked_record || student.maskedRecord || student.record);
     document.getElementById('maskedInfo').textContent = `${maskedCount}개 항목이 자동으로 마스킹되었습니다.`;
 
     completeStep(1);
