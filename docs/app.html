@@ -947,10 +947,15 @@ class Database {
       throw new Error('로그인이 필요합니다.');
     }
 
+    // 이메일 가져오기
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const userEmail = user?.email || '';
+
     const { data: student, error } = await supabaseClient
       .from('students')
       .insert({
         user_id: userId,
+        email: userEmail,
         university: data.university,
         department: data.department,
         record: data.record,

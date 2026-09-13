@@ -573,10 +573,10 @@ async function loadUsers() {
   document.getElementById('emptyUsers').style.display = 'none';
 
   try {
-    // students 테이블에서 user_id와 email을 가져옴
+    // students 테이블에서 user_id, email을 가져옴
     const { data, error } = await supabaseClient
       .from('students')
-      .select('user_id, created_at')
+      .select('user_id, email, created_at')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -598,14 +598,14 @@ async function loadUsers() {
     const tbody = document.getElementById('usersTableBody');
     tbody.innerHTML = '';
 
-    // 각 user_id에 대해 auth 정보 가져오기는 불가능하므로
-    // user_id만 표시
+    // 유저 정보 표시
     usersMap.forEach((student, userId) => {
       const tr = document.createElement('tr');
       const createdDate = new Date(student.created_at).toLocaleDateString('ko-KR');
+      const email = student.email || userId; // 이메일 또는 user_id
 
       tr.innerHTML = `
-        <td>${userId}</td>
+        <td>${email}</td>
         <td>
           <span class="badge user">일반</span>
         </td>
