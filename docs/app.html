@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2027 대입 AI 면접코치 | 학생부종합 전형 면접 대비</title>
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -26,28 +27,62 @@ body {
   position: relative;
 }
 
-/* 설정 버튼 */
-.settings-btn {
-  position: absolute;
-  top: 30px;
-  right: 30px;
-  background: #667eea;
+/* 네비게이션 바 */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.nav-logo {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.nav-btn {
+  padding: 10px 20px;
   border: none;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: white;
+  gap: 6px;
   transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(102,126,234,0.3);
 }
 
-.settings-btn:hover {
+.nav-btn.settings {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.nav-btn.settings:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.nav-btn.logout {
+  background: #667eea;
+  color: white;
+}
+
+.nav-btn.logout:hover {
   background: #764ba2;
-  transform: rotate(90deg);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102,126,234,0.3);
 }
 
 /* 헤더 */
@@ -486,10 +521,20 @@ textarea {
 <body>
 
 <div class="container">
-  <!-- 설정 버튼 -->
-  <button class="settings-btn" onclick="openSettings()">
-    <i data-lucide="settings" style="width:20px; height:20px"></i>
-  </button>
+  <!-- 네비게이션 바 -->
+  <div class="navbar">
+    <div class="nav-logo">🎓 AI 면접코치</div>
+    <div class="nav-actions">
+      <button class="nav-btn settings" onclick="openSettings()">
+        <i data-lucide="settings" style="width:16px; height:16px"></i>
+        설정
+      </button>
+      <button class="nav-btn logout" onclick="handleLogout()">
+        <i data-lucide="log-out" style="width:16px; height:16px"></i>
+        나가기
+      </button>
+    </div>
+  </div>
 
   <!-- 헤더 -->
   <h1>🎓 2027 대입 AI 면접코치</h1>
@@ -756,6 +801,33 @@ textarea {
 
 <script>
 // ============================================================
+// Supabase 초기화
+// ============================================================
+const SUPABASE_URL = 'https://uflotegcmhkfocvszncd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmbG90ZWdjbWhrZm9jdnN6bmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODE2NDksImV4cCI6MjEwNDg1NzY0OX0.zgeE4lgiy1qnynWFcABLLRG09SrFv1zXdtNhWed39_M';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// 로그아웃 핸들러
+async function handleLogout() {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error('로그아웃 실패:', error);
+    alert('로그아웃에 실패했습니다.');
+  } else {
+    window.location.href = 'login.html';
+  }
+}
+
+// 페이지 로드 시 로그인 체크
+async function checkAuth() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = 'login.html';
+  }
+}
+
+// ============================================================
 // DB 추상화 레이어 (IndexedDB → Supabase 전환 용이)
 // ============================================================
 class Database {
@@ -941,6 +1013,9 @@ let currentTranscript = ''; // 답변 임시 저장 (수정용)
 // 초기화
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
+  // 로그인 체크
+  await checkAuth();
+
   lucide.createIcons();
   loadSettings();
 
