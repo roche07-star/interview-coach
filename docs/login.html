@@ -216,13 +216,31 @@ body {
 const SUPABASE_URL = 'https://uflotegcmhkfocvszncd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmbG90ZWdjbWhrZm9jdnN6bmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODE2NDksImV4cCI6MjEwNDg1NzY0OX0.zgeE4lgiy1qnynWFcABLLRG09SrFv1zXdtNhWed39_M';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabaseClient = null;
+
+// Supabase SDK가 로드되었는지 확인
+if (typeof window.supabase !== 'undefined') {
+  try {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Supabase 초기화 완료');
+  } catch (error) {
+    console.error('❌ Supabase 초기화 실패:', error);
+  }
+} else {
+  console.error('⚠️ Supabase SDK가 로드되지 않았습니다.');
+}
 
 // 이미 로그인된 경우 리다이렉트
 async function checkExistingSession() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    window.location.href = 'app.html';
+  if (!supabaseClient) return;
+
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      window.location.href = 'app.html';
+    }
+  } catch (error) {
+    console.error('세션 체크 실패:', error);
   }
 }
 
@@ -273,22 +291,34 @@ function hideLoading() {
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   hideError();
+
+  if (!supabaseClient) {
+    showError('Supabase가 초기화되지 않았습니다.');
+    return;
+  }
+
   showLoading();
 
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
+  try {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
 
-  if (error) {
+    if (error) {
+      hideLoading();
+      switchTab('login');
+      showError('로그인 실패: ' + error.message);
+    } else {
+      window.location.href = 'app.html';
+    }
+  } catch (error) {
     hideLoading();
     switchTab('login');
-    showError('로그인 실패: ' + error.message);
-  } else {
-    window.location.href = 'app.html';
+    showError('로그인 오류: ' + error.message);
   }
 });
 
@@ -296,6 +326,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   hideError();
+
+  if (!supabaseClient) {
+    showError('Supabase가 초기화되지 않았습니다.');
+    return;
+  }
 
   const email = document.getElementById('signupEmail').value;
   const password = document.getElementById('signupPassword').value;
@@ -308,18 +343,24 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
 
   showLoading();
 
-  const { data, error } = await supabase.auth.signUp({
-    email: email,
-    password: password
-  });
+  try {
+    const { data, error } = await supabaseClient.auth.signUp({
+      email: email,
+      password: password
+    });
 
-  if (error) {
+    if (error) {
+      hideLoading();
+      switchTab('signup');
+      showError('회원가입 실패: ' + error.message);
+    } else {
+      // 회원가입 성공 → 가이드 페이지로 이동
+      window.location.href = 'guide.html';
+    }
+  } catch (error) {
     hideLoading();
     switchTab('signup');
-    showError('회원가입 실패: ' + error.message);
-  } else {
-    // 회원가입 성공 → 가이드 페이지로 이동
-    window.location.href = 'guide.html';
+    showError('회원가입 오류: ' + error.message);
   }
 });
 </script>
