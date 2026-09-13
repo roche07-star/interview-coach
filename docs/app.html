@@ -1001,9 +1001,12 @@ class Database {
         questions: questions
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) {
+      throw new Error('질문 저장 실패: 데이터가 반환되지 않았습니다.');
+    }
     return data.id;
   }
 
@@ -1015,16 +1018,10 @@ class Database {
         .from('questions')
         .select('*')
         .eq('student_id', studentId)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // 데이터 없음
-          return null;
-        }
-        throw error;
-      }
-      return data;
+      if (error) throw error;
+      return data;  // null 가능
     } catch (error) {
       console.error('질문 조회 실패:', error);
       return null;
@@ -1044,9 +1041,12 @@ class Database {
         answer: data.answer
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!interview) {
+      throw new Error('면접 답변 저장 실패: 데이터가 반환되지 않았습니다.');
+    }
     return interview.id;
   }
 
