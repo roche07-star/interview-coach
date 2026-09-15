@@ -1427,14 +1427,15 @@ ${isResume ? `⚠️ 이미 ${existingCount}개의 질문이 생성되었습니�
 
 JSON만 출력하고 다른 설명은 하지 마.`;
 
-    // Netlify Function 사용
-    const response = await fetch('/.netlify/functions/claude', {
+    // Claude API 직접 호출
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json'
       },
       body: JSON.stringify({
-        apiKey: apiKey,
         model: 'claude-sonnet-4-5-20250929',
         max_tokens: 16000,
         messages: [{
@@ -2317,14 +2318,15 @@ async function getFeedback() {
       studentAnswer: interview.transcript
     }));
 
-    // Claude API 호출
-    const response = await fetch('/api/claude', {
+    // Claude API 직접 호출
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json'
       },
       body: JSON.stringify({
-        apiKey: apiKey,
         model: 'claude-sonnet-4-6',
         max_tokens: 4000,
         messages: [{
