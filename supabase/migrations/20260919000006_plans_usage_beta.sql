@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS plans (
 INSERT INTO plans (code, name, price_krw, max_universities, question_limit, interview_limit, feedback_limit)
 VALUES
   ('FREE', '무료 체험', 0, 1, 3, 1, 1),
-  ('BETA', '2026 AI 면접코치 베타', 29000, 3, 1000, 100, 100)
+  ('BETA', '2026 AI 면접코치 베타', 29000, 3, 300, 50, 50)
 ON CONFLICT (code) DO UPDATE SET
   name = EXCLUDED.name,
   price_krw = EXCLUDED.price_krw,
