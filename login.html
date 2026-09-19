@@ -358,7 +358,37 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
       showError(errorMsg);
       console.error('로그인 에러 상세:', error);
+
+      // 로그인 실패 횟수 카운트
+      const failKey = 'login_fail_' + email;
+      let failCount = parseInt(localStorage.getItem(failKey) || '0') + 1;
+      localStorage.setItem(failKey, failCount.toString());
+
+      // 3회 실패 시 문의 옵션 제공
+      if (failCount >= 3) {
+        setTimeout(() => {
+          const shouldInquire = confirm(
+            '⚠️ 로그인에 3회 실패했습니다.\n\n' +
+            '비밀번호를 잊으셨거나 계정에 문제가 있으신가요?\n\n' +
+            '관리자에게 문의하시겠습니까?\n\n' +
+            '[확인]을 누르면 문의 창이 열립니다.'
+          );
+
+          if (shouldInquire) {
+            document.getElementById('inquiryEmail').value = email;
+            document.getElementById('inquirySubject').value = '로그인 문제 (3회 실패)';
+            document.getElementById('inquiryMessage').value = '안녕하세요.\n\n로그인 시 다음 문제가 발생했습니다:\n' + errorMsg + '\n\n비밀번호 재설정 또는 계정 확인이 필요합니다.';
+            document.getElementById('inquiryModal').style.display = 'flex';
+
+            // 카운터 초기화
+            localStorage.removeItem(failKey);
+          }
+        }, 500);
+      }
     } else {
+      // 로그인 성공 시 실패 카운터 초기화
+      const failKey = 'login_fail_' + email;
+      localStorage.removeItem(failKey);
       // 탈퇴 요청한 사용자 확인
       if (email !== 'roche07he@gmail.com') {
         const { data: approvalData } = await supabaseClient
