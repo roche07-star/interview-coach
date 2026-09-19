@@ -884,12 +884,15 @@ textarea {
   <div class="toast-message" id="toastMessage"></div>
 </div>
 
+<!-- 환경 변수 설정 -->
+<script src="config.js"></script>
+
 <script>
 // ============================================================
 // 2027 대입 면접코치 - Supabase Edge Function 구조
 // ============================================================
-const SUPABASE_URL = 'https://uflotegcmhkfocvszncd.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmbG90ZWdjbWhrZm9jdnN6bmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODE2NDksImV4cCI6MjEwNDg1NzY0OX0.zgeE4lgiy1qnynWFcABLLRG09SrFv1zXdtNhWed39_M';
+const SUPABASE_URL = CONFIG.SUPABASE_URL;
+const SUPABASE_ANON_KEY = CONFIG.SUPABASE_ANON_KEY;
 
 let supabaseClient = null;
 let currentUser = null;
