@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>사용량 테스트</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>사용량 테스트</h1>
+  <button onclick="testUsage()">사용량 확인</button>
+  <button onclick="testManualRecord()">수동 기록 테스트</button>
+  <pre id="result"></pre>
+
+  <script>
+    const CONFIG = {
+      SUPABASE_URL: 'https://uflotegcmhkfocvszncd.supabase.co',
+      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmbG90ZWdjbWhrZm9jdnN6bmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODE2NDksImV4cCI6MjEwNDg1NzY0OX0.zgeE4lgiy1qnynWFcABLLRG09SrFv1zXdtNhWed39_M'
+    };
+
+    const client = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+
+    async function testUsage() {
+      const result = document.getElementById('result');
+
+      try {
+        // 1. 플랜 확인
+        const { data: plan, error: planError } = await client.rpc('get_my_plan');
+        result.textContent += '=== 플랜 정보 ===\n';
+        result.textContent += JSON.stringify(plan, null, 2) + '\n\n';
+
+        // 2. 사용량 확인
+        const { data: usage, error: usageError } = await client.rpc('get_my_usage');
+        result.textContent += '=== 사용량 정보 ===\n';
+        result.textContent += JSON.stringify(usage, null, 2) + '\n\n';
+
+        if (usageError) {
+          result.textContent += '❌ 사용량 조회 에러: ' + usageError.message + '\n';
+        }
+
+        // 3. usage_events 테이블 직접 조회
+        const { data: events, error: eventsError } = await client
+          .from('usage_events')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        result.textContent += '=== 최근 사용 이벤트 ===\n';
+        result.textContent += JSON.stringify(events, null, 2) + '\n\n';
+
+        if (eventsError) {
+          result.textContent += '❌ 이벤트 조회 에러: ' + eventsError.message + '\n';
+        }
+
+      } catch (e) {
+        result.textContent += '❌ 에러: ' + e.message + '\n';
+      }
+    }
+
+    async function testManualRecord() {
+      const result = document.getElementById('result');
+
+      try {
+        // RPC 함수로 사용량 기록 테스트
+        const { data, error } = await client.rpc('consume_ai_usage', {
+          p_feature: 'questions',
+          p_quantity: 1,
+          p_metadata: { test: true }
+        });
+
+        result.textContent += '=== 수동 기록 테스트 ===\n';
+        result.textContent += 'Result: ' + JSON.stringify(data, null, 2) + '\n';
+
+        if (error) {
+          result.textContent += '❌ 에러: ' + JSON.stringify(error, null, 2) + '\n';
+        } else {
+          result.textContent += '✅ 기록 성공!\n';
+          // 다시 사용량 확인
+          setTimeout(testUsage, 1000);
+        }
+
+      } catch (e) {
+        result.textContent += '❌ 에러: ' + e.message + '\n';
+      }
+    }
+  </script>
+</body>
+</html>

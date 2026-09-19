@@ -6,14 +6,6 @@
 <title>관리자 페이지 - AI 면접코치</title>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-// CONFIG 직접 정의 (임시 해결책)
-const CONFIG = {
-  SUPABASE_URL: 'https://uflotegcmhkfocvszncd.supabase.co',
-  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmbG90ZWdjbWhrZm9jdnN6bmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODE2NDksImV4cCI6MjEwNDg1NzY0OX0.zgeE4lgiy1qnynWFcABLLRG09SrFv1zXdtNhWed39_M'
-};
-</script>
-<script src="common.js?v=2"></script>
 <style>
 * {
   margin: 0;
@@ -419,274 +411,6 @@ body {
 .tab-content.active {
   display: block;
 }
-
-/* 반응형 디자인 */
-
-/* 태블릿 (768px ~ 1024px) */
-@media (max-width: 1024px) {
-  .container {
-    max-width: 100%;
-    padding: 30px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .plan-summary-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* 모바일 (최대 768px) */
-@media (max-width: 768px) {
-  body {
-    padding: 10px;
-  }
-
-  .container {
-    padding: 20px;
-    border-radius: 16px;
-  }
-
-  /* 헤더 */
-  h1 {
-    font-size: 24px;
-  }
-
-  /* 네비게이션 */
-  .navbar {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-  }
-
-  .nav-logo {
-    justify-content: center;
-    font-size: 20px;
-  }
-
-  .nav-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-  }
-
-  .nav-btn {
-    justify-content: center;
-    padding: 12px 16px;
-    font-size: 14px;
-    width: 100%;
-  }
-
-  /* 탭 메뉴 */
-  .tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 6px;
-    padding-bottom: 4px;
-  }
-
-  .tab-btn {
-    flex: 0 0 auto;
-    min-width: 100px;
-    padding: 10px 16px;
-    font-size: 13px;
-  }
-
-  /* 통계 그리드 */
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .stat-card {
-    padding: 16px;
-  }
-
-  .stat-value {
-    font-size: 28px;
-  }
-
-  .stat-label {
-    font-size: 13px;
-  }
-
-  /* 플랜 요약 그리드 */
-  .plan-summary-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .mini-card {
-    padding: 12px;
-  }
-
-  /* 테이블 */
-  .users-table,
-  .approvals-table,
-  .inquiries-table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  table {
-    min-width: 600px; /* 가로 스크롤 */
-  }
-
-  th, td {
-    padding: 10px 8px;
-    font-size: 13px;
-  }
-
-  /* 버튼 */
-  .btn-primary,
-  .btn-danger {
-    padding: 10px 16px;
-    font-size: 13px;
-    min-height: 44px;
-  }
-
-  /* 모달 */
-  .modal-content {
-    width: 95%;
-    max-height: 85vh;
-    padding: 24px;
-    border-radius: 12px;
-  }
-
-  .modal-header h2 {
-    font-size: 18px;
-  }
-
-  .form-group {
-    margin-bottom: 16px;
-  }
-
-  .form-group input,
-  .form-group select {
-    font-size: 15px; /* 모바일 줌 방지 */
-    padding: 12px;
-    min-height: 44px;
-  }
-
-  .form-group label {
-    font-size: 13px;
-  }
-
-  /* Toast */
-  .toast {
-    left: 10px;
-    right: 10px;
-    top: 10px;
-    min-width: auto;
-    max-width: calc(100vw - 20px);
-  }
-
-  /* Loading */
-  .loading-content {
-    padding: 24px;
-  }
-
-  /* 섹션 */
-  .section {
-    margin-bottom: 24px;
-    padding: 16px;
-  }
-
-  .section h2 {
-    font-size: 18px;
-    margin-bottom: 12px;
-  }
-}
-
-/* 작은 모바일 (최대 480px) */
-@media (max-width: 480px) {
-  body {
-    padding: 8px;
-  }
-
-  .container {
-    padding: 16px;
-  }
-
-  h1 {
-    font-size: 22px;
-  }
-
-  .tabs {
-    gap: 4px;
-  }
-
-  .tab-btn {
-    min-width: 80px;
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .stats-grid {
-    gap: 10px;
-  }
-
-  .stat-card {
-    padding: 14px;
-  }
-
-  .stat-value {
-    font-size: 24px;
-  }
-
-  table {
-    min-width: 500px;
-  }
-
-  th, td {
-    padding: 8px 6px;
-    font-size: 12px;
-  }
-
-  .modal-content {
-    padding: 20px;
-  }
-}
-
-/* 가로 모드 대응 */
-@media (max-height: 600px) and (orientation: landscape) {
-  .container {
-    padding: 16px;
-  }
-
-  .modal-content {
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-}
-
-/* 터치 디바이스 최적화 */
-@media (hover: none) and (pointer: coarse) {
-  /* 터치 타겟 크기 확대 */
-  .btn-primary,
-  .btn-danger,
-  .tab-btn,
-  input,
-  select {
-    min-height: 44px; /* iOS 권장 최소 크기 */
-  }
-
-  /* 호버 효과 제거 */
-  .tab-btn:hover,
-  .stat-card:hover,
-  .btn-primary:hover,
-  .btn-danger:hover {
-    transform: none;
-  }
-
-  /* 탭 하이라이트 색상 */
-  * {
-    -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
-  }
-}
 </style>
 </head>
 <body>
@@ -929,27 +653,23 @@ body {
   <span id="toastMessage"></span>
 </div>
 
+<!-- 환경 변수 설정 -->
+<script src="config.js"></script>
+
 <script>
-// Supabase 초기화 (직접 초기화)
-let supabaseClient = null;
+// Supabase 초기화
+const SUPABASE_URL = CONFIG.SUPABASE_URL;
+const SUPABASE_ANON_KEY = CONFIG.SUPABASE_ANON_KEY;
 
-if (window.supabase && CONFIG) {
-  supabaseClient = window.supabase.createClient(
-    CONFIG.SUPABASE_URL,
-    CONFIG.SUPABASE_ANON_KEY
-  );
-  console.log('✅ Supabase 초기화 완료 (admin)');
-} else {
-  console.error('❌ Supabase SDK 또는 CONFIG 로드 실패');
-}
+let supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const ADMIN_EMAILS = ['ziron7@gmail.com', 'roche07he@gmail.com'];
+const ADMIN_EMAIL = 'ziron7@gmail.com';
 
 // 로그아웃
 async function handleLogout() {
   const { error } = await supabaseClient.auth.signOut();
   if (error) {
-    showToast('error', '🚪 로그아웃에 실패했습니다. 페이지를 새로고침해주세요.');
+    showToast('error', '로그아웃 실패');
   } else {
     window.location.href = 'login.html';
   }
@@ -982,7 +702,7 @@ async function checkAuth() {
     return;
   }
 
-  if (!ADMIN_EMAILS.includes(session.user.email)) {
+  if (session.user.email !== ADMIN_EMAIL) {
     alert('관리자 권한이 없습니다.');
     window.location.href = 'app.html';
     return;
@@ -998,7 +718,7 @@ async function loadStats() {
     const { count: usersCount, error: usersError } = await supabaseClient
       .from('user_approvals')
       .select('*', { count: 'exact', head: true })
-      .not('email', 'in', `(${ADMIN_EMAILS.map(e => `"${e}"`).join(',')})`);
+      .neq('email', ADMIN_EMAIL);
 
     if (!usersError) {
       document.getElementById('totalUsers').textContent = usersCount || 0;
@@ -1054,7 +774,7 @@ async function loadUsers() {
       .select('*')
       .eq('approval_status', 'approved')
       .is('deleted_at', null)
-      .not('email', 'in', `(${ADMIN_EMAILS.map(e => `"${e}"`).join(',')})`)
+      .neq('email', ADMIN_EMAIL)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -1062,18 +782,16 @@ async function loadUsers() {
     const tbody = document.getElementById('usersTableBody');
     tbody.innerHTML = '';
 
-    // 관리자들 먼저 추가
-    ADMIN_EMAILS.forEach(email => {
-      const adminTr = document.createElement('tr');
-      adminTr.innerHTML = `
-        <td>${email}</td>
-        <td>
-          <span class="badge admin">관리자</span>
-        </td>
-        <td>-</td>
-      `;
-      tbody.appendChild(adminTr);
-    });
+    // 관리자 먼저 추가
+    const adminTr = document.createElement('tr');
+    adminTr.innerHTML = `
+      <td>${ADMIN_EMAIL}</td>
+      <td>
+        <span class="badge admin">관리자</span>
+      </td>
+      <td>-</td>
+    `;
+    tbody.appendChild(adminTr);
 
     // 일반 유저 추가
     if (data && data.length > 0) {
@@ -1102,7 +820,7 @@ async function loadUsers() {
     }
   } catch (error) {
     console.error('유저 목록 로드 실패:', error);
-    showToast('error', '👥 유저 목록을 불러오는데 실패했습니다. 페이지를 새로고침해주세요.');
+    showToast('error', '유저 목록을 불러올 수 없습니다.');
     document.getElementById('loadingUsers').classList.remove('show');
   }
 }
@@ -1127,7 +845,7 @@ async function handleAddUser(event) {
   const passwordConfirm = document.getElementById('newUserPasswordConfirm').value;
 
   if (password !== passwordConfirm) {
-    showToast('error', '🔒 비밀번호가 일치하지 않습니다. 다시 확인해주세요.');
+    showToast('error', '비밀번호가 일치하지 않습니다.');
     return;
   }
 
@@ -1139,9 +857,9 @@ async function handleAddUser(event) {
 
     if (error) {
       if (error.message.includes('already registered')) {
-        showToast('error', '⚠️ 이미 등록된 이메일입니다. 다른 이메일을 사용해주세요.');
+        showToast('error', '이미 등록된 이메일입니다.');
       } else {
-        showToast('error', '❌ 유저 추가 실패: ' + error.message);
+        showToast('error', '유저 추가 실패: ' + error.message);
       }
       return;
     }
@@ -1152,11 +870,28 @@ async function handleAddUser(event) {
     await loadStats();
   } catch (error) {
     console.error('유저 추가 실패:', error);
-    showToast('error', '❌ 유저 추가에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    showToast('error', '유저 추가에 실패했습니다.');
   }
 }
 
-// showToast는 common.js에서 제공 (중복 제거)
+// Toast 알림
+function showToast(type, message) {
+  const toast = document.getElementById('toast');
+  const icon = document.getElementById('toastIcon');
+  const msg = document.getElementById('toastMessage');
+
+  toast.className = 'toast show ' + type;
+
+  if (type === 'success') icon.textContent = '✅';
+  else if (type === 'error') icon.textContent = '❌';
+  else icon.textContent = 'ℹ️';
+
+  msg.textContent = message;
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
 
 // 초기화
 async function loadPlanUsage(){
@@ -1204,7 +939,7 @@ async function loadPendingApprovals() {
     const { data, error } = await supabaseClient
       .from('user_approvals')
       .select('*')
-      .not('email', 'in', `(${ADMIN_EMAILS.map(e => `"${e}"`).join(',')})`)
+      .neq('email', 'ziron7@gmail.com')
       .order('requested_at', { ascending: false });
 
     loading.style.display = 'none';
@@ -1257,7 +992,7 @@ async function loadPendingApprovals() {
     table.style.display = 'table';
   } catch (error) {
     loading.style.display = 'none';
-    showToast('error', '📋 승인 대기 목록을 불러오는데 실패했습니다. 페이지를 새로고침해주세요.');
+    showToast('error', '승인 목록 로드 실패');
     console.error(error);
   }
 }
@@ -1283,7 +1018,7 @@ async function approveUser(userId) {
     showToast('success', '승인이 완료되었습니다.');
     await loadPendingApprovals();
   } catch (error) {
-    showToast('error', '✅ 승인 처리에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    showToast('error', '승인 처리 실패');
     console.error(error);
   }
 }
@@ -1336,7 +1071,7 @@ async function loadInquiries() {
     lucide.createIcons();
   } catch (error) {
     loading.style.display = 'none';
-    showToast('error', '💬 문의 목록을 불러오는데 실패했습니다. 페이지를 새로고침해주세요.');
+    showToast('error', '문의 목록 로드 실패');
     console.error(error);
   }
 }
@@ -1358,7 +1093,7 @@ async function rejectUser(userId) {
     showToast('success', '승인이 거부되었습니다.');
     await loadPendingApprovals();
   } catch (error) {
-    showToast('error', '❌ 거부 처리에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    showToast('error', '거부 처리 실패');
     console.error(error);
   }
 }
@@ -1390,7 +1125,7 @@ async function adminDeleteUser(userId, email) {
     await loadPendingApprovals();
     await loadUsers();
   } catch (error) {
-    showToast('error', '🗑️ DB 삭제 실패: ' + error.message + ' 관리자에게 문의하세요.');
+    showToast('error', 'DB 삭제 실패: ' + error.message);
     console.error(error);
   }
 }
@@ -1459,7 +1194,7 @@ ${data.answer}
       }
     }
   } catch (error) {
-    showToast('error', '💬 문의 조회에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    showToast('error', '문의 조회 실패');
     console.error(error);
   }
 }
@@ -1479,7 +1214,7 @@ async function deleteInquiry(inquiryId) {
     showToast('success', '문의가 삭제되었습니다.');
     await loadInquiries();
   } catch (error) {
-    showToast('error', '🗑️ 문의 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    showToast('error', '문의 삭제 실패');
     console.error(error);
   }
 }
