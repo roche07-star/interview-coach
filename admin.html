@@ -461,9 +461,9 @@ body {
     <div class="stat-card">
       <div class="stat-header">
         <div class="stat-icon">
-          <i data-lucide="file-text" style="width:24px; height:24px"></i>
+          <i data-lucide="clock" style="width:24px; height:24px"></i>
         </div>
-        <div class="stat-label">총 학생부 수</div>
+        <div class="stat-label">승인 대기</div>
       </div>
       <div class="stat-value" id="totalStudents">0</div>
     </div>
@@ -471,9 +471,9 @@ body {
     <div class="stat-card">
       <div class="stat-header">
         <div class="stat-icon">
-          <i data-lucide="help-circle" style="width:24px; height:24px"></i>
+          <i data-lucide="mail" style="width:24px; height:24px"></i>
         </div>
-        <div class="stat-label">총 질문 수</div>
+        <div class="stat-label">총 문의 수</div>
       </div>
       <div class="stat-value" id="totalQuestions">0</div>
     </div>
@@ -481,9 +481,9 @@ body {
     <div class="stat-card">
       <div class="stat-header">
         <div class="stat-icon">
-          <i data-lucide="mic" style="width:24px; height:24px"></i>
+          <i data-lucide="message-circle" style="width:24px; height:24px"></i>
         </div>
-        <div class="stat-label">총 면접 연습 수</div>
+        <div class="stat-label">면접 세션 수</div>
       </div>
       <div class="stat-value" id="totalInterviews">0</div>
     </div>
@@ -694,42 +694,42 @@ async function checkAuth() {
 // 통계 로드
 async function loadStats() {
   try {
-    // 총 유저 수 (Supabase Auth Admin API는 anon key로는 접근 불가)
-    // 대신 students 테이블의 고유 user_id 수를 사용
-    const { data: users, error: usersError } = await supabaseClient
-      .from('students')
-      .select('user_id');
+    // 총 유저 수 (user_approvals - 관리자 제외)
+    const { count: usersCount, error: usersError } = await supabaseClient
+      .from('user_approvals')
+      .select('*', { count: 'exact', head: true })
+      .neq('email', ADMIN_EMAIL);
 
-    if (!usersError && users) {
-      const uniqueUsers = new Set(users.map(u => u.user_id));
-      document.getElementById('totalUsers').textContent = uniqueUsers.size;
+    if (!usersError) {
+      document.getElementById('totalUsers').textContent = usersCount || 0;
     }
 
-    // 총 학생부 수
-    const { count: studentsCount, error: studentsError } = await supabaseClient
-      .from('students')
-      .select('*', { count: 'exact', head: true });
+    // 총 승인 대기 수
+    const { count: pendingCount, error: pendingError } = await supabaseClient
+      .from('user_approvals')
+      .select('*', { count: 'exact', head: true })
+      .eq('approval_status', 'pending');
 
-    if (!studentsError) {
-      document.getElementById('totalStudents').textContent = studentsCount || 0;
+    if (!pendingError) {
+      document.getElementById('totalStudents').textContent = pendingCount || 0;
     }
 
-    // 총 질문 수
-    const { count: questionsCount, error: questionsError } = await supabaseClient
-      .from('questions')
+    // 총 문의 수
+    const { count: inquiriesCount, error: inquiriesError } = await supabaseClient
+      .from('user_inquiries')
       .select('*', { count: 'exact', head: true });
 
-    if (!questionsError) {
-      document.getElementById('totalQuestions').textContent = questionsCount || 0;
+    if (!inquiriesError) {
+      document.getElementById('totalQuestions').textContent = inquiriesCount || 0;
     }
 
-    // 총 면접 연습 수
-    const { count: interviewsCount, error: interviewsError } = await supabaseClient
-      .from('interviews')
+    // 총 면접 세션 수
+    const { count: sessionsCount, error: sessionsError } = await supabaseClient
+      .from('interview_sessions')
       .select('*', { count: 'exact', head: true });
 
-    if (!interviewsError) {
-      document.getElementById('totalInterviews').textContent = interviewsCount || 0;
+    if (!sessionsError) {
+      document.getElementById('totalInterviews').textContent = sessionsCount || 0;
     }
   } catch (error) {
     console.error('통계 로드 실패:', error);
