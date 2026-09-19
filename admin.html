@@ -817,23 +817,33 @@ async function loadPendingApprovals() {
     }
 
     const tbody = document.getElementById('approvalsTableBody');
-    tbody.innerHTML = data.map(approval => `
-      <tr>
-        <td>${approval.email}</td>
-        <td>${new Date(approval.requested_at).toLocaleString('ko-KR')}</td>
-        <td>
-          <span class="badge ${approval.approval_status === 'approved' ? 'success' : approval.approval_status === 'rejected' ? 'error' : 'warning'}">
-            ${approval.approval_status === 'approved' ? '✅ 승인됨' : approval.approval_status === 'rejected' ? '❌ 거부됨' : '⏳ 대기중'}
-          </span>
-        </td>
-        <td>
-          ${approval.approval_status === 'pending' ? `
-            <button class="btn-primary" onclick="approveUser('${approval.user_id}')" style="background:#4caf50; margin-right:8px;">승인</button>
-            <button class="btn-primary" onclick="rejectUser('${approval.user_id}')" style="background:#f44336;">거부</button>
-          ` : '-'}
-        </td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = data.map(approval => {
+      // 탈퇴 상태 확인
+      const isDeleted = approval.deleted_at;
+      const statusBadge = isDeleted
+        ? `<span class="badge" style="background:#9e9e9e; color:white;">🗑️ 탈퇴 (${new Date(approval.deleted_at).toLocaleDateString('ko-KR')})</span>`
+        : approval.approval_status === 'approved'
+          ? '<span class="badge success">✅ 승인됨</span>'
+          : approval.approval_status === 'rejected'
+            ? '<span class="badge error">❌ 거부됨</span>'
+            : '<span class="badge warning">⏳ 대기중</span>';
+
+      const actions = isDeleted || approval.approval_status !== 'pending'
+        ? '-'
+        : `
+          <button class="btn-primary" onclick="approveUser('${approval.user_id}')" style="background:#4caf50; margin-right:8px;">승인</button>
+          <button class="btn-primary" onclick="rejectUser('${approval.user_id}')" style="background:#f44336;">거부</button>
+        `;
+
+      return `
+        <tr>
+          <td>${approval.email}</td>
+          <td>${new Date(approval.requested_at).toLocaleString('ko-KR')}</td>
+          <td>${statusBadge}</td>
+          <td>${actions}</td>
+        </tr>
+      `;
+    }).join('');
 
     table.style.display = 'table';
   } catch (error) {
