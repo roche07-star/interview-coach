@@ -6,7 +6,13 @@
 <title>관리자 페이지 - AI 면접코치</title>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js?v=2"></script>
+<script>
+// CONFIG 직접 정의 (임시 해결책)
+const CONFIG = {
+  SUPABASE_URL: 'https://uflotegcmhkfocvszncd.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmbG90ZWdjbWhrZm9jdnN6bmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODE2NDksImV4cCI6MjEwNDg1NzY0OX0.zgeE4lgiy1qnynWFcABLLRG09SrFv1zXdtNhWed39_M'
+};
+</script>
 <script src="common.js?v=2"></script>
 <style>
 * {
