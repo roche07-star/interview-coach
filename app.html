@@ -702,6 +702,11 @@ textarea {
           테스트 (2개만)
         </button>
       </div>
+      <div style="margin-top:20px;">
+        <button class="btn" onclick="showSavedFeedbacks()" style="background:#9c27b0;">
+          📋 이전 피드백 다시보기
+        </button>
+      </div>
     </div>
 
     <div id="interviewContainer" style="display:none;">
@@ -779,6 +784,19 @@ textarea {
     </div>
     <div id="studentListContainer" style="max-height:500px; overflow-y:auto;">
       <!-- 학생 목록이 여기에 표시됩니다 -->
+    </div>
+  </div>
+</div>
+
+<!-- 저장된 피드백 목록 모달 -->
+<div class="modal" id="feedbackListModal">
+  <div class="modal-content" style="max-width:700px;">
+    <div class="modal-header">
+      <h2>📋 저장된 면접 피드백</h2>
+      <button class="modal-close" onclick="closeFeedbackListModal()">×</button>
+    </div>
+    <div id="feedbackListContainer" style="max-height:500px; overflow-y:auto;">
+      <!-- 피드백 목록이 여기에 표시됩니다 -->
     </div>
   </div>
 </div>
@@ -993,6 +1011,17 @@ class Database {
       .maybeSingle();
     if (error) throw error;
     return data;
+  }
+
+  async getStudentSessions(studentId) {
+    await this.getStudent(studentId);
+    const { data, error } = await supabaseClient
+      .from('interview_sessions')
+      .select('*')
+      .eq('student_id', studentId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
   }
 }
 
@@ -1299,6 +1328,67 @@ async function showInterviewComplete(){
 }
 function resetInterview(){currentSessionId=null;currentQuestion=0;document.getElementById('interviewStartSection').style.display='block';document.getElementById('interviewContainer').style.display='none';}
 function retryInterview(){resetInterview();showToast('info','같은 질문으로 다시 연습할 수 있습니다.');}
+
+async function showSavedFeedbacks(){
+  if(!currentStudentId){showToast('error','생기부를 먼저 입력하고 질문을 생성하세요.');return;}
+  showLoading('피드백 목록 조회 중...');
+  try{
+    const sessions=await db.getStudentSessions(currentStudentId);
+    const feedbackSessions=sessions.filter(s=>s.feedback);
+    hideLoading();
+
+    const c=document.getElementById('feedbackListContainer');
+    if(!feedbackSessions.length){
+      c.innerHTML='<p style="padding:40px;text-align:center;color:#999">저장된 피드백이 없습니다.<br>면접을 완료하고 피드백을 받아보세요.</p>';
+    }else{
+      c.innerHTML='';
+      feedbackSessions.forEach(s=>{
+        const div=document.createElement('div');
+        div.className='student-item';
+        div.dataset.sessionId=s.id;
+        div.style.cssText='padding:16px;border:1px solid #ddd;border-radius:8px;margin-bottom:10px;cursor:pointer';
+
+        const title=document.createElement('strong');
+        title.textContent=`면접 세션 #${s.id}`;
+
+        const date=document.createElement('div');
+        date.style.cssText='font-size:12px;color:#888;margin-top:4px';
+        date.textContent=formatDate(s.created_at);
+
+        const status=document.createElement('div');
+        status.style.cssText='font-size:12px;color:#4caf50;margin-top:4px';
+        status.textContent=`질문 ${s.question_count}개 | ${s.status==='completed'?'완료':'진행중'}`;
+
+        div.appendChild(title);
+        div.appendChild(date);
+        div.appendChild(status);
+        c.appendChild(div);
+      });
+
+      c.onclick=e=>{
+        const item=e.target.closest('.student-item');
+        if(item)loadFeedback(item.dataset.sessionId);
+      };
+    }
+    document.getElementById('feedbackListModal').classList.add('show');
+  }catch(e){hideLoading();console.error(e);showToast('error','피드백 목록 조회 실패: '+e.message);}
+}
+
+function closeFeedbackListModal(){document.getElementById('feedbackListModal').classList.remove('show');}
+
+async function loadFeedback(sessionId){
+  showLoading('피드백 불러오는 중...');
+  try{
+    const feedback=await db.getFeedback(sessionId);
+    if(!feedback)throw new Error('저장된 피드백이 없습니다.');
+    closeFeedbackListModal();
+    hideLoading();
+    displayFeedback(feedback,sessionId);
+    document.getElementById('interviewStartSection').style.display='none';
+    document.getElementById('interviewContainer').style.display='block';
+    showToast('success','이전 피드백을 불러왔습니다.');
+  }catch(e){hideLoading();showToast('error','피드백 불러오기 실패: '+e.message);}
+}
 
 async function getFeedback(){
   if(!currentSessionId){showToast('error','분석할 면접 세션이 없습니다.');return;}
