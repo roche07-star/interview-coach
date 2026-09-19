@@ -39,7 +39,9 @@ body {
 }
 
 .nav-logo {
-  font-size: 20px;
+  display: flex;
+  align-items: center;
+  font-size: 22px;
   font-weight: 700;
   background: linear-gradient(135deg, #667eea, #764ba2);
   -webkit-background-clip: text;
@@ -49,7 +51,7 @@ body {
 
 .nav-actions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -57,46 +59,61 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 8px 14px;
+  background: #f8f9ff;
+  border-radius: 20px;
+  font-size: 13px;
   font-weight: 600;
   color: #667eea;
+  border: 1px solid #eef2ff;
 }
 
 .nav-btn {
-  padding: 10px 20px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.3s;
+  transition: all 0.2s;
+  white-space: nowrap;
 }
 
-.nav-btn.settings {
-  background: #f0f0f0;
+.nav-btn.plan-badge {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 8px 18px;
+  box-shadow: 0 2px 8px rgba(102,126,234,0.3);
+}
+
+.nav-btn.plan-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+}
+
+.nav-btn.icon-only {
+  padding: 8px;
+  background: #f8f9fa;
   color: #666;
 }
 
-.nav-btn.settings:hover {
-  background: #e0e0e0;
-  color: #333;
+.nav-btn.icon-only:hover {
+  background: #eef2ff;
+  color: #667eea;
 }
 
 .nav-btn.logout {
-  background: #667eea;
-  color: white;
+  padding: 8px;
+  background: #fee;
+  color: #c0392b;
 }
 
 .nav-btn.logout:hover {
-  background: #764ba2;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+  background: #fdd;
+  transform: translateY(-1px);
 }
 
 /* 헤더 */
@@ -544,28 +561,26 @@ textarea {
   <!-- 네비게이션 바 -->
   <div class="navbar">
     <div class="nav-logo">
-      <i data-lucide="graduation-cap" style="width:20px; height:20px; display:inline-block; vertical-align:middle; margin-right:6px;"></i>
-      면접코치
+      <i data-lucide="graduation-cap" style="width:24px; height:24px; display:inline-block; vertical-align:middle; margin-right:8px;"></i>
+      <span>면접코치</span>
     </div>
     <div class="nav-actions">
-      <div class="nav-user" id="navUser" style="display:none;">
+      <div class="nav-user" id="navUser">
         <i data-lucide="user" style="width:16px; height:16px"></i>
         <span id="userEmail">-</span>
       </div>
-      <button class="nav-btn settings" onclick="showPlanInfo()" id="planBadgeBtn" style="background:#eef2ff;color:#667eea;">
-        <i data-lucide="badge-check" style="width:16px;height:16px"></i>
+      <button class="nav-btn plan-badge" onclick="showPlanInfo()" id="planBadgeBtn">
+        <i data-lucide="crown" style="width:16px;height:16px"></i>
         <span id="planBadge">플랜 확인</span>
       </button>
-      <button class="nav-btn settings" onclick="redeemBetaCoupon()" id="couponBtn">
-        🎟️ 베타 코드
+      <button class="nav-btn icon-only" onclick="redeemBetaCoupon()" id="couponBtn" title="베타 코드 입력">
+        <i data-lucide="ticket" style="width:18px;height:18px"></i>
       </button>
-      <button class="nav-btn settings" onclick="openSettings()">
-        <i data-lucide="settings" style="width:16px; height:16px"></i>
-        설정
+      <button class="nav-btn icon-only" onclick="openSettings()" title="설정">
+        <i data-lucide="settings" style="width:18px; height:18px"></i>
       </button>
-      <button class="nav-btn logout" onclick="handleLogout()">
-        <i data-lucide="log-out" style="width:16px; height:16px"></i>
-        나가기
+      <button class="nav-btn logout" onclick="handleLogout()" title="로그아웃">
+        <i data-lucide="log-out" style="width:18px; height:18px"></i>
       </button>
     </div>
   </div>
