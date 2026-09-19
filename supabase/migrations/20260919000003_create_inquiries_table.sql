@@ -22,17 +22,17 @@ CREATE POLICY "Anyone can insert inquiry"
 CREATE POLICY "Admins can view all inquiries"
   ON user_inquiries FOR SELECT
   USING (
-    (auth.jwt() ->> 'email') = 'roche07he@gmail.com'
+    (auth.jwt() ->> 'email') = 'ziron7@gmail.com'
   );
 
 CREATE POLICY "Admins can update inquiries"
   ON user_inquiries FOR UPDATE
   USING (
-    (auth.jwt() ->> 'email') = 'roche07he@gmail.com'
+    (auth.jwt() ->> 'email') = 'ziron7@gmail.com'
   );
 
 CREATE POLICY "Admins can delete inquiries"
   ON user_inquiries FOR DELETE
   USING (
-    (auth.jwt() ->> 'email') = 'roche07he@gmail.com'
+    (auth.jwt() ->> 'email') = 'ziron7@gmail.com'
   );

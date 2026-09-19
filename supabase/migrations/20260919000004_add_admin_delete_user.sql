@@ -7,7 +7,7 @@ SECURITY DEFINER
 AS $$
 BEGIN
   -- 관리자만 실행 가능
-  IF (auth.jwt() ->> 'email') != 'roche07he@gmail.com' THEN
+  IF (auth.jwt() ->> 'email') != 'ziron7@gmail.com' THEN
     RAISE EXCEPTION 'Unauthorized: Only admin can delete users';
   END IF;
 

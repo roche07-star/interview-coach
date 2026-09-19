@@ -266,7 +266,7 @@ async function checkExistingSession() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
       // 관리자는 admin.html로, 일반 사용자는 app.html로
-      if (session.user.email === 'roche07he@gmail.com') {
+      if (session.user.email === 'ziron7@gmail.com') {
         window.location.href = 'admin.html';
       } else {
         window.location.href = 'app.html';
@@ -390,7 +390,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       const failKey = 'login_fail_' + email;
       localStorage.removeItem(failKey);
       // 탈퇴 요청한 사용자 확인
-      if (email !== 'roche07he@gmail.com') {
+      if (email !== 'ziron7@gmail.com') {
         const { data: approvalData } = await supabaseClient
           .from('user_approvals')
           .select('deleted_at')
@@ -414,7 +414,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       }
 
       // 관리자는 admin.html로, 일반 사용자는 app.html로
-      if (email === 'roche07he@gmail.com') {
+      if (email === 'ziron7@gmail.com') {
         window.location.href = 'admin.html';
       } else {
         window.location.href = 'app.html';
@@ -470,7 +470,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
       } else {
         // 이메일 확인 불필요 (자동 로그인됨)
         // 관리자는 바로 admin.html로, 일반 사용자는 guide.html로
-        if (email === 'roche07he@gmail.com') {
+        if (email === 'ziron7@gmail.com') {
           window.location.href = 'admin.html';
         } else {
           window.location.href = 'guide.html';

@@ -558,7 +558,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 let supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const ADMIN_EMAIL = 'roche07he@gmail.com';
+const ADMIN_EMAIL = 'ziron7@gmail.com';
 
 // 로그아웃
 async function handleLogout() {
@@ -797,7 +797,7 @@ async function loadPendingApprovals() {
     const { data, error } = await supabaseClient
       .from('user_approvals')
       .select('*')
-      .neq('email', 'roche07he@gmail.com')
+      .neq('email', 'ziron7@gmail.com')
       .order('requested_at', { ascending: false });
 
     loading.style.display = 'none';
