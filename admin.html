@@ -1304,7 +1304,8 @@ async function handleCreateCoupon(event) {
       .single();
 
     if (planError || !betaPlan) {
-      showToast('error', 'BETA 플랜을 찾을 수 없습니다');
+      console.error('BETA 플랜 조회 실패:', planError);
+      showToast('error', 'BETA 플랜을 찾을 수 없습니다. Phase 2 Migration을 실행하셨나요?');
       return;
     }
 
@@ -1322,10 +1323,19 @@ async function handleCreateCoupon(event) {
       .single();
 
     if (error) {
+      console.error('쿠폰 생성 에러:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        full: error
+      });
       if (error.code === '23505') {
         showToast('error', '이미 존재하는 쿠폰 코드입니다');
+      } else if (error.code === '42P01') {
+        showToast('error', 'coupons 테이블이 없습니다. Phase 2 Migration을 실행하세요');
       } else {
-        throw error;
+        showToast('error', `쿠폰 생성 실패: ${error.message || error.code}`);
       }
       return;
     }
