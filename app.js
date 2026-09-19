@@ -587,6 +587,19 @@ async function generateQuestions() {
     questions=[...questions,...added];
     logEvent('questions_generated',{count:added.length,university,department});
     await db.saveQuestions(currentStudentId,questions);
+
+    // 수동 사용량 기록 (Edge Function 실패 대비)
+    try {
+      await supabaseClient.rpc('consume_ai_usage', {
+        p_feature: 'questions',
+        p_quantity: added.length,
+        p_metadata: { university, department }
+      });
+      console.log(`✅ 사용량 기록 완료: questions ${added.length}개`);
+    } catch (usageError) {
+      console.warn('⚠️ 사용량 기록 실패:', usageError);
+    }
+
     hideLoading(); displayQuestions(); await loadPlanState(); completeStep(2); switchStep(3); showToast('success',`총 ${questions.length}개 질문이 준비되었습니다.`);
   } catch(e){hideLoading();console.error(e);showToast('error','질문 생성 실패: '+e.message);}
 }
