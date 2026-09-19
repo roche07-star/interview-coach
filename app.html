@@ -772,6 +772,16 @@ textarea {
       <i data-lucide="check" style="width:18px; height:18px"></i>
       저장
     </button>
+
+    <div style="margin-top:30px; padding-top:20px; border-top:1px solid #e0e0e0;">
+      <button class="btn btn-block btn-danger" onclick="handleDeleteAccount()" style="background:#f44336; color:white;">
+        <i data-lucide="user-x" style="width:18px; height:18px"></i>
+        회원 탈퇴
+      </button>
+      <small style="color:#999; font-size:12px; display:block; margin-top:8px; text-align:center;">
+        탈퇴 시 모든 데이터가 영구적으로 삭제됩니다.
+      </small>
+    </div>
   </div>
 </div>
 
@@ -1095,6 +1105,44 @@ async function checkAuth() {
 async function handleLogout() {
   if (supabaseClient) await supabaseClient.auth.signOut();
   window.location.href = 'login.html';
+}
+
+async function handleDeleteAccount() {
+  if (!supabaseClient || !currentUser) {
+    alert('로그인이 필요합니다.');
+    return;
+  }
+
+  const confirmMsg = '⚠️ 정말로 회원 탈퇴하시겠습니까?\n\n' +
+    '- 모든 생기부 데이터가 삭제됩니다.\n' +
+    '- 면접 세션 및 피드백이 삭제됩니다.\n' +
+    '- 이 작업은 되돌릴 수 없습니다.\n\n' +
+    '계속하려면 "탈퇴"를 입력하세요.';
+
+  const userInput = prompt(confirmMsg);
+
+  if (userInput !== '탈퇴') {
+    alert('회원 탈퇴가 취소되었습니다.');
+    return;
+  }
+
+  try {
+    // RPC 함수를 통해 자신의 계정 삭제 (user_approvals, interview_sessions는 CASCADE로 자동 삭제)
+    const { error } = await supabaseClient.rpc('delete_current_user');
+
+    if (error) {
+      console.error('계정 삭제 오류:', error);
+      alert('⚠️ 계정 삭제 중 오류가 발생했습니다.\n\n' + error.message);
+      return;
+    }
+
+    alert('✅ 회원 탈퇴가 완료되었습니다.\n\n그동안 이용해 주셔서 감사합니다.');
+    window.location.href = 'login.html';
+
+  } catch (error) {
+    console.error('탈퇴 처리 오류:', error);
+    alert('오류가 발생했습니다: ' + error.message);
+  }
 }
 
 function openSettings() { document.getElementById('settingsModal').classList.add('show'); }
