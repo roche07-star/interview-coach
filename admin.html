@@ -644,12 +644,13 @@ async function loadUsers() {
   document.getElementById('emptyUsers').style.display = 'none';
 
   try {
-    // user_approvals 테이블에서 승인된 유저만 가져옴 (탈퇴하지 않은 유저)
+    // user_approvals 테이블에서 승인된 유저만 가져옴 (탈퇴하지 않은 유저, 관리자 제외)
     const { data, error } = await supabaseClient
       .from('user_approvals')
       .select('*')
       .eq('approval_status', 'approved')
       .is('deleted_at', null)
+      .neq('email', ADMIN_EMAIL)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
