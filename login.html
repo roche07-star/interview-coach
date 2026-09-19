@@ -331,6 +331,23 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       showError(errorMsg);
       console.error('로그인 에러 상세:', error);
     } else {
+      // 탈퇴 요청한 사용자 확인
+      if (email !== 'roche07he@gmail.com') {
+        const { data: approvalData } = await supabaseClient
+          .from('user_approvals')
+          .select('deleted_at')
+          .eq('user_id', data.user.id)
+          .single();
+
+        if (approvalData && approvalData.deleted_at) {
+          hideLoading();
+          switchTab('login');
+          await supabaseClient.auth.signOut();
+          showError('회원 탈퇴가 처리된 계정입니다. 다시 가입하시려면 관리자에게 문의하세요.');
+          return;
+        }
+      }
+
       // 관리자는 admin.html로, 일반 사용자는 app.html로
       if (email === 'roche07he@gmail.com') {
         window.location.href = 'admin.html';
