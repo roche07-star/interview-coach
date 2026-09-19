@@ -28,19 +28,11 @@ CREATE POLICY "Users can request approval"
 CREATE POLICY "Admins can view all approvals"
   ON user_approvals FOR SELECT
   USING (
-    EXISTS (
-      SELECT 1 FROM auth.users
-      WHERE auth.users.id = auth.uid()
-      AND auth.users.email = 'roche07he@gmail.com'
-    )
+    (auth.jwt() ->> 'email') = 'roche07he@gmail.com'
   );
 
 CREATE POLICY "Admins can update approvals"
   ON user_approvals FOR UPDATE
   USING (
-    EXISTS (
-      SELECT 1 FROM auth.users
-      WHERE auth.users.id = auth.uid()
-      AND auth.users.email = 'roche07he@gmail.com'
-    )
+    (auth.jwt() ->> 'email') = 'roche07he@gmail.com'
   );
