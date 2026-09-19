@@ -1128,7 +1128,7 @@ async function handleDeleteAccount() {
 
   try {
     // RPC 함수를 통해 자신의 계정 삭제 (user_approvals, interview_sessions는 CASCADE로 자동 삭제)
-    const { error } = await supabaseClient.rpc('delete_current_user');
+    const { error } = await supabaseClient.rpc('request_account_deletion');
 
     if (error) {
       console.error('계정 삭제 오류:', error);
