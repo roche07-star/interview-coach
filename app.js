@@ -215,9 +215,22 @@ async function loadPlanState() {
   setUsage('usageFeedback','usageFeedbackBar',used.feedback_used,fLimit);
   document.getElementById('usagePlanName')?.replaceChildren(document.createTextNode(planState?.name || '무료 체험'));
   document.getElementById('usagePlanMeta')?.replaceChildren(document.createTextNode(isBeta && planState.expires_at ? `베타 만료 ${new Date(planState.expires_at).toLocaleDateString('ko-KR')}` : '현재 무료 체험 플랜'));
-  document.getElementById('generateBtnText')?.replaceChildren(document.createTextNode(isBeta ? `질문/답변 ${selectedQuestionCount}개 생성` : `무료 질문 ${Math.min(selectedQuestionCount,3)}개 생성`));
-  ['count10','count20','count30'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=!isBeta;b.style.opacity=isBeta?'1':'0.45';b.title=isBeta?'':'BETA 플랜에서 사용할 수 있습니다.';});
-  if(!isBeta && selectedQuestionCount>3) selectQuestionCount(3);
+  document.getElementById('generateBtnText')?.replaceChildren(document.createTextNode(isBeta ? `질문/답변 ${selectedQuestionCount}개 생성` : `무료 질문 ${Math.min(selectedQuestionCount,10)}개 생성`));
+  // 무료: 10개까지, 유료: 10/20/30개
+  ['count10','count20','count30'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(!b) return;
+    if(id === 'count10') {
+      b.disabled = false;
+      b.style.opacity = '1';
+      b.title = '';
+    } else {
+      b.disabled = !isBeta;
+      b.style.opacity = isBeta ? '1' : '0.45';
+      b.title = isBeta ? '' : 'BETA 플랜에서 사용할 수 있습니다.';
+    }
+  });
+  if(!isBeta && selectedQuestionCount>10) selectQuestionCount(10);
   updateOnboarding();
 }
 
@@ -575,14 +588,196 @@ async function generateQuestions() {
   if (!supabaseClient) { showToast('error','🔌 서버 연결이 필요합니다. 페이지를 새로고침해주세요.'); return; }
   const university=localStorage.getItem('university')||''; const department=localStorage.getItem('department')||'';
   const isBeta = planState?.code === 'BETA';
-  const targetCount = isBeta ? selectedQuestionCount : Math.min(selectedQuestionCount,3);
+  const targetCount = isBeta ? selectedQuestionCount : Math.min(selectedQuestionCount,10);
   const need=Math.max(0,targetCount-questions.length);
   if(need===0){showToast('info',`이미 ${targetCount}개 질문이 있습니다.`);return;}
   showLoading('🤖 AI가 질문을 생성하고 있습니다',`${need}개의 맞춤형 면접 질문 생성 중 (평균 10~15초 소요)`,true);
   try {
-    const prompt=`너는 2027학년도 대입 학생부종합 전형 면접 전문가이다.\n대학: ${university}\n학과: ${department}\n\n[생기부]\n${maskedRecord}\n\n${questions.length ? `기존 질문 ${questions.length}개가 있으므로 중복 없이 ${need}개만 추가한다.`:''}\n\n각 항목은 question, answer, follow_ups(1~2개)를 가진다. 질문은 생기부의 구체적 활동을 근거로 만들고 전공적합성 40%, 학업역량 30%, 인성 20%, 발전가능성 10%를 반영한다. 답변은 5~7문장, 학생부와 자연스럽게 연결하며 사실을 임의로 만들지 않는다.\n\n⚠️ 중요: 반드시 유효한 JSON만 출력하세요. 설명, 주석, 마크다운 불가. 순수 JSON만 출력.\n\n출력 형식:\n{"questions":[{"question":"질문 내용","answer":"답변 내용","follow_ups":["꼬리질문1","꼬리질문2"]}]}`;
+    // 무료 사용자 프롬프트 (꼬리질문 없음)
+    const freePrompt = `너는 2027학년도 대입 학생부종합전형 면접 전문가이다.
+
+대학: ${university}
+학과: ${department}
+
+[학생부]
+${maskedRecord}
+
+${questions.length ? `
+[기존 질문]
+${JSON.stringify(questions)}
+
+기존 질문과 동일하거나 유사한 질문은 제외하고 새로운 질문 ${need}개만 생성한다.
+` : `
+새로운 질문 ${need}개를 생성한다.
+`}
+
+[질문 생성 원칙]
+1. 반드시 학생부에 실제로 기록된 활동, 교과, 세특, 동아리, 진로활동, 탐구활동 등을 근거로 질문한다.
+2. 학생부에 없는 경험, 활동, 수상, 역할, 성과, 수치 등을 임의로 만들어내지 않는다.
+3. 실제 대학 면접관이 학생부를 보고 물어볼 만한 구체적인 질문을 만든다.
+4. 단순한 자기소개나 지원동기 질문만 반복하지 않는다.
+5. 학생부의 여러 활동과 영역을 균형 있게 활용한다.
+6. 대학과 학과의 특성을 고려하여 전공과 학생부 활동의 연결성을 확인한다.
+7. 활동의 결과뿐 아니라 활동 과정, 학생의 역할, 배운 점과 성찰을 확인한다.
+
+[평가요소]
+전체 질문에서 다음 평가요소를 균형 있게 반영한다.
+- 전공적합성: 40%
+- 학업역량: 30%
+- 인성: 20%
+- 발전가능성: 10%
+
+[질문 유형]
+다음 유형을 골고루 포함한다.
+- 학생부 활동 확인
+- 전공 및 진로 연계
+- 학업 및 탐구
+- 문제 해결
+- 협업 및 공동체
+- 경험에 대한 성찰
+
+[답변 생성 원칙]
+1. 질문과 학생부 내용을 직접 연결하여 답변한다.
+2. 학생부에 없는 사실을 절대 추가하지 않는다.
+3. 학생이 실제 면접에서 말할 수 있는 자연스러운 표현으로 작성한다.
+4. 질문에 먼저 직접 답하고 구체적인 경험이나 근거를 제시한다.
+5. 마지막에는 배운 점이나 앞으로의 방향을 자연스럽게 연결한다.
+6. 학생부 내용을 그대로 복사하지 않고 학생의 생각이 드러나도록 작성한다.
+7. 답변은 5~7문장으로 작성한다.
+8. 지나치게 전문적이거나 완벽한 표현은 피한다.
+
+⚠️ 중요
+- 꼬리질문은 생성하지 않는다.
+- 반드시 질문과 답변만 생성한다.
+- 반드시 유효한 JSON만 출력한다.
+- 설명, 주석, 마크다운, 코드블록은 출력하지 않는다.
+- JSON 외의 문자는 출력하지 않는다.
+
+출력 형식:
+{
+  "questions": [
+    {
+      "question": "질문 내용",
+      "answer": "답변 내용"
+    }
+  ]
+}`;
+
+    // 유료 사용자 프롬프트 (꼬리질문 2~3개 포함, 실전 대비 강화)
+    const paidPrompt = `너는 2027학년도 대입 학생부종합전형 면접 전문가이자
+실전 대학 면접을 대비시키는 전문 면접 코치이다.
+
+대학: ${university}
+학과: ${department}
+
+[학생부]
+${maskedRecord}
+
+${questions.length ? `
+[기존 질문]
+${JSON.stringify(questions)}
+
+기존 질문과 동일하거나 유사한 질문은 제외하고 새로운 질문 ${need}개만 생성한다.
+` : `
+실전 면접 대비를 위한 질문 ${need}개를 생성한다.
+`}
+
+[질문 생성 원칙]
+1. 반드시 학생부에 기록된 구체적인 활동과 내용을 근거로 질문한다.
+2. 학생부에 없는 경험, 활동, 수상, 역할, 성과, 수치 등을 임의로 만들어내지 않는다.
+3. 대학과 학과의 특성을 고려한다.
+4. 실제 대학 면접관이 학생부를 보고 추가로 확인할 가능성이 높은 질문을 만든다.
+5. 동일한 활동만 반복하지 않고 학생부의 여러 영역을 활용한다.
+6. 활동의 동기, 과정, 역할, 결과, 어려움, 해결방법, 배운 점과 성찰을 다양하게 확인한다.
+7. 전공 관련 활동은 전공과의 연결성을 한 단계 깊게 확인한다.
+8. 학생이 실제로 해당 활동을 이해하고 수행했는지 확인할 수 있는 질문을 포함한다.
+9. 학생부의 강점뿐 아니라 면접에서 추가 설명이 필요할 가능성이 있는 부분도 질문한다.
+
+[평가요소]
+다음 평가요소를 균형 있게 반영한다.
+- 전공적합성
+- 학업역량
+- 인성
+- 발전가능성
+
+[실전 질문 유형]
+전체 질문에서 다음 유형이 골고루 포함되도록 한다.
+
+1. 활동 확인 질문
+2. 탐구 심화 질문
+3. 전공 연계 질문
+4. 학업 과정 질문
+5. 문제 해결 질문
+6. 협업 및 갈등 상황 질문
+7. 가치관 및 성찰 질문
+8. 학생부 내용 검증 질문
+9. 예상 반론 및 추가 설명 질문
+10. 사고의 깊이를 확인하는 질문
+
+[답변 생성 원칙]
+1. 학생부에 기록된 내용을 근거로 답변한다.
+2. 학생부에 없는 경험이나 성과를 절대 추가하지 않는다.
+3. 학생이 실제 면접에서 말할 수 있는 자연스러운 말투로 작성한다.
+4. 질문에 먼저 직접 답하고 구체적인 경험을 근거로 설명한다.
+5. 자신의 역할과 생각이 드러나도록 작성한다.
+6. 활동의 결과뿐 아니라 과정과 배운 점을 설명한다.
+7. 마지막에는 변화, 성찰 또는 향후 방향을 자연스럽게 연결한다.
+8. 학생부 내용을 단순히 반복하지 않는다.
+9. 답변은 5~7문장으로 작성한다.
+10. 지나치게 완벽하거나 성인 전문가처럼 들리는 표현은 피한다.
+
+[꼬리질문]
+각 질문마다 실제 면접관이 추가로 물어볼 가능성이 높은 꼬리질문 2~3개를 생성한다.
+
+꼬리질문은 다음 목적을 가진다.
+- 답변의 근거 확인
+- 학생의 이해도 확인
+- 사고의 깊이 확인
+- 활동의 진정성 확인
+- 전공과의 연결성 확인
+- 답변의 논리적 빈틈 확인
+
+꼬리질문은 본 질문과 동일한 내용을 반복하지 않는다.
+
+[실전 검증]
+각 질문과 답변이 다음 조건을 만족하는지 확인한다.
+
+- 질문이 학생부의 구체적인 근거를 가지고 있는가?
+- 답변이 질문에 직접 답하고 있는가?
+- 답변에 학생부에 없는 사실이 포함되지 않았는가?
+- 질문과 답변이 서로 모순되지 않는가?
+- 실제 고등학생이 면접에서 말할 수 있는 수준인가?
+- 꼬리질문이 실제 면접에서 이어질 만한 내용인가?
+
+조건을 충족하지 않는 경우 내부적으로 수정한 후 최종 결과만 출력한다.
+
+⚠️ 매우 중요
+- 반드시 유효한 JSON만 출력한다.
+- 설명, 주석, 마크다운, 코드블록은 절대 출력하지 않는다.
+- JSON 외의 문자는 출력하지 않는다.
+
+출력 형식:
+{
+  "questions": [
+    {
+      "question": "질문 내용",
+      "answer": "답변 내용",
+      "follow_ups": [
+        "꼬리질문1",
+        "꼬리질문2",
+        "꼬리질문3"
+      ]
+    }
+  ]
+}`;
+
+    const prompt = isBeta ? paidPrompt : freePrompt;
     const result=extractJson(await callAI(prompt,16000,'questions',need,{university,department}));
-    const added=(result.questions||[]).map(q=>({question:String(q.question||'').trim(),answer:String(q.answer||'').trim(),follow_ups:Array.isArray(q.follow_ups)?q.follow_ups.map(String):[]})).filter(q=>q.question&&q.answer).slice(0,need);
+    const added=(result.questions||[]).map(q=>({
+      question:String(q.question||'').trim(),
+      answer:String(q.answer||'').trim(),
+      follow_ups:Array.isArray(q.follow_ups)?q.follow_ups.map(String):[]
+    })).filter(q=>q.question&&q.answer).slice(0,need);
     if(!added.length) throw new Error('생성된 질문이 없습니다.');
     questions=[...questions,...added];
     logEvent('questions_generated',{count:added.length,university,department});
