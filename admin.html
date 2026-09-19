@@ -723,7 +723,7 @@ const SUPABASE_ANON_KEY = CONFIG.SUPABASE_ANON_KEY;
 
 let supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const ADMIN_EMAIL = 'roche07he@gmail.com'; // 또는 'ziron7@gmail.com'
+const ADMIN_EMAILS = ['ziron7@gmail.com', 'roche07he@gmail.com'];
 
 // 로그아웃
 async function handleLogout() {
@@ -767,7 +767,7 @@ async function checkAuth() {
     return;
   }
 
-  if (session.user.email !== ADMIN_EMAIL) {
+  if (!ADMIN_EMAILS.includes(session.user.email)) {
     alert('관리자 권한이 없습니다.');
     window.location.href = 'app.html';
     return;
@@ -783,7 +783,7 @@ async function loadStats() {
     const { count: usersCount, error: usersError } = await supabaseClient
       .from('user_approvals')
       .select('*', { count: 'exact', head: true })
-      .neq('email', ADMIN_EMAIL);
+      .not('email', 'in', `(${ADMIN_EMAILS.map(e => `"${e}"`).join(',')})`);
 
     if (!usersError) {
       document.getElementById('totalUsers').textContent = usersCount || 0;
@@ -839,7 +839,7 @@ async function loadUsers() {
       .select('*')
       .eq('approval_status', 'approved')
       .is('deleted_at', null)
-      .neq('email', ADMIN_EMAIL)
+      .not('email', 'in', `(${ADMIN_EMAILS.map(e => `"${e}"`).join(',')})`)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -848,15 +848,17 @@ async function loadUsers() {
     tbody.innerHTML = '';
 
     // 관리자 먼저 추가
-    const adminTr = document.createElement('tr');
-    adminTr.innerHTML = `
-      <td>${ADMIN_EMAIL}</td>
-      <td>
-        <span class="badge admin">관리자</span>
-      </td>
-      <td>-</td>
-    `;
-    tbody.appendChild(adminTr);
+    ADMIN_EMAILS.forEach(email => {
+      const adminTr = document.createElement('tr');
+      adminTr.innerHTML = `
+        <td>${email}</td>
+        <td>
+          <span class="badge admin">관리자</span>
+        </td>
+        <td>-</td>
+      `;
+      tbody.appendChild(adminTr);
+    });
 
     // 일반 유저 추가
     if (data && data.length > 0) {
@@ -987,7 +989,7 @@ async function loadPendingApprovals() {
     const { data, error } = await supabaseClient
       .from('user_approvals')
       .select('*')
-      .neq('email', 'ziron7@gmail.com')
+      .not('email', 'in', `(${ADMIN_EMAILS.map(e => `"${e}"`).join(',')})`)
       .order('requested_at', { ascending: false });
 
     loading.style.display = 'none';
