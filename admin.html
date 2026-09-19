@@ -718,7 +718,7 @@ async function loadStats() {
     const { count: usersCount, error: usersError } = await supabaseClient
       .from('user_approvals')
       .select('*', { count: 'exact', head: true })
-      .neq('email', ADMIN_EMAIL);
+      .not('email', 'in', `(${ADMIN_EMAILS.map(e => `"${e}"`).join(',')})`);
 
     if (!usersError) {
       document.getElementById('totalUsers').textContent = usersCount || 0;
@@ -774,7 +774,7 @@ async function loadUsers() {
       .select('*')
       .eq('approval_status', 'approved')
       .is('deleted_at', null)
-      .neq('email', ADMIN_EMAIL)
+      .not('email', 'in', `(${ADMIN_EMAILS.map(e => `"${e}"`).join(',')})`)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -939,7 +939,7 @@ async function loadPendingApprovals() {
     const { data, error } = await supabaseClient
       .from('user_approvals')
       .select('*')
-      .neq('email', 'ziron7@gmail.com')
+      .not('email', 'in', `(${ADMIN_EMAILS.map(e => `"${e}"`).join(',')})`)
       .order('requested_at', { ascending: false });
 
     loading.style.display = 'none';
