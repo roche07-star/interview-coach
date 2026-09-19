@@ -1,8 +1,6 @@
 -- Add approval system for users
 
 -- approval_status: 'pending' | 'approved' | 'rejected'
-ALTER TABLE auth.users
-ADD COLUMN IF NOT EXISTS raw_user_meta_data JSONB DEFAULT '{}'::jsonb;
 
 -- Create a custom users table to store approval status
 CREATE TABLE IF NOT EXISTS user_approvals (
