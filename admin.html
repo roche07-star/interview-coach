@@ -471,9 +471,9 @@ body {
     <div class="stat-card">
       <div class="stat-header">
         <div class="stat-icon">
-          <i data-lucide="mail" style="width:24px; height:24px"></i>
+          <i data-lucide="help-circle" style="width:24px; height:24px"></i>
         </div>
-        <div class="stat-label">총 문의 수</div>
+        <div class="stat-label">총 질문 수</div>
       </div>
       <div class="stat-value" id="totalQuestions">0</div>
     </div>
@@ -481,9 +481,9 @@ body {
     <div class="stat-card">
       <div class="stat-header">
         <div class="stat-icon">
-          <i data-lucide="message-circle" style="width:24px; height:24px"></i>
+          <i data-lucide="mic" style="width:24px; height:24px"></i>
         </div>
-        <div class="stat-label">면접 세션 수</div>
+        <div class="stat-label">총 면접 연습 수</div>
       </div>
       <div class="stat-value" id="totalInterviews">0</div>
     </div>
@@ -714,22 +714,27 @@ async function loadStats() {
       document.getElementById('totalStudents').textContent = pendingCount || 0;
     }
 
-    // 총 문의 수
-    const { count: inquiriesCount, error: inquiriesError } = await supabaseClient
-      .from('user_inquiries')
-      .select('*', { count: 'exact', head: true });
+    // 총 질문 수 (각 세션의 질문 수 합계 - question_count 컬럼이 있다면)
+    // 임시로 세션별 질문을 10개로 가정하여 계산
+    const { data: sessions, error: sessionsError } = await supabaseClient
+      .from('interview_sessions')
+      .select('question_count');
 
-    if (!inquiriesError) {
-      document.getElementById('totalQuestions').textContent = inquiriesCount || 0;
+    if (!sessionsError && sessions) {
+      // question_count 컬럼이 있으면 합계, 없으면 세션 수 × 10
+      const totalQuestions = sessions.reduce((sum, s) => sum + (s.question_count || 10), 0);
+      document.getElementById('totalQuestions').textContent = totalQuestions || 0;
+    } else {
+      document.getElementById('totalQuestions').textContent = 0;
     }
 
-    // 총 면접 세션 수
-    const { count: sessionsCount, error: sessionsError } = await supabaseClient
+    // 총 면접 연습 수 (세션 수)
+    const { count: interviewsCount, error: interviewsError } = await supabaseClient
       .from('interview_sessions')
       .select('*', { count: 'exact', head: true });
 
-    if (!sessionsError) {
-      document.getElementById('totalInterviews').textContent = sessionsCount || 0;
+    if (!interviewsError) {
+      document.getElementById('totalInterviews').textContent = interviewsCount || 0;
     }
   } catch (error) {
     console.error('통계 로드 실패:', error);
