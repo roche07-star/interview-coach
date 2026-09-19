@@ -3,7 +3,7 @@
 > 학생부종합 전형 면접을 준비하는 수험생을 위한 AI 기반 면접 연습 도구
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)](https://roche07-star.github.io/interview-coach/)
+[![Vercel](https://img.shields.io/badge/Vercel-Live-brightgreen)](https://interview-coach-delta-sage.vercel.app/)
 
 ## 📋 서비스 소개
 
@@ -36,7 +36,7 @@
 
 ### 1. 웹사이트 접속
 
-**배포 URL**: [https://roche07-star.github.io/interview-coach/](https://roche07-star.github.io/interview-coach/)
+**배포 URL**: [https://interview-coach-delta-sage.vercel.app/](https://interview-coach-delta-sage.vercel.app/)
 
 **커스텀 도메인** (설정 예정): https://interview.jobizic.com
 
