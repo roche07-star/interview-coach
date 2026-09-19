@@ -16,6 +16,12 @@ CREATE TABLE IF NOT EXISTS user_approvals (
 -- Enable RLS
 ALTER TABLE user_approvals ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view own approval" ON user_approvals;
+DROP POLICY IF EXISTS "Users can request approval" ON user_approvals;
+DROP POLICY IF EXISTS "Admins can view all approvals" ON user_approvals;
+DROP POLICY IF EXISTS "Admins can update approvals" ON user_approvals;
+
 -- Policies
 CREATE POLICY "Users can view own approval"
   ON user_approvals FOR SELECT
