@@ -1052,7 +1052,38 @@ function getAIConfig() {
 async function checkAuth() {
   if (!supabaseClient) return;
   const { data: { session } } = await supabaseClient.auth.getSession();
-  currentUser = session?.user || null;
+
+  if (!session) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  currentUser = session.user;
+
+  // 승인 상태 확인
+  try {
+    const { data, error } = await supabaseClient
+      .from('user_approvals')
+      .select('approval_status')
+      .eq('user_id', session.user.id)
+      .single();
+
+    if (!data || data.approval_status === 'pending') {
+      alert('승인 대기 중입니다. 관리자 승인 후 이용 가능합니다.');
+      window.location.href = 'guide.html';
+      return;
+    }
+
+    if (data.approval_status === 'rejected') {
+      alert('승인이 거부되었습니다. 관리자에게 문의하세요.');
+      await supabaseClient.auth.signOut();
+      window.location.href = 'login.html';
+      return;
+    }
+  } catch (error) {
+    console.error('승인 상태 확인 오류:', error);
+  }
+
   const navUser = document.getElementById('navUser');
   const userEmail = document.getElementById('userEmail');
   if (currentUser && navUser && userEmail) {

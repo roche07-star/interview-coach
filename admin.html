@@ -420,6 +420,39 @@ body {
     </div>
   </div>
 
+  <!-- 승인 대기 목록 -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">승인 대기 목록</h2>
+      <button class="btn-primary" onclick="loadPendingApprovals()" style="background:#ff9800;">
+        <i data-lucide="refresh-cw" style="width:16px; height:16px"></i>
+        새로고침
+      </button>
+    </div>
+
+    <div id="loadingApprovals" class="loading">
+      로딩 중...
+    </div>
+
+    <table class="users-table" id="approvalsTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>이메일</th>
+          <th>요청일시</th>
+          <th>상태</th>
+          <th>작업</th>
+        </tr>
+      </thead>
+      <tbody id="approvalsTableBody">
+      </tbody>
+    </table>
+
+    <div id="emptyApprovals" class="empty-state" style="display:none;">
+      <i data-lucide="check-circle" style="width:48px; height:48px; color:#ccc;"></i>
+      <p>승인 대기 중인 유저가 없습니다.</p>
+    </div>
+  </div>
+
   <!-- 유저 목록 -->
   <div class="section">
     <div class="section-header">
@@ -491,7 +524,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 let supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const ADMIN_EMAIL = 'roche07m@gmail.com';
+const ADMIN_EMAIL = 'roche07he@gmail.com';
 
 // 로그아웃
 async function handleLogout() {
@@ -716,6 +749,116 @@ document.getElementById('addUserModal').addEventListener('click', (e) => {
   if (e.target.id === 'addUserModal') {
     closeAddUserModal();
   }
+});
+
+// 승인 대기 목록 로드
+async function loadPendingApprovals() {
+  const loading = document.getElementById('loadingApprovals');
+  const table = document.getElementById('approvalsTable');
+  const empty = document.getElementById('emptyApprovals');
+
+  loading.style.display = 'block';
+  table.style.display = 'none';
+  empty.style.display = 'none';
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('user_approvals')
+      .select('*')
+      .order('requested_at', { ascending: false });
+
+    loading.style.display = 'none';
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      empty.style.display = 'block';
+      lucide.createIcons();
+      return;
+    }
+
+    const tbody = document.getElementById('approvalsTableBody');
+    tbody.innerHTML = data.map(approval => `
+      <tr>
+        <td>${approval.email}</td>
+        <td>${new Date(approval.requested_at).toLocaleString('ko-KR')}</td>
+        <td>
+          <span class="badge ${approval.approval_status === 'approved' ? 'success' : approval.approval_status === 'rejected' ? 'error' : 'warning'}">
+            ${approval.approval_status === 'approved' ? '✅ 승인됨' : approval.approval_status === 'rejected' ? '❌ 거부됨' : '⏳ 대기중'}
+          </span>
+        </td>
+        <td>
+          ${approval.approval_status === 'pending' ? `
+            <button class="btn-primary" onclick="approveUser('${approval.user_id}')" style="background:#4caf50; margin-right:8px;">승인</button>
+            <button class="btn-primary" onclick="rejectUser('${approval.user_id}')" style="background:#f44336;">거부</button>
+          ` : '-'}
+        </td>
+      </tr>
+    `).join('');
+
+    table.style.display = 'table';
+  } catch (error) {
+    loading.style.display = 'none';
+    showToast('error', '승인 목록 로드 실패');
+    console.error(error);
+  }
+}
+
+// 승인 처리
+async function approveUser(userId) {
+  if (!confirm('이 사용자를 승인하시겠습니까?')) return;
+
+  try {
+    const { data: { user: admin } } = await supabaseClient.auth.getSession();
+
+    const { error } = await supabaseClient
+      .from('user_approvals')
+      .update({
+        approval_status: 'approved',
+        approved_at: new Date().toISOString(),
+        approved_by: admin.user.id
+      })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    showToast('success', '승인이 완료되었습니다.');
+    await loadPendingApprovals();
+  } catch (error) {
+    showToast('error', '승인 처리 실패');
+    console.error(error);
+  }
+}
+
+// 거부 처리
+async function rejectUser(userId) {
+  if (!confirm('이 사용자의 승인을 거부하시겠습니까?')) return;
+
+  try {
+    const { error } = await supabaseClient
+      .from('user_approvals')
+      .update({
+        approval_status: 'rejected'
+      })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    showToast('success', '승인이 거부되었습니다.');
+    await loadPendingApprovals();
+  } catch (error) {
+    showToast('error', '거부 처리 실패');
+    console.error(error);
+  }
+}
+
+// 페이지 로드 시 승인 목록도 로드
+window.addEventListener('DOMContentLoaded', async () => {
+  lucide.createIcons();
+  await checkAuth();
+  await loadStats();
+  await loadUsers();
+  await loadPendingApprovals();
 });
 </script>
 

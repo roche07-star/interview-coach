@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>사용 가이드 - AI 면접코치</title>
+<title>사용 가이드 - 면접코치</title>
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * {
   margin: 0;
@@ -242,15 +243,20 @@ body {
 <div class="container">
   <!-- 로고 -->
   <div class="logo">
-    <h1>🎓 AI 면접코치에 오신 것을 환영합니다!</h1>
-    <p>학생부종합 전형 면접 완벽 대비</p>
+    <h1>🎓 면접코치에 오신 것을 환영합니다!</h1>
+    <p>학생부종합 전형 면접 대비</p>
   </div>
 
   <!-- 환영 메시지 -->
   <div class="welcome">
     <h2>회원가입이 완료되었습니다! 🎉</h2>
-    <p>이제 AI 면접코치로 학생부종합 전형 면접을 완벽하게 준비하세요.<br>
+    <p>이제 면접코치로 학생부종합 전형 면접을 완벽하게 준비하세요.<br>
     생기부 기반 맞춤형 질문 생성부터 실전 면접 연습까지 한 번에!</p>
+  </div>
+
+  <!-- 승인 상태 메시지 -->
+  <div id="approvalStatus" style="display:none; text-align:center; padding:20px; background:#fff3cd; border-radius:12px; margin-bottom:30px;">
+    <p style="color:#856404; font-size:16px; font-weight:600;"></p>
   </div>
 
   <!-- 주요 기능 -->
@@ -311,7 +317,7 @@ body {
     <div class="step">
       <div class="step-number">4</div>
       <div class="step-content">
-        <h4>AI 면접 테스트</h4>
+        <h4>면접 테스트</h4>
         <p>생성된 질문으로 음성 인식을 활용한 실전 면접 연습을 시작하세요!</p>
       </div>
     </div>
@@ -319,10 +325,10 @@ body {
 
   <!-- CTA -->
   <div class="cta">
-    <a href="app.html" class="btn-start">
-      <i data-lucide="rocket" style="width:20px; height:20px"></i>
-      시작하기
-    </a>
+    <button id="requestApprovalBtn" class="btn-start" onclick="requestApproval()">
+      <i data-lucide="check-circle" style="width:20px; height:20px"></i>
+      승인 요청
+    </button>
   </div>
 
   <!-- Footer -->
@@ -332,7 +338,105 @@ body {
 </div>
 
 <script>
-lucide.createIcons();
+// Supabase 초기화
+const SUPABASE_URL = 'https://uflotegcmhkfocvszncd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmbG90ZWdjbWhrZm9jdnN6bmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODE2NDksImV4cCI6MjEwNDg1NzY0OX0.zgeE4lgiy1qnynWFcABLLRG09SrFv1zXdtNhWed39_M';
+
+let supabaseClient = null;
+
+if (typeof window.supabase !== 'undefined') {
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  console.log('✅ Supabase 초기화 완료');
+}
+
+// 승인 상태 확인
+async function checkApprovalStatus() {
+  if (!supabaseClient) return;
+
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from('user_approvals')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('승인 상태 확인 실패:', error);
+      return;
+    }
+
+    if (data) {
+      if (data.approval_status === 'approved') {
+        // 승인됨 - app.html로 리다이렉트
+        window.location.href = 'app.html';
+      } else if (data.approval_status === 'pending') {
+        // 대기 중
+        document.getElementById('approvalStatus').style.display = 'block';
+        document.getElementById('approvalStatus').querySelector('p').textContent = '⏳ 승인 요청이 전송되었습니다. 관리자 승인을 기다려주세요.';
+        document.getElementById('requestApprovalBtn').disabled = true;
+        document.getElementById('requestApprovalBtn').style.opacity = '0.5';
+        document.getElementById('requestApprovalBtn').style.cursor = 'not-allowed';
+      } else if (data.approval_status === 'rejected') {
+        // 거부됨
+        document.getElementById('approvalStatus').style.display = 'block';
+        document.getElementById('approvalStatus').style.background = '#f8d7da';
+        document.getElementById('approvalStatus').querySelector('p').textContent = '❌ 승인이 거부되었습니다. 관리자에게 문의하세요.';
+        document.getElementById('approvalStatus').querySelector('p').style.color = '#721c24';
+      }
+    }
+  } catch (error) {
+    console.error('상태 확인 오류:', error);
+  }
+}
+
+// 승인 요청
+async function requestApproval() {
+  if (!supabaseClient) {
+    alert('시스템 오류가 발생했습니다.');
+    return;
+  }
+
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      alert('로그인이 필요합니다.');
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from('user_approvals')
+      .insert({
+        user_id: session.user.id,
+        email: session.user.email,
+        approval_status: 'pending'
+      });
+
+    if (error) {
+      console.error('승인 요청 실패:', error);
+      alert('승인 요청 실패: ' + error.message);
+      return;
+    }
+
+    alert('✅ 승인 요청이 전송되었습니다!\n\n관리자 승인 후 서비스를 이용하실 수 있습니다.');
+    checkApprovalStatus();
+  } catch (error) {
+    console.error('승인 요청 오류:', error);
+    alert('오류가 발생했습니다: ' + error.message);
+  }
+}
+
+// 페이지 로드 시 상태 확인
+window.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  checkApprovalStatus();
+});
 </script>
 
 </body>
