@@ -4,51 +4,53 @@
  */
 
 // ============================================================
-// Supabase 초기화
+// Supabase 초기화 (IIFE로 전역 변수 충돌 방지)
 // ============================================================
 
-let supabaseClient = null;
+(function() {
+  let _supabaseClient = null;
 
-/**
- * Supabase 클라이언트 초기화
- * @returns {Object} Supabase 클라이언트
- */
-function initSupabase() {
-  if (supabaseClient) return supabaseClient;
+  /**
+   * Supabase 클라이언트 초기화
+   * @returns {Object} Supabase 클라이언트
+   */
+  window.initSupabase = function() {
+    if (_supabaseClient) return _supabaseClient;
 
-  if (!window.CONFIG) {
-    console.error('❌ CONFIG가 정의되지 않았습니다. config.js를 먼저 로드해주세요.');
-    return null;
-  }
+    if (!window.CONFIG) {
+      console.error('❌ CONFIG가 정의되지 않았습니다. config.js를 먼저 로드해주세요.');
+      return null;
+    }
 
-  if (!window.supabase) {
-    console.error('❌ Supabase SDK가 로드되지 않았습니다.');
-    return null;
-  }
+    if (!window.supabase) {
+      console.error('❌ Supabase SDK가 로드되지 않았습니다.');
+      return null;
+    }
 
-  try {
-    supabaseClient = window.supabase.createClient(
-      window.CONFIG.SUPABASE_URL,
-      window.CONFIG.SUPABASE_ANON_KEY
-    );
-    console.log('✅ Supabase 초기화 완료');
-    return supabaseClient;
-  } catch (error) {
-    console.error('❌ Supabase 초기화 실패:', error);
-    return null;
-  }
-}
+    try {
+      _supabaseClient = window.supabase.createClient(
+        window.CONFIG.SUPABASE_URL,
+        window.CONFIG.SUPABASE_ANON_KEY
+      );
+      console.log('✅ Supabase 초기화 완료');
+      return _supabaseClient;
+    } catch (error) {
+      console.error('❌ Supabase 초기화 실패:', error);
+      return null;
+    }
+  };
 
-/**
- * Supabase 클라이언트 가져오기
- * @returns {Object} Supabase 클라이언트
- */
-function getSupabaseClient() {
-  if (!supabaseClient) {
-    return initSupabase();
-  }
-  return supabaseClient;
-}
+  /**
+   * Supabase 클라이언트 가져오기
+   * @returns {Object} Supabase 클라이언트
+   */
+  window.getSupabaseClient = function() {
+    if (!_supabaseClient) {
+      return window.initSupabase();
+    }
+    return _supabaseClient;
+  };
+})();
 
 // ============================================================
 // Toast 알림
@@ -230,8 +232,7 @@ function timeAgo(date) {
 
 // 전역 스코프에 함수 노출
 if (typeof window !== 'undefined') {
-  window.initSupabase = initSupabase;
-  window.getSupabaseClient = getSupabaseClient;
+  // initSupabase, getSupabaseClient는 이미 IIFE에서 할당됨
   window.showToast = showToast;
   window.checkAuth = checkAuth;
   window.escapeHtml = escapeHtml;
