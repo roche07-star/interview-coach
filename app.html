@@ -1031,6 +1031,15 @@ class Database {
 
   async saveStudent(data) {
     const user = await this.requireUser();
+
+    // 같은 학교의 생기부가 이미 있는지 확인
+    const { data: existing, error: findError } = await supabaseClient
+      .from('students')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('university', data.university)
+      .maybeSingle();
+
     const payload = {
       user_id: user.id,
       email: user.email || '',
@@ -1041,9 +1050,26 @@ class Database {
       record: data.record,
       masked_record: data.maskedRecord
     };
-    const { data: row, error } = await supabaseClient.from('students').insert(payload).select().single();
-    if (error) throw error;
-    return row.id;
+
+    // 이미 있으면 업데이트, 없으면 insert
+    if (existing) {
+      const { data: row, error } = await supabaseClient
+        .from('students')
+        .update(payload)
+        .eq('id', existing.id)
+        .select()
+        .single();
+      if (error) throw error;
+      return row.id;
+    } else {
+      const { data: row, error } = await supabaseClient
+        .from('students')
+        .insert(payload)
+        .select()
+        .single();
+      if (error) throw error;
+      return row.id;
+    }
   }
 
   async getStudent(studentId) {
@@ -1902,7 +1928,54 @@ async function loadStudentRecord(){
 }
 function closeLoadStudentModal(){document.getElementById('loadStudentModal').classList.remove('show');}
 async function selectStudent(id){
-  try{showLoading('불러오는 중...','생기부와 질문을 불러옵니다.');const s=await db.getStudent(id);currentStudentId=s.id;savedRecord=s.record||s.masked_record||'';maskedRecord=s.masked_record||s.record||'';document.getElementById('studentRecord').value=s.record||s.masked_record||'';populateAdmissionYears(s.admission_year||2027); await loadAdmissionCatalog(Number(s.admission_year||2027)); document.getElementById('university').value=s.university||''; updateAdmissionTracks(s.admission_track||'');document.getElementById('department').value=s.department||'';localStorage.setItem('university',s.university||'');localStorage.setItem('admissionYear',String(s.admission_year||2027));localStorage.setItem('admissionTrack',s.admission_track||'');localStorage.setItem('department',s.department||'');const q=await db.getQuestions(id);questions=q?.questions||[];document.getElementById('analysisResult').style.display='block';completeStep(1);if(questions.length){displayQuestions();completeStep(2);}closeLoadStudentModal();hideLoading();showToast('success',`생기부와 질문 ${questions.length}개를 불러왔습니다.`);}catch(e){hideLoading();showToast('error','불러오기 실패: '+e.message);}
+  try {
+    showLoading('불러오는 중...','생기부를 불러옵니다.');
+    const s = await db.getStudent(id);
+
+    // 생기부 내용만 불러오기
+    currentStudentId = s.id;
+    savedRecord = s.record || s.masked_record || '';
+    maskedRecord = s.masked_record || s.record || '';
+    document.getElementById('studentRecord').value = s.record || s.masked_record || '';
+
+    // 현재 설정된 학교 정보 확인
+    const currentUniversity = localStorage.getItem('university');
+    const currentAdmissionTrack = localStorage.getItem('admissionTrack');
+    const currentDepartment = localStorage.getItem('department');
+
+    // 설정이 없으면 안내
+    if (!currentUniversity || !currentAdmissionTrack || !currentDepartment) {
+      closeLoadStudentModal();
+      hideLoading();
+      showToast('info', `📋 생기부를 불러왔습니다.\n설정에서 지원할 대학/전형/학과를 선택하세요.`);
+      setTimeout(() => openSettings(), 500);
+      return;
+    }
+
+    // 질문도 불러오기
+    const q = await db.getQuestions(id);
+    questions = q?.questions || [];
+
+    document.getElementById('analysisResult').style.display = 'block';
+    completeStep(1);
+    if (questions.length) {
+      displayQuestions();
+      completeStep(2);
+    }
+
+    closeLoadStudentModal();
+    hideLoading();
+
+    // 이전 학교와 다르면 안내
+    if (s.university !== currentUniversity) {
+      showToast('success', `✅ 생기부 불러오기 완료\n현재 설정: ${currentUniversity} ${currentDepartment}`);
+    } else {
+      showToast('success', `생기부와 질문 ${questions.length}개를 불러왔습니다.`);
+    }
+  } catch(e) {
+    hideLoading();
+    showToast('error','불러오기 실패: '+e.message);
+  }
 }
 async function loadQuestionsOnly(){await loadStudentRecord();}
 async function selectQuestionsOnly(id){await selectStudent(id);switchStep(2);}
