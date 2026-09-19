@@ -1,16 +1,18 @@
 // ============================================================
 // 2027 대입 면접코치 - Main Application Logic
-// common.js의 공통 함수 사용
+// common.js의 showToast 등 유틸리티 사용
 // ============================================================
 
+// Supabase 초기화 (app.js 전용)
+const SUPABASE_URL = CONFIG.SUPABASE_URL;
+const SUPABASE_ANON_KEY = CONFIG.SUPABASE_ANON_KEY;
+
+let supabaseClient = null;
 let currentUser = null;
 
-// Supabase 클라이언트는 common.js에서 관리
-function getClient() {
-  return window.getSupabaseClient();
+if (window.supabase) {
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
-
-const supabaseClient = getClient();
 
 class Database {
   async init() {
