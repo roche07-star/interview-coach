@@ -28,10 +28,16 @@ RETURNS TABLE (
   notes TEXT
 )
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
+DECLARE
+  v_user_email TEXT;
 BEGIN
-  IF (SELECT email FROM auth.users WHERE id=auth.uid()) IS DISTINCT FROM public.phase5_admin_email() THEN
+  -- auth.users.id를 명확하게 참조
+  SELECT email INTO v_user_email FROM auth.users WHERE auth.users.id = auth.uid();
+
+  IF v_user_email IS DISTINCT FROM public.phase5_admin_email() THEN
     RAISE EXCEPTION '관리자 권한이 없습니다.';
   END IF;
+
   RETURN QUERY
   SELECT s.id, s.admission_year, s.university, s.official_url, s.guide_url,
          COALESCE(NULLIF(s.guide_url,''), s.official_url) AS source_url, s.notes
