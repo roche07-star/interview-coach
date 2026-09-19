@@ -822,12 +822,20 @@ async function loadPendingApprovals() {
             ? '<span class="badge error">❌ 거부됨</span>'
             : '<span class="badge warning">⏳ 대기중</span>';
 
-      const actions = isDeleted || approval.approval_status !== 'pending'
-        ? '-'
-        : `
+      let actions;
+      if (isDeleted) {
+        // 탈퇴한 유저는 DB삭제 버튼만 표시
+        actions = `<button class="btn-primary" onclick="adminDeleteUser('${approval.user_id}', '${approval.email}')" style="background:#d32f2f; color:white;">🗑️ DB삭제</button>`;
+      } else if (approval.approval_status === 'pending') {
+        // 대기 중인 유저는 승인/거부 버튼
+        actions = `
           <button class="btn-primary" onclick="approveUser('${approval.user_id}')" style="background:#4caf50; margin-right:8px;">승인</button>
           <button class="btn-primary" onclick="rejectUser('${approval.user_id}')" style="background:#f44336;">거부</button>
         `;
+      } else {
+        // 그 외는 작업 없음
+        actions = '-';
+      }
 
       return `
         <tr>
@@ -944,6 +952,38 @@ async function rejectUser(userId) {
     await loadPendingApprovals();
   } catch (error) {
     showToast('error', '거부 처리 실패');
+    console.error(error);
+  }
+}
+
+// 탈퇴 유저 완전 삭제 (DB에서 제거)
+async function adminDeleteUser(userId, email) {
+  const confirmMsg = `⚠️ 정말로 이 사용자를 DB에서 완전히 삭제하시겠습니까?\n\n` +
+    `이메일: ${email}\n\n` +
+    `이 작업은 되돌릴 수 없습니다.\n` +
+    `- auth.users 테이블에서 삭제\n` +
+    `- user_approvals 테이블에서 삭제\n` +
+    `- 모든 관련 데이터 삭제\n\n` +
+    `계속하려면 "삭제"를 입력하세요.`;
+
+  const userInput = prompt(confirmMsg);
+
+  if (userInput !== '삭제') {
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient.rpc('admin_delete_user', {
+      target_user_id: userId
+    });
+
+    if (error) throw error;
+
+    showToast('success', '사용자가 DB에서 완전히 삭제되었습니다.');
+    await loadPendingApprovals();
+    await loadUsers();
+  } catch (error) {
+    showToast('error', 'DB 삭제 실패: ' + error.message);
     console.error(error);
   }
 }
