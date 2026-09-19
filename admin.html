@@ -930,8 +930,18 @@ body {
 </div>
 
 <script>
-// Supabase 초기화 (common.js 사용)
-let supabaseClient = window.getSupabaseClient();
+// Supabase 초기화 (직접 초기화)
+let supabaseClient = null;
+
+if (window.supabase && CONFIG) {
+  supabaseClient = window.supabase.createClient(
+    CONFIG.SUPABASE_URL,
+    CONFIG.SUPABASE_ANON_KEY
+  );
+  console.log('✅ Supabase 초기화 완료 (admin)');
+} else {
+  console.error('❌ Supabase SDK 또는 CONFIG 로드 실패');
+}
 
 const ADMIN_EMAILS = ['ziron7@gmail.com', 'roche07he@gmail.com'];
 
