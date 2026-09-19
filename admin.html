@@ -765,6 +765,7 @@ async function loadPendingApprovals() {
     const { data, error } = await supabaseClient
       .from('user_approvals')
       .select('*')
+      .neq('email', 'roche07he@gmail.com')
       .order('requested_at', { ascending: false });
 
     loading.style.display = 'none';
