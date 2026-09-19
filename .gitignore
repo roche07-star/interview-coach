@@ -28,4 +28,4 @@ logs/
 .env
 .env.local
 .env.*.local
-config.js
+# config.js는 Vercel 배포를 위해 커밋 (Supabase Anon Key는 RLS로 보호됨)
