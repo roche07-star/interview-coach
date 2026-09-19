@@ -378,6 +378,14 @@ async function checkApprovalStatus() {
     }
 
     if (data) {
+      // 탈퇴 요청한 사용자는 즉시 로그아웃
+      if (data.deleted_at) {
+        alert('회원 탈퇴가 처리되었습니다.');
+        await supabaseClient.auth.signOut();
+        window.location.href = 'login.html';
+        return;
+      }
+
       if (data.approval_status === 'approved') {
         // 승인됨 - app.html로 리다이렉트
         window.location.href = 'app.html';

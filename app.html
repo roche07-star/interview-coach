@@ -1070,13 +1070,21 @@ async function checkAuth() {
 
   currentUser = session.user;
 
-  // 승인 상태 확인
+  // 승인 상태 및 탈퇴 상태 확인
   try {
     const { data, error } = await supabaseClient
       .from('user_approvals')
-      .select('approval_status')
+      .select('approval_status, deleted_at')
       .eq('user_id', session.user.id)
       .single();
+
+    // 탈퇴 요청한 사용자는 즉시 로그아웃
+    if (data && data.deleted_at) {
+      alert('회원 탈퇴가 처리되었습니다.');
+      await supabaseClient.auth.signOut();
+      window.location.href = 'login.html';
+      return;
+    }
 
     if (!data || data.approval_status === 'pending') {
       alert('승인 대기 중입니다. 관리자 승인 후 이용 가능합니다.');
