@@ -1601,7 +1601,14 @@ async function generateQuestions() {
     questions=[...questions,...added];
     logEvent('questions_generated',{count:added.length,university,admissionYear,admissionTrack,department,plan:isBeta?'BETA':'FREE'});
     await db.saveQuestions(currentStudentId,questions);
-    hideLoading(); displayQuestions(); await loadPlanState(); completeStep(2); switchStep(3); showToast('success',`총 ${questions.length}개 질문이 준비되었습니다.`);
+    hideLoading();
+    displayQuestions();
+    // 사용량 즉시 업데이트
+    await loadPlanState();
+    console.log('✅ 질문 생성 완료:', added.length, '개 - 사용량 업데이트됨');
+    completeStep(2);
+    switchStep(3);
+    showToast('success',`총 ${questions.length}개 질문이 준비되었습니다.`);
   } catch(e){hideLoading();console.error(e);showToast('error','질문 생성 실패: '+e.message);}
 }
 
