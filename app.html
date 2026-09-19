@@ -968,6 +968,32 @@ class Database {
     const { error } = await supabaseClient.from('interview_sessions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', sessionId);
     if (error) throw error;
   }
+
+  async saveFeedback(sessionId, feedback) {
+    await this.getCurrentStudentIdForSession(sessionId);
+    const { error } = await supabaseClient.from('interview_sessions').update({ feedback }).eq('id', sessionId);
+    if (error) throw error;
+  }
+
+  async getFeedback(sessionId) {
+    await this.getCurrentStudentIdForSession(sessionId);
+    const { data, error } = await supabaseClient.from('interview_sessions').select('feedback').eq('id', sessionId).single();
+    if (error) throw error;
+    return data?.feedback || null;
+  }
+
+  async getRecentSession(studentId) {
+    await this.getStudent(studentId);
+    const { data, error } = await supabaseClient
+      .from('interview_sessions')
+      .select('*')
+      .eq('student_id', studentId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  }
 }
 
 const db = new Database();
@@ -1283,12 +1309,87 @@ async function getFeedback(){
     const qa=interviews.map((i,n)=>({number:n+1,question:i.question,modelAnswer:i.model_answer||'',studentAnswer:i.student_answer||''}));
     const prompt=`너는 대입 면접 평가 전문가다. 다음 학생의 실제 면접 답변만 근거로 객관적인 피드백을 작성하라. 관찰할 수 없는 목소리, 표정, 자세는 평가하지 않는다.\n\n${qa.map(x=>`[질문 ${x.number}]\n${x.question}\n[참고 답변]\n${x.modelAnswer}\n[학생 답변]\n${x.studentAnswer}`).join('\n\n')}\n\n다음 형식으로 작성한다:\n## 전체 평가\n점수: 0-100\n총평: 2-3문장\n## 질문별 분석\n각 질문마다 평가(상/중/하), 강점, 개선점\n## 종합 피드백\n잘한 점 3가지\n아쉬운 점 3가지\n개선 방향 3가지\n다음 면접 준비사항.\n'모범답안과 일치' 같은 표현은 사용하지 않는다.`;
     const feedback=await callAI(prompt,6000); if(!feedback)throw new Error('AI 피드백 응답이 비어 있습니다.');
-    hideLoading();displayFeedback(feedback);
+    await db.saveFeedback(currentSessionId,feedback);
+    hideLoading();displayFeedback(feedback,currentSessionId);
+    showToast('success','피드백이 저장되었습니다.');
   }catch(e){hideLoading();console.error(e);showToast('error','피드백 생성 실패: '+e.message);}
 }
-function displayFeedback(feedback){
+function displayFeedback(feedback,sessionId){
   const c=document.getElementById('interviewContainer');
-  c.innerHTML=`<div style="line-height:1.8"><h2 style="margin-bottom:16px">🤖 AI 면접 피드백</h2><div style="background:#f8f9ff;padding:20px;border-radius:10px">${markdownToHtml(feedback)}</div><div style="text-align:center;margin-top:20px"><button class="btn" onclick="resetInterview()">처음으로</button></div></div>`;
+  c.innerHTML=`<div style="line-height:1.8"><h2 style="margin-bottom:16px">🤖 AI 면접 피드백</h2><div style="background:#f8f9ff;padding:20px;border-radius:10px">${markdownToHtml(feedback)}</div><div style="text-align:center;margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><button class="btn" onclick="downloadFeedback()" style="background:#4caf50">📥 다운로드</button><button class="btn" onclick="resetInterview()">처음으로</button></div></div>`;
+  window._currentFeedback=feedback;
+  window._currentSessionId=sessionId;
+}
+
+function downloadFeedback(){
+  const feedback=window._currentFeedback;
+  if(!feedback){showToast('error','피드백 데이터가 없습니다.');return;}
+
+  const university=localStorage.getItem('university')||'대학';
+  const department=localStorage.getItem('department')||'학과';
+  const now=new Date().toLocaleString('ko-KR').replace(/[:/\s]/g,'-');
+
+  const html=`<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 면접 피드백 - ${university} ${department}</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 40px 20px;
+  line-height: 1.6;
+}
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+h1 { font-size: 28px; margin-bottom: 8px; color: #333; }
+.meta { font-size: 14px; color: #666; margin-bottom: 30px; }
+.content {
+  background: #f8f9ff;
+  padding: 30px;
+  border-radius: 12px;
+  line-height: 1.8;
+}
+h2, h3 { margin-top: 24px; margin-bottom: 12px; color: #333; }
+strong { font-weight: 700; color: #1a1a1a; }
+ul { margin: 12px 0; padding-left: 24px; }
+li { margin: 6px 0; }
+code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 13px; }
+@media print {
+  body { background: white; padding: 0; }
+  .container { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🤖 AI 면접 피드백</h1>
+  <div class="meta">${university} ${department} | ${new Date().toLocaleDateString('ko-KR')}</div>
+  <div class="content">
+    ${markdownToHtml(feedback)}
+  </div>
+</div>
+</body>
+</html>`;
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`AI면접피드백_${university}_${department}_${now}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('success','피드백이 다운로드되었습니다.');
 }
 
 async function loadStudentRecord(){
