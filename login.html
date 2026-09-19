@@ -211,6 +211,34 @@ body {
   </div>
 </div>
 
+<!-- 문의 모달 -->
+<div id="inquiryModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+  <div style="max-width:500px; width:90%; background:white; border-radius:20px; padding:40px; position:relative;">
+    <button onclick="closeInquiryModal()" style="position:absolute; top:15px; right:15px; background:none; border:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
+
+    <h2 style="margin-bottom:20px; color:#333;">관리자에게 문의</h2>
+
+    <div style="margin-bottom:15px;">
+      <label style="display:block; font-size:14px; font-weight:600; color:#333; margin-bottom:5px;">이메일</label>
+      <input type="email" id="inquiryEmail" readonly style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:8px; background:#f5f5f5;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+      <label style="display:block; font-size:14px; font-weight:600; color:#333; margin-bottom:5px;">제목</label>
+      <input type="text" id="inquirySubject" placeholder="문의 제목" style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:8px;">
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label style="display:block; font-size:14px; font-weight:600; color:#333; margin-bottom:5px;">문의 내용</label>
+      <textarea id="inquiryMessage" rows="6" placeholder="문의 내용을 입력하세요" style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:8px; resize:vertical;"></textarea>
+    </div>
+
+    <button onclick="submitInquiry()" style="width:100%; padding:16px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; border:none; border-radius:12px; font-size:16px; font-weight:600; cursor:pointer;">
+      문의 보내기
+    </button>
+  </div>
+</div>
+
 <script>
 // Supabase 초기화
 const SUPABASE_URL = 'https://uflotegcmhkfocvszncd.supabase.co';
@@ -344,19 +372,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
           switchTab('login');
           await supabaseClient.auth.signOut();
 
-          // 관리자 문의 안내
-          const contactAdmin = confirm(
-            '⚠️ 회원 탈퇴가 처리된 계정입니다.\n\n' +
-            '다시 가입하시려면 관리자에게 문의하세요.\n\n' +
-            '관리자: roche07he@gmail.com\n\n' +
-            '[확인] 버튼을 누르면 이메일 앱이 열립니다.'
-          );
+          // 문의 모달 열기
+          document.getElementById('inquiryEmail').value = email;
+          document.getElementById('inquirySubject').value = '재가입 문의';
+          document.getElementById('inquiryMessage').value = '안녕하세요.\n\n탈퇴한 계정으로 재가입을 희망합니다.';
+          document.getElementById('inquiryModal').style.display = 'flex';
 
-          if (contactAdmin) {
-            window.location.href = 'mailto:roche07he@gmail.com?subject=[면접코치] 재가입 문의&body=안녕하세요.%0A%0A탈퇴한 계정으로 재가입을 희망합니다.%0A%0A이메일: ' + email;
-          }
-
-          showError('회원 탈퇴가 처리된 계정입니다.');
+          showError('회원 탈퇴가 처리된 계정입니다. 관리자에게 문의하세요.');
           return;
         }
       }
@@ -431,6 +453,41 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     showError('회원가입 오류: ' + error.message);
   }
 });
+
+// 문의 모달 닫기
+function closeInquiryModal() {
+  document.getElementById('inquiryModal').style.display = 'none';
+}
+
+// 문의 제출
+async function submitInquiry() {
+  const email = document.getElementById('inquiryEmail').value;
+  const subject = document.getElementById('inquirySubject').value.trim();
+  const message = document.getElementById('inquiryMessage').value.trim();
+
+  if (!subject || !message) {
+    alert('제목과 내용을 모두 입력해주세요.');
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('user_inquiries')
+      .insert({
+        email: email,
+        subject: subject,
+        message: message
+      });
+
+    if (error) throw error;
+
+    alert('✅ 문의가 접수되었습니다.\n\n관리자 확인 후 이메일로 답변드리겠습니다.');
+    closeInquiryModal();
+  } catch (error) {
+    console.error('문의 제출 오류:', error);
+    alert('문의 제출 중 오류가 발생했습니다: ' + error.message);
+  }
+}
 </script>
 
 </body>

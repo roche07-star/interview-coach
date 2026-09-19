@@ -457,21 +457,33 @@ body {
   <div class="section">
     <div class="section-header">
       <h2 class="section-title">유저 문의</h2>
-      <button class="btn-primary" onclick="openGmail()" style="background:#4285f4;">
-        <i data-lucide="mail" style="width:16px; height:16px"></i>
-        Gmail 확인
+      <button class="btn-primary" onclick="loadInquiries()" style="background:#ff9800;">
+        <i data-lucide="refresh-cw" style="width:16px; height:16px"></i>
+        새로고침
       </button>
     </div>
 
-    <div style="padding:20px; background:#f8f9fa; border-radius:8px; text-align:center;">
-      <i data-lucide="mail-open" style="width:48px; height:48px; color:#666; margin-bottom:12px;"></i>
-      <p style="color:#666; margin-bottom:16px;">
-        재가입 문의 등 유저 문의는 이메일(<strong>roche07he@gmail.com</strong>)로 수신됩니다.
-      </p>
-      <button class="btn-primary" onclick="openGmail()" style="background:#4285f4;">
-        <i data-lucide="external-link" style="width:16px; height:16px"></i>
-        Gmail 받은편지함 열기
-      </button>
+    <div id="loadingInquiries" class="loading">
+      로딩 중...
+    </div>
+
+    <table class="users-table" id="inquiriesTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>이메일</th>
+          <th>제목</th>
+          <th>문의일시</th>
+          <th>상태</th>
+          <th>작업</th>
+        </tr>
+      </thead>
+      <tbody id="inquiriesTableBody">
+      </tbody>
+    </table>
+
+    <div id="emptyInquiries" class="empty-state" style="display:none;">
+      <i data-lucide="inbox" style="width:48px; height:48px; color:#ccc;"></i>
+      <p>문의 내역이 없습니다.</p>
     </div>
   </div>
 
@@ -857,6 +869,59 @@ async function approveUser(userId) {
   }
 }
 
+// 문의 목록 로드
+async function loadInquiries() {
+  const loading = document.getElementById('loadingInquiries');
+  const table = document.getElementById('inquiriesTable');
+  const empty = document.getElementById('emptyInquiries');
+
+  loading.style.display = 'block';
+  table.style.display = 'none';
+  empty.style.display = 'none';
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('user_inquiries')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    loading.style.display = 'none';
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      empty.style.display = 'block';
+      lucide.createIcons();
+      return;
+    }
+
+    const tbody = document.getElementById('inquiriesTableBody');
+    tbody.innerHTML = data.map(inquiry => `
+      <tr>
+        <td>${inquiry.email}</td>
+        <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${inquiry.subject}</td>
+        <td>${new Date(inquiry.created_at).toLocaleString('ko-KR')}</td>
+        <td>
+          <span class="badge ${inquiry.status === 'answered' ? 'success' : 'warning'}">
+            ${inquiry.status === 'answered' ? '✅ 답변완료' : '⏳ 대기중'}
+          </span>
+        </td>
+        <td>
+          <button class="btn-primary" onclick="viewInquiry('${inquiry.id}')" style="background:#2196f3; margin-right:8px;">상세</button>
+          <button class="btn-primary" onclick="deleteInquiry('${inquiry.id}')" style="background:#f44336;">삭제</button>
+        </td>
+      </tr>
+    `).join('');
+
+    table.style.display = 'table';
+    lucide.createIcons();
+  } catch (error) {
+    loading.style.display = 'none';
+    showToast('error', '문의 목록 로드 실패');
+    console.error(error);
+  }
+}
+
 // 거부 처리
 async function rejectUser(userId) {
   if (!confirm('이 사용자의 승인을 거부하시겠습니까?')) return;
@@ -879,6 +944,95 @@ async function rejectUser(userId) {
   }
 }
 
+// 문의 상세 보기
+async function viewInquiry(inquiryId) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('user_inquiries')
+      .select('*')
+      .eq('id', inquiryId)
+      .single();
+
+    if (error) throw error;
+
+    const message = `
+━━━━━━━━━━━━━━━━━━━━━
+📧 문의 상세 정보
+━━━━━━━━━━━━━━━━━━━━━
+
+이메일: ${data.email}
+제목: ${data.subject}
+작성일: ${new Date(data.created_at).toLocaleString('ko-KR')}
+상태: ${data.status === 'answered' ? '답변완료' : '대기중'}
+
+━━━━━━━━━━━━━━━━━━━━━
+📝 문의 내용
+━━━━━━━━━━━━━━━━━━━━━
+
+${data.message}
+
+${data.answer ? `
+━━━━━━━━━━━━━━━━━━━━━
+✅ 답변 내용
+━━━━━━━━━━━━━━━━━━━━━
+
+${data.answer}
+
+답변일: ${new Date(data.answered_at).toLocaleString('ko-KR')}
+` : ''}
+━━━━━━━━━━━━━━━━━━━━━
+    `.trim();
+
+    alert(message);
+
+    // 답변 처리
+    if (data.status === 'pending') {
+      const shouldAnswer = confirm('이 문의에 답변하시겠습니까?\n\n답변은 ' + data.email + ' 로 이메일을 보내주세요.');
+      if (shouldAnswer) {
+        window.open('mailto:' + data.email + '?subject=Re: ' + data.subject, '_blank');
+
+        // 답변 완료 처리
+        const markAnswered = confirm('답변을 완료 처리하시겠습니까?');
+        if (markAnswered) {
+          await supabaseClient
+            .from('user_inquiries')
+            .update({
+              status: 'answered',
+              answered_at: new Date().toISOString()
+            })
+            .eq('id', inquiryId);
+
+          showToast('success', '답변 완료 처리되었습니다.');
+          await loadInquiries();
+        }
+      }
+    }
+  } catch (error) {
+    showToast('error', '문의 조회 실패');
+    console.error(error);
+  }
+}
+
+// 문의 삭제
+async function deleteInquiry(inquiryId) {
+  if (!confirm('이 문의를 삭제하시겠습니까?')) return;
+
+  try {
+    const { error } = await supabaseClient
+      .from('user_inquiries')
+      .delete()
+      .eq('id', inquiryId);
+
+    if (error) throw error;
+
+    showToast('success', '문의가 삭제되었습니다.');
+    await loadInquiries();
+  } catch (error) {
+    showToast('error', '문의 삭제 실패');
+    console.error(error);
+  }
+}
+
 // 페이지 로드 시 승인 목록도 로드
 window.addEventListener('DOMContentLoaded', async () => {
   lucide.createIcons();
@@ -886,6 +1040,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   await loadStats();
   await loadUsers();
   await loadPendingApprovals();
+  await loadInquiries();
 });
 </script>
 
