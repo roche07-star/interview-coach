@@ -132,24 +132,24 @@ BEGIN
    WHERE up.user_id = v_uid;
 
   IF NOT FOUND THEN
-    SELECT id, code, name, price_krw, max_universities,
-           question_limit, interview_limit, feedback_limit
+    SELECT plans.id, plans.code, plans.name, plans.price_krw, plans.max_universities,
+           plans.question_limit, plans.interview_limit, plans.feedback_limit
       INTO v_plan_id, v_code, v_name, v_price, v_max_universities,
            v_question_limit, v_interview_limit, v_feedback_limit
-      FROM plans WHERE code = 'FREE' AND active = TRUE;
+      FROM plans WHERE plans.code = 'FREE' AND plans.active = TRUE;
 
     INSERT INTO user_plans (user_id, plan_id, status)
     VALUES (v_uid, v_plan_id, 'active')
-    RETURNING started_at, expires_at, status
+    RETURNING user_plans.started_at, user_plans.expires_at, user_plans.status
       INTO v_started_at, v_expires_at, v_status;
   END IF;
 
   IF v_expires_at IS NOT NULL AND v_expires_at < NOW() THEN
-    SELECT code, name, price_krw, max_universities,
-           question_limit, interview_limit, feedback_limit
+    SELECT plans.code, plans.name, plans.price_krw, plans.max_universities,
+           plans.question_limit, plans.interview_limit, plans.feedback_limit
       INTO v_code, v_name, v_price, v_max_universities,
            v_question_limit, v_interview_limit, v_feedback_limit
-      FROM plans WHERE code = 'FREE' AND active = TRUE;
+      FROM plans WHERE plans.code = 'FREE' AND plans.active = TRUE;
     v_status := 'expired';
   END IF;
 
@@ -193,7 +193,7 @@ BEGIN
   PERFORM public.get_my_plan();
 
   SELECT up.plan_id, p.code,
-         CASE p_feature
+         CASE consume_ai_usage.p_feature
            WHEN 'questions' THEN p.question_limit
            WHEN 'interview' THEN p.interview_limit
            WHEN 'feedback' THEN p.feedback_limit
@@ -204,31 +204,31 @@ BEGIN
    WHERE up.user_id = v_uid
    FOR UPDATE;
 
-  SELECT started_at INTO v_period_start FROM user_plans WHERE user_id = v_uid;
+  SELECT user_plans.started_at INTO v_period_start FROM user_plans WHERE user_plans.user_id = v_uid;
 
   -- Expired BETA falls back to FREE for usage purposes.
   IF v_plan_code IS NULL THEN RAISE EXCEPTION '플랜을 찾을 수 없습니다.'; END IF;
   IF EXISTS (
     SELECT 1 FROM user_plans
-     WHERE user_id = v_uid AND expires_at IS NOT NULL AND expires_at < NOW()
+     WHERE user_plans.user_id = v_uid AND user_plans.expires_at IS NOT NULL AND user_plans.expires_at < NOW()
   ) THEN
-    SELECT id, code,
-           CASE p_feature
-             WHEN 'questions' THEN question_limit
-             WHEN 'interview' THEN interview_limit
-             WHEN 'feedback' THEN feedback_limit
+    SELECT plans.id, plans.code,
+           CASE consume_ai_usage.p_feature
+             WHEN 'questions' THEN plans.question_limit
+             WHEN 'interview' THEN plans.interview_limit
+             WHEN 'feedback' THEN plans.feedback_limit
            END
       INTO v_plan_id, v_plan_code, v_limit
-      FROM plans WHERE code = 'FREE';
-    SELECT expires_at INTO v_period_start FROM user_plans WHERE user_id = v_uid;
+      FROM plans WHERE plans.code = 'FREE';
+    SELECT user_plans.expires_at INTO v_period_start FROM user_plans WHERE user_plans.user_id = v_uid;
   END IF;
 
-  SELECT COALESCE(SUM(quantity), 0)::INTEGER
+  SELECT COALESCE(SUM(usage_events.quantity), 0)::INTEGER
     INTO v_used
     FROM usage_events
-   WHERE user_id = v_uid
-     AND feature = p_feature
-     AND created_at >= COALESCE(v_period_start, '1970-01-01'::timestamptz);
+   WHERE usage_events.user_id = v_uid
+     AND usage_events.feature = consume_ai_usage.p_feature
+     AND usage_events.created_at >= COALESCE(v_period_start, '1970-01-01'::timestamptz);
 
   IF v_limit IS NOT NULL AND v_used + p_quantity > v_limit THEN
     RETURN QUERY SELECT FALSE, v_plan_code, v_limit, v_used, GREATEST(v_limit - v_used, 0);
