@@ -43,7 +43,7 @@ RETURNS TABLE(
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v_admin_email TEXT := auth.jwt() ->> 'email';
 BEGIN
-  IF v_admin_email <> 'ziron7@gmail.com' THEN RAISE EXCEPTION '관리자 권한이 없습니다.'; END IF;
+  IF v_admin_email NOT IN ('ziron7@gmail.com', 'roche07he@gmail.com') THEN RAISE EXCEPTION '관리자 권한이 없습니다.'; END IF;
   RETURN QUERY
   WITH base AS (
     SELECT ua.user_id, ua.email, ua.approval_status,
@@ -74,7 +74,7 @@ RETURNS TABLE(event_name TEXT,event_count BIGINT)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
 DECLARE v_admin_email TEXT := auth.jwt() ->> 'email';
 BEGIN
-  IF v_admin_email <> 'ziron7@gmail.com' THEN RAISE EXCEPTION '관리자 권한이 없습니다.'; END IF;
+  IF v_admin_email NOT IN ('ziron7@gmail.com', 'roche07he@gmail.com') THEN RAISE EXCEPTION '관리자 권한이 없습니다.'; END IF;
   RETURN QUERY SELECT ae.event_name, COUNT(*)::BIGINT FROM analytics_events ae
    LEFT JOIN user_approvals ua ON ua.user_id=ae.user_id
   WHERE COALESCE(ua.email,'') <> v_admin_email GROUP BY ae.event_name ORDER BY COUNT(*) DESC;
