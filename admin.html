@@ -644,49 +644,20 @@ async function loadUsers() {
   document.getElementById('emptyUsers').style.display = 'none';
 
   try {
-    // students 테이블에서 user_id, email을 가져옴
+    // user_approvals 테이블에서 승인된 유저만 가져옴 (탈퇴하지 않은 유저)
     const { data, error } = await supabaseClient
-      .from('students')
-      .select('user_id, email, created_at')
+      .from('user_approvals')
+      .select('*')
+      .eq('approval_status', 'approved')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    if (!data || data.length === 0) {
-      document.getElementById('loadingUsers').classList.remove('show');
-      document.getElementById('emptyUsers').style.display = 'block';
-      return;
-    }
-
-    // user_id로 그룹화
-    const usersMap = new Map();
-    data.forEach(student => {
-      if (!usersMap.has(student.user_id)) {
-        usersMap.set(student.user_id, student);
-      }
-    });
-
     const tbody = document.getElementById('usersTableBody');
     tbody.innerHTML = '';
 
-    // 유저 정보 표시
-    usersMap.forEach((student, userId) => {
-      const tr = document.createElement('tr');
-      const createdDate = new Date(student.created_at).toLocaleDateString('ko-KR');
-      const email = student.email || userId; // 이메일 또는 user_id
-
-      tr.innerHTML = `
-        <td>${email}</td>
-        <td>
-          <span class="badge user">일반</span>
-        </td>
-        <td>${createdDate}</td>
-      `;
-
-      tbody.appendChild(tr);
-    });
-
-    // 관리자 추가
+    // 관리자 먼저 추가
     const adminTr = document.createElement('tr');
     adminTr.innerHTML = `
       <td>${ADMIN_EMAIL}</td>
@@ -695,10 +666,33 @@ async function loadUsers() {
       </td>
       <td>-</td>
     `;
-    tbody.insertBefore(adminTr, tbody.firstChild);
+    tbody.appendChild(adminTr);
+
+    // 일반 유저 추가
+    if (data && data.length > 0) {
+      data.forEach(user => {
+        const tr = document.createElement('tr');
+        const createdDate = new Date(user.created_at).toLocaleDateString('ko-KR');
+
+        tr.innerHTML = `
+          <td>${user.email}</td>
+          <td>
+            <span class="badge user">일반</span>
+          </td>
+          <td>${createdDate}</td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
 
     document.getElementById('loadingUsers').classList.remove('show');
-    document.getElementById('usersTable').style.display = 'table';
+
+    if (data && data.length > 0 || true) { // 관리자만 있어도 표시
+      document.getElementById('usersTable').style.display = 'table';
+    } else {
+      document.getElementById('emptyUsers').style.display = 'block';
+    }
   } catch (error) {
     console.error('유저 목록 로드 실패:', error);
     showToast('error', '유저 목록을 불러올 수 없습니다.');
