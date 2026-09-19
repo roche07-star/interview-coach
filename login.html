@@ -343,7 +343,20 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
           hideLoading();
           switchTab('login');
           await supabaseClient.auth.signOut();
-          showError('회원 탈퇴가 처리된 계정입니다. 다시 가입하시려면 관리자에게 문의하세요.');
+
+          // 관리자 문의 안내
+          const contactAdmin = confirm(
+            '⚠️ 회원 탈퇴가 처리된 계정입니다.\n\n' +
+            '다시 가입하시려면 관리자에게 문의하세요.\n\n' +
+            '관리자: roche07he@gmail.com\n\n' +
+            '[확인] 버튼을 누르면 이메일 앱이 열립니다.'
+          );
+
+          if (contactAdmin) {
+            window.location.href = 'mailto:roche07he@gmail.com?subject=[면접코치] 재가입 문의&body=안녕하세요.%0A%0A탈퇴한 계정으로 재가입을 희망합니다.%0A%0A이메일: ' + email;
+          }
+
+          showError('회원 탈퇴가 처리된 계정입니다.');
           return;
         }
       }

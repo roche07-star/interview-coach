@@ -453,6 +453,28 @@ body {
     </div>
   </div>
 
+  <!-- 유저 문의 -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">유저 문의</h2>
+      <button class="btn-primary" onclick="openGmail()" style="background:#4285f4;">
+        <i data-lucide="mail" style="width:16px; height:16px"></i>
+        Gmail 확인
+      </button>
+    </div>
+
+    <div style="padding:20px; background:#f8f9fa; border-radius:8px; text-align:center;">
+      <i data-lucide="mail-open" style="width:48px; height:48px; color:#666; margin-bottom:12px;"></i>
+      <p style="color:#666; margin-bottom:16px;">
+        재가입 문의 등 유저 문의는 이메일(<strong>roche07he@gmail.com</strong>)로 수신됩니다.
+      </p>
+      <button class="btn-primary" onclick="openGmail()" style="background:#4285f4;">
+        <i data-lucide="external-link" style="width:16px; height:16px"></i>
+        Gmail 받은편지함 열기
+      </button>
+    </div>
+  </div>
+
   <!-- 유저 목록 -->
   <div class="section">
     <div class="section-header">
@@ -534,6 +556,10 @@ async function handleLogout() {
   } else {
     window.location.href = 'login.html';
   }
+}
+// Gmail 열기
+function openGmail() {
+  window.open('https://mail.google.com/mail/u/0/#inbox', '_blank');
 }
 
 // 권한 체크
