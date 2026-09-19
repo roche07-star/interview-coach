@@ -810,14 +810,14 @@ async function approveUser(userId) {
   if (!confirm('이 사용자를 승인하시겠습니까?')) return;
 
   try {
-    const { data: { user: admin } } = await supabaseClient.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
 
     const { error } = await supabaseClient
       .from('user_approvals')
       .update({
         approval_status: 'approved',
         approved_at: new Date().toISOString(),
-        approved_by: admin.user.id
+        approved_by: session.user.id
       })
       .eq('user_id', userId);
 
