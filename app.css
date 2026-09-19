@@ -533,22 +533,287 @@ textarea {
 .onboarding{background:linear-gradient(135deg,#f7f8ff,#fff);border:1px solid #e5e7f5;border-radius:14px;padding:18px;margin-bottom:20px}.onboarding-row{display:flex;gap:12px;align-items:center;padding:8px 0;color:#555}.onboarding-row.done{color:#1a7a4a}.upgrade-btn{border:0;border-radius:9px;padding:10px 14px;background:#667eea;color:#fff;font-weight:700;cursor:pointer}
 @media(max-width:768px){.usage-grid{grid-template-columns:1fr}}
 
-/* 반응형 */
-@media (max-width: 768px) {
+/* 반응형 디자인 */
+
+/* 태블릿 (768px ~ 1024px) */
+@media (max-width: 1024px) {
   .container {
-    padding: 20px;
+    max-width: 100%;
+    padding: 30px;
   }
 
+  .usage-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 모바일 (최대 768px) */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .container {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  /* 헤더 */
   h1 {
     font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    margin-bottom: 30px;
+  }
+
+  /* 네비게이션 */
+  .navbar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .nav-logo {
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .nav-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .nav-user {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  .nav-btn {
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .nav-btn.plan-badge {
+    padding: 10px 16px;
+  }
+
+  /* 3단계 탭 */
+  .steps-nav {
+    gap: 6px;
   }
 
   .step-tab {
     font-size: 13px;
-    padding: 12px 10px;
+    padding: 12px 8px;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .step-tab span:not(.step-number) {
-    display: none;
+    font-size: 11px;
+    display: block;
+  }
+
+  /* 입력 필드 */
+  textarea {
+    min-height: 150px;
+    font-size: 15px; /* 모바일 줌 방지 */
+  }
+
+  select, input {
+    font-size: 15px; /* 모바일 줌 방지 */
+    padding: 14px;
+    min-height: 48px; /* 터치 친화적 */
+  }
+
+  label {
+    font-size: 13px;
+  }
+
+  /* 버튼 */
+  .btn {
+    padding: 16px 20px;
+    font-size: 15px;
+    min-height: 48px; /* 터치 친화적 */
+  }
+
+  /* 인포박스 */
+  .info-box {
+    padding: 14px;
+    font-size: 13px;
+  }
+
+  .info-box ul {
+    margin-left: 16px;
+  }
+
+  /* 질문 카드 */
+  .question-card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .question-number {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+
+  .question-text {
+    font-size: 15px;
+  }
+
+  .answer-text {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  /* 모달 */
+  .modal-content {
+    width: 95%;
+    max-height: 85vh;
+    padding: 24px;
+    border-radius: 12px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  /* Toast */
+  .toast {
+    left: 10px;
+    right: 10px;
+    top: 10px;
+    min-width: auto;
+    max-width: calc(100vw - 20px);
+  }
+
+  .toast-message {
+    font-size: 13px;
+  }
+
+  /* Phase 3: Usage Panel */
+  .usage-panel {
+    padding: 14px;
+  }
+
+  .usage-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .usage-item {
+    padding: 10px;
+  }
+
+  .usage-label {
+    font-size: 11px;
+  }
+
+  .usage-value {
+    font-size: 15px;
+  }
+
+  .onboarding {
+    padding: 14px;
+  }
+
+  .onboarding-row {
+    font-size: 13px;
+    padding: 6px 0;
+  }
+
+  .upgrade-btn {
+    padding: 12px 16px;
+    font-size: 14px;
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+
+/* 작은 모바일 (최대 480px) */
+@media (max-width: 480px) {
+  body {
+    padding: 8px;
+  }
+
+  .container {
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  .nav-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-btn.icon-only {
+    display: none; /* 작은 화면에서는 아이콘 버튼 숨김 */
+  }
+
+  .step-tab span:not(.step-number) {
+    display: none; /* 텍스트 숨기고 아이콘만 */
+  }
+
+  .modal-content {
+    padding: 20px;
+  }
+
+  .question-card {
+    padding: 14px;
+  }
+}
+
+/* 가로 모드 대응 */
+@media (max-height: 600px) and (orientation: landscape) {
+  .container {
+    padding: 16px;
+  }
+
+  .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  textarea {
+    min-height: 120px;
+  }
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  /* 터치 타겟 크기 확대 */
+  .btn,
+  .nav-btn,
+  .step-tab,
+  select,
+  input,
+  textarea {
+    min-height: 44px; /* iOS 권장 최소 크기 */
+  }
+
+  /* 호버 효과 제거 (터치에서 불필요) */
+  .btn:hover,
+  .nav-btn:hover,
+  .step-tab:hover,
+  .question-card:hover {
+    transform: none;
+  }
+
+  /* 탭 하이라이트 색상 조정 */
+  * {
+    -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
   }
 }
