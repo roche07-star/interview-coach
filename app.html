@@ -546,6 +546,13 @@ textarea {
         <i data-lucide="user" style="width:16px; height:16px"></i>
         <span id="userEmail">-</span>
       </div>
+      <button class="nav-btn settings" onclick="showPlanInfo()" id="planBadgeBtn" style="background:#eef2ff;color:#667eea;">
+        <i data-lucide="badge-check" style="width:16px;height:16px"></i>
+        <span id="planBadge">플랜 확인</span>
+      </button>
+      <button class="nav-btn settings" onclick="redeemBetaCoupon()" id="couponBtn">
+        🎟️ 베타 코드
+      </button>
       <button class="nav-btn settings" onclick="openSettings()">
         <i data-lucide="settings" style="width:16px; height:16px"></i>
         설정
@@ -638,6 +645,14 @@ textarea {
     <div style="margin-bottom:16px;">
       <div style="font-size:14px; font-weight:600; color:#333; margin-bottom:8px;">생성할 질문 개수:</div>
       <div style="display:flex; gap:8px;">
+        <button
+          class="count-select-btn"
+          id="count3"
+          onclick="selectQuestionCount(3)"
+          style="flex:1; padding:10px; border:2px solid #667eea; background:white; color:#667eea; border-radius:8px; font-weight:600; cursor:pointer; transition:all 0.2s;"
+        >
+          3개
+        </button>
         <button
           class="count-select-btn"
           id="count10"
@@ -970,14 +985,13 @@ class Database {
 
   async createInterviewSession(studentId, mode, selected) {
     await this.getStudent(studentId);
-    const { data, error } = await supabaseClient.from('interview_sessions').insert({
-      student_id: studentId,
-      mode,
-      question_count: selected.length,
-      status: 'in_progress'
-    }).select().single();
+    const { data, error } = await supabaseClient.rpc('create_interview_session_with_usage', {
+      p_student_id: studentId,
+      p_mode: mode,
+      p_question_count: selected.length
+    });
     if (error) throw error;
-    return data.id;
+    return data;
   }
 
   async saveInterview(data) {
@@ -1066,13 +1080,85 @@ let questions = [];
 let selectedQuestions = [];
 let currentQuestion = 0;
 let isTestMode = false;
-let selectedQuestionCount = 10;
+let selectedQuestionCount = 3;
+let planState = null;
+let usageState = null;
 let currentStudentId = null;
 let currentSessionId = null;
 let currentTranscript = '';
 let recognition = null;
 let recordingFinalText = '';
 let loadingProgressInterval = null;
+
+async function loadPlanState() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient.rpc('get_my_plan');
+    if (error) throw error;
+    planState = Array.isArray(data) ? data[0] : data;
+
+    const { data: usage, error: usageError } = await supabaseClient.rpc('get_my_usage');
+    if (!usageError) usageState = usage;
+
+    renderPlanUI();
+  } catch (e) {
+    console.error('플랜 조회 실패:', e);
+  }
+}
+
+function renderPlanUI() {
+  const badge = document.getElementById('planBadge');
+  if (badge && planState) badge.textContent = planState.code === 'BETA' ? 'BETA 29,000원' : '무료 체험';
+
+  const isBeta = planState?.code === 'BETA';
+  document.getElementById('count3')?.style.setProperty('display', isBeta ? 'none' : 'block');
+  document.getElementById('count10')?.style.setProperty('display', isBeta ? 'block' : 'none');
+  document.getElementById('count20')?.style.setProperty('display', isBeta ? 'block' : 'none');
+  document.getElementById('count30')?.style.setProperty('display', isBeta ? 'block' : 'none');
+
+  if (!isBeta) {
+    selectedQuestionCount = 3;
+    document.getElementById('generateBtnText')?.replaceChildren(document.createTextNode('무료 질문 3개 생성'));
+  } else if (selectedQuestionCount === 3) {
+    selectedQuestionCount = 10;
+    selectQuestionCount(10);
+  }
+
+  const fullBtn = document.querySelector('#interviewStartSection button[onclick="startInterview(false)"]');
+  const testBtn = document.querySelector('#interviewStartSection button[onclick="startInterview(true)"]');
+  if (fullBtn) fullBtn.style.display = isBeta ? 'block' : 'none';
+  if (testBtn) testBtn.textContent = isBeta ? '테스트 (2개만)' : '무료 테스트 (2개)';
+}
+
+function showPlanInfo() {
+  if (!planState) return;
+  const usage = usageState || {};
+  const lines = [
+    `현재 플랜: ${planState.name}`,
+    `등록 가능 대학: 최대 ${planState.max_universities}개`,
+    `질문 사용량: ${usage.questions_used ?? 0} / ${planState.question_limit ?? '무제한'}`,
+    `면접 사용량: ${usage.interview_used ?? 0} / ${planState.interview_limit ?? '무제한'}`,
+    `피드백 사용량: ${usage.feedback_used ?? 0} / ${planState.feedback_limit ?? '무제한'}`
+  ];
+  if (planState.expires_at) lines.push(`플랜 만료: ${new Date(planState.expires_at).toLocaleDateString('ko-KR')}`);
+  alert(lines.join('\n'));
+}
+
+async function redeemBetaCoupon() {
+  const code = prompt('베타 코드를 입력하세요.');
+  if (!code) return;
+  try {
+    const { data, error } = await supabaseClient.rpc('redeem_coupon', { p_code: code.trim() });
+    if (error) throw error;
+    const result = Array.isArray(data) ? data[0] : data;
+    if (!result?.success) { showToast('error', result?.message || '쿠폰 적용에 실패했습니다.'); return; }
+    showToast('success', '2026 베타 플랜이 활성화되었습니다.');
+    await loadPlanState();
+  } catch (e) {
+    console.error(e);
+    showToast('error', '쿠폰 적용 실패: ' + e.message);
+  }
+}
 
 function getAIConfig() {
   return {
@@ -1344,7 +1430,7 @@ function selectQuestionCount(count) {
   const text = document.getElementById('generateBtnText'); if (text) text.textContent = `질문/답변 ${count}개 생성`;
 }
 
-async function callAI(prompt, maxTokens=12000) {
+async function callAI(prompt, maxTokens=12000, usageFeature, usageQuantity=1, usageMetadata={}) {
   if (!supabaseClient) throw new Error('Supabase가 초기화되지 않았습니다.');
   const cfg = getAIConfig();
 
@@ -1352,7 +1438,10 @@ async function callAI(prompt, maxTokens=12000) {
     body: {
       provider: cfg.provider,
       prompt,
-      max_tokens: maxTokens
+      max_tokens: maxTokens,
+      usage_feature: usageFeature,
+      usage_quantity: usageQuantity,
+      usage_metadata: usageMetadata
     }
   });
 
@@ -1388,7 +1477,7 @@ async function generateQuestions() {
   showLoading('질문/답변 생성 중...',`${need}개 질문을 생성하고 있습니다`,true);
   try {
     const prompt=`너는 2027학년도 대입 학생부종합 전형 면접 전문가이다.\n대학: ${university}\n학과: ${department}\n\n[생기부]\n${maskedRecord}\n\n${questions.length ? `기존 질문 ${questions.length}개가 있으므로 중복 없이 ${need}개만 추가한다.`:''}\n\n각 항목은 question, answer, follow_ups(1~2개)를 가진다. 질문은 생기부의 구체적 활동을 근거로 만들고 전공적합성 40%, 학업역량 30%, 인성 20%, 발전가능성 10%를 반영한다. 답변은 5~7문장, 학생부와 자연스럽게 연결하며 사실을 임의로 만들지 않는다.\n\n⚠️ 중요: 반드시 유효한 JSON만 출력하세요. 설명, 주석, 마크다운 불가. 순수 JSON만 출력.\n\n출력 형식:\n{"questions":[{"question":"질문 내용","answer":"답변 내용","follow_ups":["꼬리질문1","꼬리질문2"]}]}`;
-    const result=extractJson(await callAI(prompt,16000));
+    const result=extractJson(await callAI(prompt,16000,'questions',need,{university,department}));
     const added=(result.questions||[]).map(q=>({question:String(q.question||'').trim(),answer:String(q.answer||'').trim(),follow_ups:Array.isArray(q.follow_ups)?q.follow_ups.map(String):[]})).filter(q=>q.question&&q.answer).slice(0,need);
     if(!added.length) throw new Error('생성된 질문이 없습니다.');
     questions=[...questions,...added];
@@ -1545,7 +1634,7 @@ async function getFeedback(){
     if(!interviews.length)throw new Error('저장된 답변이 없습니다.');
     const qa=interviews.map((i,n)=>({number:n+1,question:i.question,modelAnswer:i.model_answer||'',studentAnswer:i.student_answer||''}));
     const prompt=`너는 대입 면접 평가 전문가다. 다음 학생의 실제 면접 답변만 근거로 객관적인 피드백을 작성하라. 관찰할 수 없는 목소리, 표정, 자세는 평가하지 않는다.\n\n${qa.map(x=>`[질문 ${x.number}]\n${x.question}\n[참고 답변]\n${x.modelAnswer}\n[학생 답변]\n${x.studentAnswer}`).join('\n\n')}\n\n다음 형식으로 작성한다:\n## 전체 평가\n점수: 0-100\n총평: 2-3문장\n## 질문별 분석\n각 질문마다 평가(상/중/하), 강점, 개선점\n## 종합 피드백\n잘한 점 3가지\n아쉬운 점 3가지\n개선 방향 3가지\n다음 면접 준비사항.\n'모범답안과 일치' 같은 표현은 사용하지 않는다.`;
-    const feedback=await callAI(prompt,6000); if(!feedback)throw new Error('AI 피드백 응답이 비어 있습니다.');
+    const feedback=await callAI(prompt,6000,'feedback',1,{session_id:currentSessionId}); if(!feedback)throw new Error('AI 피드백 응답이 비어 있습니다.');
     await db.saveFeedback(currentSessionId,feedback);
     hideLoading();displayFeedback(feedback,currentSessionId);
     showToast('success','피드백이 저장되었습니다.');
@@ -1683,7 +1772,7 @@ function showToast(type,message){const t=document.getElementById('toast');if(!t)
 
 window.addEventListener('DOMContentLoaded',async()=>{
   lucide.createIcons();loadSettings();await checkAuth();
-  try{await db.init();}catch(e){console.error(e);showToast('error',e.message);}
+  try{await db.init(); await loadPlanState();}catch(e){console.error(e);showToast('error',e.message);}
   document.getElementById('aiProvider')?.addEventListener('change',updateAISettingsHelp);
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;if(SpeechRecognition)console.log('음성 인식 지원');
 });

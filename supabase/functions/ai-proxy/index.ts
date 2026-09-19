@@ -76,7 +76,7 @@ serve(async (req) => {
     }
 
     const body = await req.json()
-    const { provider, prompt, max_tokens } = body
+    const { provider, prompt, max_tokens, usage_feature, usage_quantity, usage_metadata } = body
 
     if (typeof prompt !== 'string' || !prompt.trim()) {
       return jsonResponse({ error: 'AI 요청 내용이 없습니다.' }, 400)
@@ -88,6 +88,39 @@ serve(async (req) => {
     const requestedMaxTokens = Number(max_tokens || 4096)
     if (!Number.isFinite(requestedMaxTokens) || requestedMaxTokens < 1 || requestedMaxTokens > 20000) {
       return jsonResponse({ error: 'max_tokens는 1~20000 범위여야 합니다.' }, 400)
+    }
+
+    // Phase 2: every AI request must reserve usage on the server.
+    // The browser cannot decide whether a request is within the user's plan.
+    const allowedFeatures = ['questions', 'interview', 'feedback']
+    if (!allowedFeatures.includes(usage_feature)) {
+      return jsonResponse({ error: 'AI 사용 기능 정보가 필요합니다.' }, 400)
+    }
+
+    const usageQuantity = Number(usage_quantity || 1)
+    if (!Number.isInteger(usageQuantity) || usageQuantity < 1 || usageQuantity > 100) {
+      return jsonResponse({ error: 'AI 사용량은 1~100 범위의 정수여야 합니다.' }, 400)
+    }
+
+    const { data: usageResult, error: usageError } = await supabase.rpc('consume_ai_usage', {
+      p_feature: usage_feature,
+      p_quantity: usageQuantity,
+      p_metadata: usage_metadata || {},
+    })
+
+    if (usageError) {
+      console.error('Usage reservation failed:', usageError)
+      return jsonResponse({ error: 'AI 사용량을 확인하지 못했습니다.' }, 500)
+    }
+
+    const usage = Array.isArray(usageResult) ? usageResult[0] : usageResult
+    if (!usage?.allowed) {
+      const remaining = Number(usage?.remaining_value ?? 0)
+      return jsonResponse({
+        error: `플랜의 ${usage_feature} 이용 한도를 초과했습니다. 남은 사용량: ${remaining}`,
+        code: 'PLAN_LIMIT_EXCEEDED',
+        usage,
+      }, 429)
     }
 
     if (provider === 'claude') {
