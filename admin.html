@@ -619,7 +619,13 @@ body {
         <form id="couponForm" onsubmit="handleCreateCoupon(event)">
           <div class="form-group">
             <label>쿠폰 코드</label>
-            <input type="text" id="couponCode" placeholder="BETA2026-TEST" required style="text-transform: uppercase;">
+            <div style="display: flex; gap: 10px;">
+              <input type="text" id="couponCode" placeholder="BETA2026-TEST" required style="text-transform: uppercase; flex: 1;">
+              <button type="button" onclick="generateRandomCoupon()" style="padding: 14px 20px; background: #764ba2; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+                <i data-lucide="shuffle" style="width:16px; height:16px;"></i>
+                랜덤 생성
+              </button>
+            </div>
           </div>
           <div class="form-group">
             <label>최대 사용 횟수</label>
@@ -1259,6 +1265,21 @@ async function deleteInquiry(inquiryId) {
     showToast('error', '문의 삭제 실패');
     console.error(error);
   }
+}
+
+// 랜덤 쿠폰 코드 생성
+function generateRandomCoupon() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 헷갈리는 문자 제외 (I, O, 0, 1)
+  const year = new Date().getFullYear();
+
+  // BETA-2026-XXXX 형식
+  let code = `BETA-${year}-`;
+  for (let i = 0; i < 4; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  document.getElementById('couponCode').value = code;
+  lucide.createIcons(); // 아이콘 다시 렌더링
 }
 
 // 베타 쿠폰 생성
