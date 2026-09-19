@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>로그인 - AI 면접코치</title>
+<title>로그인 - 면접코치</title>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -164,7 +164,7 @@ body {
 
 <div class="container">
   <div class="logo">
-    <h1>🎓 AI 면접코치</h1>
+    <h1>🎓 면접코치</h1>
     <p>학생부종합 전형 면접 대비</p>
   </div>
 
@@ -238,7 +238,7 @@ async function checkExistingSession() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
       // 관리자는 admin.html로, 일반 사용자는 app.html로
-      if (session.user.email === 'roche07m@gmail.com') {
+      if (session.user.email === 'roche07he@gmail.com') {
         window.location.href = 'admin.html';
       } else {
         window.location.href = 'app.html';
@@ -332,7 +332,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       console.error('로그인 에러 상세:', error);
     } else {
       // 관리자는 admin.html로, 일반 사용자는 app.html로
-      if (email === 'roche07m@gmail.com') {
+      if (email === 'roche07he@gmail.com') {
         window.location.href = 'admin.html';
       } else {
         window.location.href = 'app.html';
