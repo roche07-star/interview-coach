@@ -6,6 +6,8 @@
 <title>관리자 페이지 - AI 면접코치</title>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="common.js"></script>
 <style>
 * {
   margin: 0;
@@ -657,11 +659,8 @@ body {
 <script src="config.js"></script>
 
 <script>
-// Supabase 초기화
-const SUPABASE_URL = CONFIG.SUPABASE_URL;
-const SUPABASE_ANON_KEY = CONFIG.SUPABASE_ANON_KEY;
-
-let supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Supabase 초기화 (common.js 사용)
+let supabaseClient = window.getSupabaseClient();
 
 const ADMIN_EMAILS = ['ziron7@gmail.com', 'roche07he@gmail.com'];
 
@@ -874,24 +873,7 @@ async function handleAddUser(event) {
   }
 }
 
-// Toast 알림
-function showToast(type, message) {
-  const toast = document.getElementById('toast');
-  const icon = document.getElementById('toastIcon');
-  const msg = document.getElementById('toastMessage');
-
-  toast.className = 'toast show ' + type;
-
-  if (type === 'success') icon.textContent = '✅';
-  else if (type === 'error') icon.textContent = '❌';
-  else icon.textContent = 'ℹ️';
-
-  msg.textContent = message;
-
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
+// showToast는 common.js에서 제공 (중복 제거)
 
 // 초기화
 async function loadPlanUsage(){

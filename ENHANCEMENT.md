@@ -360,7 +360,7 @@ pg_dump $DATABASE_URL > backup_$(date +%Y%m%d).sql
 
 ### **1주일 내**
 1. ✅ app.html 파일 분리 (JS/CSS)
-2. ⬜ 중복 코드 제거
+2. ✅ 중복 코드 제거
 3. ⬜ 반응형 디자인 개선
 4. ⬜ 주석/문서화
 

@@ -1,15 +1,16 @@
 // ============================================================
-// 2027 대입 면접코치 - Supabase Edge Function 구조
+// 2027 대입 면접코치 - Main Application Logic
+// common.js의 공통 함수 사용
 // ============================================================
-const SUPABASE_URL = CONFIG.SUPABASE_URL;
-const SUPABASE_ANON_KEY = CONFIG.SUPABASE_ANON_KEY;
 
-let supabaseClient = null;
 let currentUser = null;
 
-if (window.supabase) {
-  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Supabase 클라이언트는 common.js에서 관리
+function getClient() {
+  return window.getSupabaseClient();
 }
+
+const supabaseClient = getClient();
 
 class Database {
   async init() {
@@ -893,9 +894,10 @@ function showLoading(text, subtext, progress = false) {
     document.getElementById('loadingOverlay').classList.add('show');
   }
 }
+// hideLoading은 진행바 관리 기능이 추가된 버전 (app 전용)
 function hideLoading(){if(loadingProgressInterval){clearInterval(loadingProgressInterval);loadingProgressInterval=null;document.getElementById('bgProgressBar').style.width='100%';document.getElementById('bgProgressText').textContent='100%';setTimeout(()=>{document.getElementById('backgroundProgress').style.display='none';document.getElementById('bgProgressBar').style.width='0%';document.getElementById('bgProgressText').textContent='0%';},500);}document.getElementById('loadingOverlay').classList.remove('show');}
 function minimizeProgress(){document.getElementById('backgroundProgress').style.display='none';}
-function showToast(type,message){const t=document.getElementById('toast');if(!t)return;document.getElementById('toastIcon').textContent=type==='success'?'✅':type==='error'?'❌':'ℹ️';document.getElementById('toastMessage').textContent=message;t.className='toast show '+type;clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),3500);}
+// showToast는 common.js에서 제공 (중복 제거)
 
 window.addEventListener('DOMContentLoaded',async()=>{
   lucide.createIcons();loadSettings();await checkAuth();
