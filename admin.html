@@ -669,7 +669,7 @@ const ADMIN_EMAILS = ['ziron7@gmail.com', 'roche07he@gmail.com'];
 async function handleLogout() {
   const { error } = await supabaseClient.auth.signOut();
   if (error) {
-    showToast('error', '로그아웃 실패');
+    showToast('error', '🚪 로그아웃에 실패했습니다. 페이지를 새로고침해주세요.');
   } else {
     window.location.href = 'login.html';
   }
@@ -820,7 +820,7 @@ async function loadUsers() {
     }
   } catch (error) {
     console.error('유저 목록 로드 실패:', error);
-    showToast('error', '유저 목록을 불러올 수 없습니다.');
+    showToast('error', '👥 유저 목록을 불러오는데 실패했습니다. 페이지를 새로고침해주세요.');
     document.getElementById('loadingUsers').classList.remove('show');
   }
 }
@@ -845,7 +845,7 @@ async function handleAddUser(event) {
   const passwordConfirm = document.getElementById('newUserPasswordConfirm').value;
 
   if (password !== passwordConfirm) {
-    showToast('error', '비밀번호가 일치하지 않습니다.');
+    showToast('error', '🔒 비밀번호가 일치하지 않습니다. 다시 확인해주세요.');
     return;
   }
 
@@ -857,9 +857,9 @@ async function handleAddUser(event) {
 
     if (error) {
       if (error.message.includes('already registered')) {
-        showToast('error', '이미 등록된 이메일입니다.');
+        showToast('error', '⚠️ 이미 등록된 이메일입니다. 다른 이메일을 사용해주세요.');
       } else {
-        showToast('error', '유저 추가 실패: ' + error.message);
+        showToast('error', '❌ 유저 추가 실패: ' + error.message);
       }
       return;
     }
@@ -870,7 +870,7 @@ async function handleAddUser(event) {
     await loadStats();
   } catch (error) {
     console.error('유저 추가 실패:', error);
-    showToast('error', '유저 추가에 실패했습니다.');
+    showToast('error', '❌ 유저 추가에 실패했습니다. 잠시 후 다시 시도해주세요.');
   }
 }
 
@@ -992,7 +992,7 @@ async function loadPendingApprovals() {
     table.style.display = 'table';
   } catch (error) {
     loading.style.display = 'none';
-    showToast('error', '승인 목록 로드 실패');
+    showToast('error', '📋 승인 대기 목록을 불러오는데 실패했습니다. 페이지를 새로고침해주세요.');
     console.error(error);
   }
 }
@@ -1018,7 +1018,7 @@ async function approveUser(userId) {
     showToast('success', '승인이 완료되었습니다.');
     await loadPendingApprovals();
   } catch (error) {
-    showToast('error', '승인 처리 실패');
+    showToast('error', '✅ 승인 처리에 실패했습니다. 잠시 후 다시 시도해주세요.');
     console.error(error);
   }
 }
@@ -1071,7 +1071,7 @@ async function loadInquiries() {
     lucide.createIcons();
   } catch (error) {
     loading.style.display = 'none';
-    showToast('error', '문의 목록 로드 실패');
+    showToast('error', '💬 문의 목록을 불러오는데 실패했습니다. 페이지를 새로고침해주세요.');
     console.error(error);
   }
 }
@@ -1093,7 +1093,7 @@ async function rejectUser(userId) {
     showToast('success', '승인이 거부되었습니다.');
     await loadPendingApprovals();
   } catch (error) {
-    showToast('error', '거부 처리 실패');
+    showToast('error', '❌ 거부 처리에 실패했습니다. 잠시 후 다시 시도해주세요.');
     console.error(error);
   }
 }
@@ -1125,7 +1125,7 @@ async function adminDeleteUser(userId, email) {
     await loadPendingApprovals();
     await loadUsers();
   } catch (error) {
-    showToast('error', 'DB 삭제 실패: ' + error.message);
+    showToast('error', '🗑️ DB 삭제 실패: ' + error.message + ' 관리자에게 문의하세요.');
     console.error(error);
   }
 }
@@ -1194,7 +1194,7 @@ ${data.answer}
       }
     }
   } catch (error) {
-    showToast('error', '문의 조회 실패');
+    showToast('error', '💬 문의 조회에 실패했습니다. 잠시 후 다시 시도해주세요.');
     console.error(error);
   }
 }
@@ -1214,7 +1214,7 @@ async function deleteInquiry(inquiryId) {
     showToast('success', '문의가 삭제되었습니다.');
     await loadInquiries();
   } catch (error) {
-    showToast('error', '문의 삭제 실패');
+    showToast('error', '🗑️ 문의 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');
     console.error(error);
   }
 }

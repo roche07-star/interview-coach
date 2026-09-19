@@ -355,8 +355,8 @@ pg_dump $DATABASE_URL > backup_$(date +%Y%m%d).sql
 ### **즉시 수정 (이번 주)**
 1. ✅ admin.html - .neq 필터 수정
 2. ✅ RLS 정책 확인 및 추가
-3. ⬜ 로딩 상태 UI 개선
-4. ⬜ 에러 메시지 개선
+3. ✅ 로딩 상태 UI 개선
+4. ✅ 에러 메시지 개선
 
 ### **1주일 내**
 1. ⬜ app.html 파일 분리 (JS/CSS)
