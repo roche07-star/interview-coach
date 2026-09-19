@@ -1091,18 +1091,43 @@ let recordingFinalText = '';
 let loadingProgressInterval = null;
 
 async function loadPlanState() {
-  if (!supabaseClient) return;
+  if (!supabaseClient) {
+    console.error('플랜 조회 실패: Supabase 클라이언트가 초기화되지 않았습니다.');
+    return;
+  }
   try {
     const { data, error } = await supabaseClient.rpc('get_my_plan');
-    if (error) throw error;
+    if (error) {
+      console.error('get_my_plan 실패:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        full: error
+      });
+      throw error;
+    }
     planState = Array.isArray(data) ? data[0] : data;
+    console.log('플랜 로드 성공:', planState);
 
     const { data: usage, error: usageError } = await supabaseClient.rpc('get_my_usage');
-    if (!usageError) usageState = usage;
+    if (usageError) {
+      console.error('get_my_usage 실패:', usageError);
+    } else {
+      usageState = Array.isArray(usage) ? usage[0] : usage;
+      console.log('사용량 로드 성공:', usageState);
+    }
 
     renderPlanUI();
   } catch (e) {
-    console.error('플랜 조회 실패:', e);
+    console.error('플랜 조회 실패:', {
+      name: e.name,
+      message: e.message,
+      code: e.code,
+      stack: e.stack,
+      full: e
+    });
+    showToast('error', '플랜 정보를 불러오지 못했습니다. Phase 2 Migration을 실행하셨나요?');
   }
 }
 
