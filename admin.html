@@ -447,6 +447,10 @@ body {
       <i data-lucide="bar-chart-3" style="width:18px; height:18px"></i>
       플랜/사용량
     </button>
+    <button class="tab-btn" onclick="switchTab('admissions');loadAdmissionTracks()">
+      <i data-lucide="graduation-cap" style="width:18px; height:18px"></i>
+      전형 관리
+    </button>
   </div>
 
   <!-- 탭 콘텐츠: 대시보드 -->
@@ -582,6 +586,25 @@ body {
     </div>
   </div>
   <!-- 플랜/사용량 탭 끝 -->
+
+  <!-- 탭 콘텐츠: 전형 관리 -->
+  <div id="tab-admissions" class="tab-content">
+    <div class="section">
+      <div class="section-header"><h2 class="section-title">연도별 대학 전형 관리</h2><button class="btn-primary" onclick="loadAdmissionTracks()">새로고침</button></div>
+      <div style="background:#f8f9ff;border-radius:10px;padding:16px;margin-bottom:20px">
+        <div style="font-weight:700;margin-bottom:8px">공식 입학처 페이지에서 전형 가져오기</div>
+        <div style="font-size:13px;color:#666;margin-bottom:12px">공식 HTML 안내 페이지 URL을 입력하면 AI가 전형 정보를 구조화합니다. 자동 등록된 데이터는 반드시 검수 후 공개하세요.</div>
+        <div style="display:grid;grid-template-columns:120px 180px 1fr auto;gap:8px;align-items:center">
+          <input id="importAdmissionYear" type="number" min="2020" max="2100" value="2028" style="padding:11px;border:1px solid #ddd;border-radius:8px">
+          <input id="importUniversity" type="text" placeholder="대학명" style="padding:11px;border:1px solid #ddd;border-radius:8px">
+          <input id="importSourceUrl" type="url" placeholder="https://입학처.공식.주소/전형안내" style="padding:11px;border:1px solid #ddd;border-radius:8px">
+          <button class="btn-primary" onclick="importAdmissionTracks()">전형 가져오기</button>
+        </div>
+        <div id="importAdmissionResult" style="margin-top:10px;font-size:13px;color:#666"></div>
+      </div>
+      <div style="overflow:auto"><table class="users-table"><thead><tr><th>연도</th><th>대학</th><th>전형</th><th>면접</th><th>상태</th><th>출처</th><th>작업</th></tr></thead><tbody id="admissionTracksBody"><tr><td colspan="7">조회 중...</td></tr></tbody></table></div>
+    </div>
+  </div>
 
   <!-- 탭 콘텐츠: 유저 목록 -->
   <div id="tab-users" class="tab-content">
@@ -894,6 +917,31 @@ function showToast(type, message) {
 }
 
 // 초기화
+async function loadAdmissionTracks(){
+  const body=document.getElementById('admissionTracksBody'); if(!body)return;
+  body.innerHTML='<tr><td colspan="7">불러오는 중...</td></tr>';
+  try{
+    const year=document.getElementById('importAdmissionYear')?.value||null;
+    const {data,error}=await supabaseClient.rpc('admin_get_admission_tracks',{p_year:year?Number(year):null});
+    if(error)throw error;
+    const rows=data||[];
+    body.innerHTML=rows.length?rows.map(x=>`<tr><td>${x.admission_year}</td><td>${escapeHtmlAdmin(x.university)}</td><td><strong>${escapeHtmlAdmin(x.track)}</strong><div style="font-size:11px;color:#888">${escapeHtmlAdmin(x.department_scope||'')}</div></td><td>${escapeHtmlAdmin(x.interview_criteria||'-')}</td><td><span class="badge ${x.import_status==='published'?'admin':'user'}">${x.import_status}</span></td><td>${x.source_url?`<a href="${escapeHtmlAdmin(x.source_url)}" target="_blank" rel="noopener">공식자료</a>`:'-'}</td><td><button class="btn-primary" style="padding:7px 10px;font-size:12px" onclick="toggleAdmissionPublish('${x.id}','${x.import_status==='published'?'draft':'published'}')">${x.import_status==='published'?'비공개':'공개'}</button> <button class="btn-primary" style="padding:7px 10px;font-size:12px;background:#d32f2f" onclick="deleteAdmissionTrack('${x.id}')">삭제</button></td></tr>`).join(''):'<tr><td colspan="7">전형 데이터가 없습니다.</td></tr>';
+  }catch(e){body.innerHTML=`<tr><td colspan="7">조회 실패: ${escapeHtmlAdmin(e.message)}</td></tr>`;}
+}
+async function importAdmissionTracks(){
+  const year=Number(document.getElementById('importAdmissionYear').value||0), university=document.getElementById('importUniversity').value.trim(), source_url=document.getElementById('importSourceUrl').value.trim(), out=document.getElementById('importAdmissionResult');
+  if(!year||!university||!source_url){showToast('error','입시연도, 대학명, 공식 URL을 입력하세요.');return;}
+  out.textContent='공식 페이지를 가져오고 AI로 전형을 구조화하는 중...';
+  try{
+    const {data,error}=await supabaseClient.functions.invoke('admission-import',{body:{admission_year:year,university,source_url}});
+    if(error)throw error;
+    out.textContent=`완료: ${data?.count||0}개 전형이 초안으로 등록되었습니다. 아래에서 검수 후 공개하세요.`;
+    document.getElementById('importAdmissionYear').value=String(year); await loadAdmissionTracks();
+  }catch(e){let msg=e.message||'가져오기 실패';try{if(e.context?.body){const b=typeof e.context.body==='string'?JSON.parse(e.context.body):e.context.body;msg=b?.error||msg;}}catch(_){} out.textContent='실패: '+msg;showToast('error',msg);}
+}
+async function toggleAdmissionPublish(id,status){try{const {error}=await supabaseClient.rpc('admin_publish_admission_track',{p_id:id,p_status:status});if(error)throw error;showToast('success',status==='published'?'전형을 공개했습니다.':'전형을 비공개 처리했습니다.');await loadAdmissionTracks();}catch(e){showToast('error',e.message);}}
+async function deleteAdmissionTrack(id){if(!confirm('이 전형 데이터를 삭제할까요?'))return;try{const {error}=await supabaseClient.rpc('admin_delete_admission_track',{p_id:id});if(error)throw error;showToast('success','삭제했습니다.');await loadAdmissionTracks();}catch(e){showToast('error',e.message);}}
+
 async function loadPlanUsage(){
   const body=document.getElementById('planUsageBody'); if(!body)return;
   body.innerHTML='<tr><td colspan="7">불러오는 중...</td></tr>';
