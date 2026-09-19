@@ -363,6 +363,53 @@ body {
   margin-bottom: 16px;
   opacity: 0.5;
 }
+
+/* 탭 네비게이션 */
+.tabs {
+  background: white;
+  border-radius: 12px;
+  padding: 8px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  display: flex;
+  gap: 8px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tab-btn:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
 </style>
 </head>
 <body>
@@ -377,8 +424,30 @@ body {
     </button>
   </div>
 
-  <!-- 통계 -->
-  <div class="stats-grid">
+  <!-- 탭 네비게이션 -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('dashboard')">
+      <i data-lucide="layout-dashboard" style="width:18px; height:18px"></i>
+      대시보드
+    </button>
+    <button class="tab-btn" onclick="switchTab('approvals')">
+      <i data-lucide="user-check" style="width:18px; height:18px"></i>
+      승인 관리
+    </button>
+    <button class="tab-btn" onclick="switchTab('inquiries')">
+      <i data-lucide="mail" style="width:18px; height:18px"></i>
+      유저 문의
+    </button>
+    <button class="tab-btn" onclick="switchTab('users')">
+      <i data-lucide="users" style="width:18px; height:18px"></i>
+      유저 목록
+    </button>
+  </div>
+
+  <!-- 탭 콘텐츠: 대시보드 -->
+  <div id="tab-dashboard" class="tab-content active">
+    <!-- 통계 -->
+    <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-header">
         <div class="stat-icon">
@@ -419,7 +488,11 @@ body {
       <div class="stat-value" id="totalInterviews">0</div>
     </div>
   </div>
+  </div>
+  <!-- 대시보드 탭 끝 -->
 
+  <!-- 탭 콘텐츠: 승인 관리 -->
+  <div id="tab-approvals" class="tab-content">
   <!-- 승인 대기 목록 -->
   <div class="section">
     <div class="section-header">
@@ -452,7 +525,11 @@ body {
       <p>승인 대기 중인 유저가 없습니다.</p>
     </div>
   </div>
+  </div>
+  <!-- 승인 관리 탭 끝 -->
 
+  <!-- 탭 콘텐츠: 유저 문의 -->
+  <div id="tab-inquiries" class="tab-content">
   <!-- 유저 문의 -->
   <div class="section">
     <div class="section-header">
@@ -486,7 +563,11 @@ body {
       <p>문의 내역이 없습니다.</p>
     </div>
   </div>
+  </div>
+  <!-- 유저 문의 탭 끝 -->
 
+  <!-- 탭 콘텐츠: 유저 목록 -->
+  <div id="tab-users" class="tab-content">
   <!-- 유저 목록 -->
   <div class="section">
     <div class="section-header">
@@ -519,6 +600,10 @@ body {
     </div>
   </div>
 </div>
+  </div>
+  <!-- 유저 목록 탭 끝 -->
+</div>
+<!-- 컨테이너 끝 -->
 
 <!-- 유저 추가 모달 -->
 <div class="modal" id="addUserModal">
@@ -569,6 +654,20 @@ async function handleLogout() {
     window.location.href = 'login.html';
   }
 }
+// 탭 전환
+function switchTab(tabName) {
+  // 모든 탭 버튼과 콘텐츠 비활성화
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+  // 선택된 탭 활성화
+  event.currentTarget.classList.add('active');
+  document.getElementById('tab-' + tabName).classList.add('active');
+
+  // 아이콘 다시 렌더링
+  lucide.createIcons();
+}
+
 // Gmail 열기
 function openGmail() {
   window.open('https://mail.google.com/mail/u/0/#inbox', '_blank');
