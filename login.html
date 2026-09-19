@@ -387,7 +387,12 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         switchTab('login');
       } else {
         // 이메일 확인 불필요 (자동 로그인됨)
-        window.location.href = 'guide.html';
+        // 관리자는 바로 admin.html로, 일반 사용자는 guide.html로
+        if (email === 'roche07he@gmail.com') {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'guide.html';
+        }
       }
     }
   } catch (error) {
