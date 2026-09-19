@@ -754,6 +754,20 @@ async function getFeedback(){
     const prompt=`너는 대입 면접 평가 전문가다. 다음 학생의 실제 면접 답변만 근거로 객관적인 피드백을 작성하라. 관찰할 수 없는 목소리, 표정, 자세는 평가하지 않는다.\n\n${qa.map(x=>`[질문 ${x.number}]\n${x.question}\n[참고 답변]\n${x.modelAnswer}\n[학생 답변]\n${x.studentAnswer}`).join('\n\n')}\n\n다음 형식으로 작성한다:\n## 전체 평가\n점수: 0-100\n총평: 2-3문장\n## 질문별 분석\n각 질문마다 평가(상/중/하), 강점, 개선점\n## 종합 피드백\n잘한 점 3가지\n아쉬운 점 3가지\n개선 방향 3가지\n다음 면접 준비사항.\n'모범답안과 일치' 같은 표현은 사용하지 않는다.`;
     const feedback=await callAI(prompt,6000,'feedback',1,{session_id:currentSessionId}); if(!feedback)throw new Error('AI 피드백 응답이 비어 있습니다.');
     await db.saveFeedback(currentSessionId,feedback); logEvent('feedback_generated',{session_id:currentSessionId});
+
+    // 수동 사용량 기록 (Edge Function 실패 대비)
+    try {
+      await supabaseClient.rpc('consume_ai_usage', {
+        p_feature: 'feedback',
+        p_quantity: 1,
+        p_metadata: { session_id: currentSessionId }
+      });
+      console.log('✅ 사용량 기록 완료: feedback 1회');
+    } catch (usageError) {
+      console.warn('⚠️ 사용량 기록 실패:', usageError);
+    }
+
+    await loadPlanState(); // 사용량 표시 업데이트
     hideLoading();displayFeedback(feedback,currentSessionId);
     showToast('success','피드백이 저장되었습니다.');
   }catch(e){hideLoading();console.error(e);showToast('error','피드백 생성 실패: '+e.message);}
