@@ -442,6 +442,10 @@ body {
       <i data-lucide="users" style="width:18px; height:18px"></i>
       유저 목록
     </button>
+    <button class="tab-btn" onclick="switchTab('coupons')">
+      <i data-lucide="ticket" style="width:18px; height:18px"></i>
+      베타 코드
+    </button>
   </div>
 
   <!-- 탭 콘텐츠: 대시보드 -->
@@ -602,6 +606,73 @@ body {
 </div>
   </div>
   <!-- 유저 목록 탭 끝 -->
+
+  <!-- 탭 콘텐츠: 베타 코드 -->
+  <div id="tab-coupons" class="tab-content">
+    <!-- 쿠폰 생성 -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">베타 쿠폰 생성</h2>
+      </div>
+
+      <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 600px;">
+        <form id="couponForm" onsubmit="handleCreateCoupon(event)">
+          <div class="form-group">
+            <label>쿠폰 코드</label>
+            <input type="text" id="couponCode" placeholder="BETA2026-TEST" required style="text-transform: uppercase;">
+          </div>
+          <div class="form-group">
+            <label>최대 사용 횟수</label>
+            <input type="number" id="couponMaxUses" value="50" min="1" required>
+          </div>
+          <div class="form-group">
+            <label>유효 기간 (일)</label>
+            <input type="number" id="couponDuration" value="120" min="1" required>
+          </div>
+          <button type="submit" class="btn-submit" style="width: 100%;">
+            <i data-lucide="plus-circle" style="width:16px; height:16px; margin-right: 6px;"></i>
+            쿠폰 생성
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 쿠폰 목록 -->
+    <div class="section" style="margin-top: 30px;">
+      <div class="section-header">
+        <h2 class="section-title">생성된 쿠폰 목록</h2>
+        <button class="btn-primary" onclick="loadCoupons()">
+          <i data-lucide="refresh-cw" style="width:16px; height:16px"></i>
+          새로고침
+        </button>
+      </div>
+
+      <div id="loadingCoupons" class="loading">
+        로딩 중...
+      </div>
+
+      <table class="users-table" id="couponsTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>쿠폰 코드</th>
+            <th>사용 횟수</th>
+            <th>유효 기간</th>
+            <th>상태</th>
+            <th>생성일</th>
+          </tr>
+        </thead>
+        <tbody id="couponsTableBody">
+        </tbody>
+      </table>
+
+      <div id="emptyCoupons" class="empty-state" style="display:none;">
+        <i data-lucide="ticket" style="width:48px; height:48px"></i>
+        <p>생성된 쿠폰이 없습니다.</p>
+      </div>
+    </div>
+  </div>
+  <!-- 베타 코드 탭 끝 -->
+
 </div>
 <!-- 컨테이너 끝 -->
 
@@ -666,6 +737,11 @@ function switchTab(tabName) {
   // 선택된 탭 활성화
   event.currentTarget.classList.add('active');
   document.getElementById('tab-' + tabName).classList.add('active');
+
+  // 탭별 데이터 로드
+  if (tabName === 'coupons') {
+    loadCoupons();
+  }
 
   // 아이콘 다시 렌더링
   lucide.createIcons();
@@ -1181,6 +1257,121 @@ async function deleteInquiry(inquiryId) {
     await loadInquiries();
   } catch (error) {
     showToast('error', '문의 삭제 실패');
+    console.error(error);
+  }
+}
+
+// 베타 쿠폰 생성
+async function handleCreateCoupon(event) {
+  event.preventDefault();
+
+  const code = document.getElementById('couponCode').value.trim().toUpperCase();
+  const maxUses = parseInt(document.getElementById('couponMaxUses').value);
+  const duration = parseInt(document.getElementById('couponDuration').value);
+
+  if (!code) {
+    showToast('error', '쿠폰 코드를 입력하세요');
+    return;
+  }
+
+  try {
+    // BETA 플랜 ID 가져오기
+    const { data: betaPlan, error: planError } = await supabaseClient
+      .from('plans')
+      .select('id')
+      .eq('code', 'BETA')
+      .single();
+
+    if (planError || !betaPlan) {
+      showToast('error', 'BETA 플랜을 찾을 수 없습니다');
+      return;
+    }
+
+    // 쿠폰 생성
+    const { data, error } = await supabaseClient
+      .from('coupons')
+      .insert({
+        code: code,
+        plan_id: betaPlan.id,
+        max_uses: maxUses,
+        duration_days: duration,
+        active: true
+      })
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === '23505') {
+        showToast('error', '이미 존재하는 쿠폰 코드입니다');
+      } else {
+        throw error;
+      }
+      return;
+    }
+
+    showToast('success', `쿠폰 "${code}" 생성 완료!`);
+    document.getElementById('couponForm').reset();
+    loadCoupons();
+  } catch (error) {
+    showToast('error', '쿠폰 생성 실패');
+    console.error(error);
+  }
+}
+
+// 쿠폰 목록 로드
+async function loadCoupons() {
+  const loading = document.getElementById('loadingCoupons');
+  const table = document.getElementById('couponsTable');
+  const tbody = document.getElementById('couponsTableBody');
+  const empty = document.getElementById('emptyCoupons');
+
+  loading.style.display = 'block';
+  table.style.display = 'none';
+  empty.style.display = 'none';
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('coupons')
+      .select(`
+        *,
+        plans (code, name)
+      `)
+      .order('created_at', { ascending: false });
+
+    loading.style.display = 'none';
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
+
+    tbody.innerHTML = data.map(coupon => `
+      <tr>
+        <td>
+          <div style="font-weight: 600; color: #667eea;">${coupon.code}</div>
+          <div style="font-size: 12px; color: #999; margin-top: 2px;">${coupon.plans?.name || 'BETA'}</div>
+        </td>
+        <td>
+          <span style="color: #667eea; font-weight: 600;">${coupon.used_count || 0}</span>
+          <span style="color: #999;"> / ${coupon.max_uses}</span>
+        </td>
+        <td>${coupon.duration_days}일</td>
+        <td>
+          ${coupon.active
+            ? '<span class="badge active">활성</span>'
+            : '<span class="badge inactive">비활성</span>'}
+        </td>
+        <td>${new Date(coupon.created_at).toLocaleDateString('ko-KR')}</td>
+      </tr>
+    `).join('');
+
+    table.style.display = 'table';
+    lucide.createIcons();
+  } catch (error) {
+    loading.style.display = 'none';
+    showToast('error', '쿠폰 목록 로드 실패');
     console.error(error);
   }
 }
