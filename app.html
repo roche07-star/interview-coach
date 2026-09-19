@@ -773,6 +773,26 @@ textarea {
       저장
     </button>
 
+    <!-- 비밀번호 변경 -->
+    <div style="margin-top:30px; padding-top:20px; border-top:1px solid #e0e0e0;">
+      <h3 style="font-size:16px; font-weight:600; margin-bottom:15px; color:#333;">🔒 비밀번호 변경</h3>
+
+      <div class="form-group">
+        <label>새 비밀번호</label>
+        <input type="password" id="newPassword" placeholder="새 비밀번호 (최소 6자)">
+      </div>
+
+      <div class="form-group">
+        <label>새 비밀번호 확인</label>
+        <input type="password" id="newPasswordConfirm" placeholder="새 비밀번호 확인">
+      </div>
+
+      <button class="btn btn-block" onclick="changePassword()" style="background:#2196f3;">
+        <i data-lucide="key" style="width:18px; height:18px"></i>
+        비밀번호 변경
+      </button>
+    </div>
+
     <div style="margin-top:30px; padding-top:20px; border-top:1px solid #e0e0e0;">
       <button class="btn btn-block btn-danger" onclick="handleDeleteAccount()" style="background:#f44336; color:white;">
         <i data-lucide="user-x" style="width:18px; height:18px"></i>
@@ -1169,6 +1189,43 @@ function saveSettings() {
   localStorage.setItem('department', department);
   showToast('success', '설정이 저장되었습니다.');
   closeSettings();
+}
+
+async function changePassword() {
+  const newPassword = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('newPasswordConfirm').value;
+
+  if (!newPassword || !confirmPassword) {
+    showToast('error', '새 비밀번호를 입력하세요.');
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    showToast('error', '비밀번호는 최소 6자 이상이어야 합니다.');
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    showToast('error', '비밀번호가 일치하지 않습니다.');
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient.auth.updateUser({
+      password: newPassword
+    });
+
+    if (error) throw error;
+
+    // 입력 필드 초기화
+    document.getElementById('newPassword').value = '';
+    document.getElementById('newPasswordConfirm').value = '';
+
+    showToast('success', '비밀번호가 변경되었습니다.');
+  } catch (error) {
+    console.error('비밀번호 변경 오류:', error);
+    showToast('error', '비밀번호 변경 실패: ' + error.message);
+  }
 }
 
 function loadSettings() {
