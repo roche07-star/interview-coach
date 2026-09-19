@@ -23,3 +23,9 @@ Thumbs.db
 # Logs
 logs/
 *.log
+
+# Environment Variables (보안)
+.env
+.env.local
+.env.*.local
+config.js

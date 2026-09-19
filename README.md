@@ -32,6 +32,39 @@
 
 - **간호학과**: 별도 서비스로 제공 예정
 
+## ⚙️ 개발 환경 설정 (로컬 실행 시)
+
+### 1. 환경 변수 설정
+
+프로젝트를 로컬에서 실행하려면 환경 변수를 설정해야 합니다.
+
+```bash
+# 1. .env 파일 생성
+cp .env.example .env
+
+# 2. .env 파일 편집
+# Supabase URL과 Anon Key를 입력하세요
+```
+
+### 2. config.js 파일 생성
+
+```bash
+# 1. config.js 파일 생성
+cp config.example.js config.js
+
+# 2. config.js 파일 편집
+# .env 파일의 값을 참고하여 빈 문자열을 채우세요
+```
+
+### 3. Vercel 배포 시 환경 변수
+
+Vercel 대시보드에서 다음 환경 변수를 설정하세요:
+
+- `SUPABASE_URL`: Supabase 프로젝트 URL
+- `SUPABASE_ANON_KEY`: Supabase Anon Key
+
+> ⚠️ **주의**: `.env`와 `config.js` 파일은 절대 Git에 커밋하지 마세요!
+
 ## 🚀 사용 방법
 
 ### 1. 웹사이트 접속
