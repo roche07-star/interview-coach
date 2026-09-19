@@ -1373,15 +1373,20 @@ function saveSettings() {
   const providerEl = document.getElementById('aiProvider');
   const provider = providerEl ? providerEl.value : 'claude';
 
-  if (!university || !admissionTrack || !department) return showToast('error', '대학, 전형, 학과를 선택하세요.');
+  if (!university || !admissionTrack || !department) return showToast('error', '대학, 전형, 학과를 모두 선택하세요.');
 
   localStorage.setItem('aiProvider', provider);
   localStorage.setItem('university', university);
   localStorage.setItem('department', department);
   localStorage.setItem('admissionTrack', admissionTrack);
   localStorage.setItem('admissionYear', String(admissionYear));
-  showToast('success', '설정이 저장되었습니다.');
   closeSettings();
+  showToast('success', `✅ 설정 완료: ${university} ${department}`);
+
+  // 생기부 입력 단계로 자동 이동
+  if (!currentStudentId) {
+    switchStep(1);
+  }
 }
 
 async function changePassword() {
@@ -1521,7 +1526,11 @@ async function saveStudentRecord() {
   const admissionYear = Number(localStorage.getItem('admissionYear') || 2027);
   const department = localStorage.getItem('department');
   if (record.length < 100) return showToast('error', '생기부 내용을 충분히 입력하세요 (최소 100자).');
-  if (!university || !admissionTrack || !department) { showToast('error', '설정에서 대학/전형/학과를 먼저 선택하세요.'); openSettings(); return; }
+  if (!university || !admissionTrack || !department) {
+    showToast('error', `⚠️ 설정 필요: ${!university ? '대학' : !admissionTrack ? '전형' : '학과'}를 선택하세요`);
+    openSettings();
+    return;
+  }
   showLoading('생기부 저장 중...', '개인정보 마스킹 및 DB 저장');
   try {
     savedRecord = record;
