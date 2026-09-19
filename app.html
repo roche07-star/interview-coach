@@ -1227,7 +1227,12 @@ function updateOnboarding(){
 }
 function logEvent(name, metadata={}){
   if(!supabaseClient) return;
-  supabaseClient.rpc('log_analytics_event',{p_event_name:name,p_metadata:metadata}).catch(e=>console.warn('analytics:',e));
+  const rpcCall = supabaseClient.rpc('log_analytics_event',{p_event_name:name,p_metadata:metadata});
+  if(rpcCall && typeof rpcCall.catch === 'function') {
+    rpcCall.catch(e=>console.warn('analytics:',e));
+  } else {
+    console.warn('logEvent: rpc did not return a Promise');
+  }
 }
 
 function showPlanInfo() {
